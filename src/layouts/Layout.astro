@@ -4,6 +4,7 @@ import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 
 import ConfigCarrier from "@components/ConfigCarrier.astro";
+import MusicPlayer from "@components/MusicPlayer.svelte";
 import Analytics from "@vercel/analytics/astro";
 import { profileConfig, siteConfig } from "@/config";
 import {
@@ -154,6 +155,7 @@ const bannerOffset =
 	>
 		<ConfigCarrier></ConfigCarrier>
 		<slot />
+		<MusicPlayer client:only="svelte" />
  		<Analytics />
 		<!-- increase the page height during page transition to prevent the scrolling animation from jumping -->
 		<div id="page-height-extend" class="hidden h-[300vh]"></div>
