@@ -26,7 +26,8 @@ const STORAGE_KEY = "music-player-pro";
 const DEFAULT_COVER = "/favicon/favicon-dark-192.png";
 
 $: currentTrack = tracks[currentIndex];
-$: progressPercent = duration > 0 ? Math.min((currentTime / duration) * 100, 100) : 0;
+$: progressPercent =
+	duration > 0 ? Math.min((currentTime / duration) * 100, 100) : 0;
 $: volumePercent = Math.round(volume * 100);
 
 onMount(async () => {
