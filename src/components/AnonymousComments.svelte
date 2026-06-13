@@ -16,10 +16,13 @@ type BlogComment = {
 
 let { slug } = $props<{ slug: string }>();
 
-const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL as string | undefined;
-const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY as
-	| string
-	| undefined;
+const env = import.meta.env as Record<string, string | undefined>;
+const supabaseUrl = env.PUBLIC_SUPABASE_URL ?? env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey =
+	env.PUBLIC_SUPABASE_ANON_KEY ??
+	env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+	env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+	env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 const supabase =
 	supabaseUrl && supabaseAnonKey
 		? createClient(supabaseUrl, supabaseAnonKey)

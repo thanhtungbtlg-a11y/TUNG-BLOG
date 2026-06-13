@@ -96,6 +96,8 @@ Anonymous comments use Supabase with moderation:
 2. Copy `.env.example` to `.env` and fill:
    - `PUBLIC_SUPABASE_URL`
    - `PUBLIC_SUPABASE_ANON_KEY`
+   - Vercel Supabase integration names are also supported:
+     `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 3. Open Supabase SQL Editor and run `supabase/comments.sql`.
 4. Create your admin user in Supabase Auth.
 5. Add that user to `comment_admins` using the SQL snippet at the end of `supabase/comments.sql`.
