@@ -83,6 +83,7 @@ async function play() {
 		await audio.play();
 		isPlaying = true;
 	} catch (err) {
+		if (err instanceof DOMException && err.name === "NotAllowedError") return;
 		console.error("Play error:", err);
 	}
 }
@@ -242,6 +243,13 @@ function formatTime(seconds: number) {
 				<div class="artist">{currentTrack.artist}</div>
 			</div>
 
+			<div class="mini-visualizer" aria-hidden="true">
+				<span></span>
+				<span></span>
+				<span></span>
+				<span></span>
+			</div>
+
 			<button class="icon-btn" aria-label={isPlaying ? "Pause music" : "Play music"} onclick={handlePlayClick}>
 				{#if isPlaying}
 					<Icon icon="material-symbols:pause-rounded" />
@@ -332,7 +340,15 @@ function formatTime(seconds: number) {
 							</div>
 							{#if index === currentIndex}
 								<span class="playing" aria-hidden="true">
-									<Icon icon={isPlaying ? "material-symbols:graphic-eq-rounded" : "material-symbols:radio-button-unchecked"} />
+									{#if isPlaying}
+										<span class="track-visualizer">
+											<span></span>
+											<span></span>
+											<span></span>
+										</span>
+									{:else}
+										<Icon icon="material-symbols:radio-button-unchecked" />
+									{/if}
 								</span>
 							{/if}
 						</button>
@@ -412,6 +428,60 @@ function formatTime(seconds: number) {
 	.mini-info {
 		flex: 1;
 		min-width: 0;
+	}
+
+	.mini-visualizer,
+	.track-visualizer {
+		display: inline-flex;
+		align-items: flex-end;
+		justify-content: center;
+		gap: 3px;
+		color: var(--music-accent);
+	}
+
+	.mini-visualizer {
+		width: 28px;
+		height: 24px;
+		opacity: 0.45;
+	}
+
+	.mini-visualizer span,
+	.track-visualizer span {
+		display: block;
+		width: 3px;
+		min-height: 4px;
+		border-radius: 999px;
+		background: currentColor;
+		animation: equalizer 900ms ease-in-out infinite;
+		animation-play-state: paused;
+	}
+
+	.track-visualizer {
+		width: 22px;
+		height: 18px;
+	}
+
+	.is-playing .mini-visualizer {
+		opacity: 1;
+	}
+
+	.is-playing .mini-visualizer span,
+	.is-playing .track-visualizer span {
+		animation-play-state: running;
+	}
+
+	.mini-visualizer span:nth-child(2),
+	.track-visualizer span:nth-child(2) {
+		animation-delay: 120ms;
+	}
+
+	.mini-visualizer span:nth-child(3),
+	.track-visualizer span:nth-child(3) {
+		animation-delay: 240ms;
+	}
+
+	.mini-visualizer span:nth-child(4) {
+		animation-delay: 360ms;
 	}
 
 	.eyebrow {
@@ -682,6 +752,19 @@ function formatTime(seconds: number) {
 		}
 	}
 
+	@keyframes equalizer {
+		0%,
+		100% {
+			height: 26%;
+		}
+		35% {
+			height: 92%;
+		}
+		65% {
+			height: 44%;
+		}
+	}
+
 	@media (max-width: 768px) {
 		.music-player {
 			right: 12px;
@@ -707,6 +790,11 @@ function formatTime(seconds: number) {
 		.controls button:hover,
 		.track:active {
 			transform: none;
+		}
+
+		.mini-visualizer span,
+		.track-visualizer span {
+			animation: none;
 		}
 	}
 </style>

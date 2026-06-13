@@ -13,6 +13,7 @@ import "../styles/expressive-code.css";
 import "../styles/photoswipe.css";
 import ConfigCarrier from "@components/ConfigCarrier.astro";
 import MusicPlayer from "@components/MusicPlayer.svelte";
+import ReadingProgress from "@components/ReadingProgress.svelte";
 import Analytics from "@vercel/analytics/astro";
 import { profileConfig, siteConfig } from "@/config";
 import {
@@ -162,6 +163,7 @@ const bannerOffset =
 		  data-overlayscrollbars-initialize
 	>
 		<ConfigCarrier></ConfigCarrier>
+		<ReadingProgress client:load />
 		<slot />
 		<MusicPlayer client:only="svelte" />
  		<Analytics />
@@ -272,6 +274,7 @@ const bannerEnabled = !!document.getElementById('banner-wrapper')
 function setClickOutsideToClose(panel: string, ignores: string[]) {
 	document.addEventListener("click", event => {
 		let panelDom = document.getElementById(panel);
+		if (!panelDom) return;
 		let tDom = event.target;
 		if (!(tDom instanceof Node)) return;		// Ensure the event target is an HTML Node
 		for (let ig of ignores) {

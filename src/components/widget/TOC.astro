@@ -71,6 +71,8 @@ class TableOfContents extends HTMLElement {
     tocEntries: HTMLAnchorElement[] = [];
     active: boolean[] = [];
     activeIndicator: HTMLElement | null = null;
+    initialized = false;
+    scrollQueued = false;
 
     constructor() {
         super();
@@ -137,7 +139,7 @@ class TableOfContents extends HTMLElement {
         const bottommost = activeHeading[activeHeading.length - 1];
         const tocHeight = this.tocEl.clientHeight;
 
-        let top;
+        let top: number;
         if (bottommost.getBoundingClientRect().bottom -
             topmost.getBoundingClientRect().top < 0.9 * tocHeight)
             top = topmost.offsetTop - 32;
@@ -148,6 +150,29 @@ class TableOfContents extends HTMLElement {
             top,
             left: 0,
             behavior: "smooth",
+        });
+    };
+
+    syncByScroll = () => {
+        if (this.scrollQueued) return;
+        this.scrollQueued = true;
+
+        requestAnimationFrame(() => {
+            this.scrollQueued = false;
+            if (!this.headings.length) return;
+
+            let activeIdx = 0;
+            for (let i = 0; i < this.headings.length; i++) {
+                const top = this.headings[i].getBoundingClientRect().top;
+                if (top <= 140) {
+                    activeIdx = i;
+                } else {
+                    break;
+                }
+            }
+
+            this.active = this.active.map((_, i) => i === activeIdx);
+            this.update();
         });
     };
 
@@ -201,6 +226,8 @@ class TableOfContents extends HTMLElement {
     };
 
     connectedCallback() {
+        requestAnimationFrame(() => this.init());
+
         // wait for the onload animation to finish, which makes the `getBoundingClientRect` return correct values
         const element = document.querySelector('.prose');
         if (element) {
@@ -213,6 +240,9 @@ class TableOfContents extends HTMLElement {
     };
 
     init() {
+        if (this.initialized) return;
+        this.initialized = true;
+
         this.tocEl = document.getElementById(
             "toc-inner-wrapper"
         );
@@ -249,7 +279,10 @@ class TableOfContents extends HTMLElement {
             this.observer.observe(section)
         );
 
+        window.addEventListener("scroll", this.syncByScroll, { passive: true });
+
         this.fallback();
+        this.syncByScroll();
         this.update();
     };
 
@@ -258,6 +291,7 @@ class TableOfContents extends HTMLElement {
             this.observer.unobserve(section)
         );
         this.observer.disconnect();
+        window.removeEventListener("scroll", this.syncByScroll);
         this.tocEl?.removeEventListener("click", this.handleAnchorClick);
     };
 }

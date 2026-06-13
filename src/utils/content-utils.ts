@@ -46,6 +46,46 @@ export async function getSortedPostsList(): Promise<PostForList[]> {
 
 	return sortedPostsList;
 }
+
+export async function getRelatedPosts(
+	entry: CollectionEntry<"posts">,
+	limit = 3,
+): Promise<CollectionEntry<"posts">[]> {
+	const allBlogPosts = await getRawSortedPosts();
+	const currentTags = new Set(entry.data.tags ?? []);
+	const currentCategory = entry.data.category?.trim();
+
+	return allBlogPosts
+		.filter((post) => post.slug !== entry.slug)
+		.map((post) => {
+			const tagScore = (post.data.tags ?? []).filter((tag) =>
+				currentTags.has(tag),
+			).length;
+			const categoryScore =
+				currentCategory && post.data.category?.trim() === currentCategory
+					? 2
+					: 0;
+			const recencyScore = Math.max(
+				0,
+				1 -
+					(Date.now() - new Date(post.data.published).getTime()) /
+						1000 /
+						60 /
+						60 /
+						24 /
+						365,
+			);
+
+			return {
+				post,
+				score: tagScore * 3 + categoryScore + recencyScore,
+			};
+		})
+		.sort((a, b) => b.score - a.score)
+		.slice(0, limit)
+		.map(({ post }) => post);
+}
+
 export type Tag = {
 	name: string;
 	count: number;

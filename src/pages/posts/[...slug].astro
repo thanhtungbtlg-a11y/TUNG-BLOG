@@ -5,12 +5,14 @@ import Markdown from "@components/misc/Markdown.astro";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
-import { getSortedPosts } from "@utils/content-utils";
+import { getRelatedPosts, getSortedPosts } from "@utils/content-utils";
 import { getDir, getPostUrlBySlug } from "@utils/url-utils";
 import { Icon } from "astro-icon/components";
 import { licenseConfig } from "src/config";
 import ImageWrapper from "../../components/misc/ImageWrapper.astro";
 import PostMetadata from "../../components/PostMeta.astro";
+import PostReactions from "../../components/PostReactions.svelte";
+import RelatedPosts from "../../components/RelatedPosts.astro";
 import { profileConfig, siteConfig } from "../../config";
 import { formatDateToYYYYMMDD } from "../../utils/date-utils";
 
@@ -26,6 +28,7 @@ const { entry } = Astro.props;
 const { Content, headings } = await entry.render();
 
 const { remarkPluginFrontmatter } = await entry.render();
+const relatedPosts = await getRelatedPosts(entry, 3);
 
 const jsonLd = {
 	"@context": "https://schema.org",
@@ -110,6 +113,9 @@ const jsonLd = {
 
         </div>
     </div>
+
+    <PostReactions slug={entry.slug} client:load />
+    <RelatedPosts posts={relatedPosts} />
 
     <div class="flex flex-col md:flex-row justify-between mb-4 gap-4 overflow-hidden w-full">
         <a href={entry.data.nextSlug ? getPostUrlBySlug(entry.data.nextSlug) : "#"}

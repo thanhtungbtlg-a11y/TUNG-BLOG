@@ -45,9 +45,25 @@ if (isLocal) {
 
 const imageClass = "w-full h-full object-cover";
 const imageStyle = `object-position: ${position}`;
+const loading = id === "banner" ? "eager" : "lazy";
 ---
-<div id={id} class:list={[className, 'overflow-hidden relative']}>
-    <div class="transition absolute inset-0 dark:bg-black/10 bg-opacity-50 pointer-events-none"></div>
-    {isLocal && img && <Image src={img} alt={alt || ""} class={imageClass} style={imageStyle}/>}
-    {!isLocal && <img src={isPublic ? url(src) : src} alt={alt || ""} class={imageClass} style={imageStyle}/>}
+<div id={id} class:list={[className, 'overflow-hidden relative image-wrapper']}>
+    <div class="image-soft-overlay transition absolute inset-0 pointer-events-none"></div>
+    {isLocal && img && <Image src={img} alt={alt || ""} class={imageClass} style={imageStyle} loading={loading} decoding="async"/>}
+    {!isLocal && <img src={isPublic ? url(src) : src} alt={alt || ""} class={imageClass} style={imageStyle} loading={loading} decoding="async"/>}
 </div>
+
+<style>
+    .image-soft-overlay {
+        z-index: 1;
+        background:
+            linear-gradient(to top, rgb(0 0 0 / 0.10), transparent 45%),
+            linear-gradient(to bottom, rgb(255 255 255 / 0.04), transparent 35%);
+    }
+
+    :global(.dark) .image-soft-overlay {
+        background:
+            linear-gradient(to top, rgb(0 0 0 / 0.28), transparent 52%),
+            linear-gradient(to bottom, rgb(255 255 255 / 0.03), transparent 35%);
+    }
+</style>
