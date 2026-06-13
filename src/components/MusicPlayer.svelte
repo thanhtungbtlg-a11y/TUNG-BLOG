@@ -45,7 +45,6 @@ onMount(async () => {
 			const state = JSON.parse(saved);
 			currentIndex = state.currentIndex ?? 0;
 			volume = state.volume ?? 0.8;
-			expanded = state.expanded ?? false;
 			shuffle = state.shuffle ?? false;
 			repeat = state.repeat ?? "all";
 		} catch {}
@@ -69,7 +68,6 @@ function saveState() {
 		JSON.stringify({
 			currentIndex,
 			volume,
-			expanded,
 			shuffle,
 			repeat,
 		}),
@@ -173,7 +171,6 @@ function changeVolume(event: Event) {
 
 function toggleExpanded() {
 	expanded = !expanded;
-	saveState();
 }
 
 function toggleShuffle() {
@@ -362,12 +359,16 @@ function formatTime(seconds: number) {
 <style>
 	.music-player {
 		position: fixed;
-		right: 20px;
-		bottom: 20px;
+		right: 14px;
+		bottom: 14px;
 		z-index: 9999;
-		width: min(340px, calc(100vw - 32px));
+		width: min(286px, calc(100vw - 24px));
 		color: white;
 		font-family: inherit;
+	}
+
+	.music-player.expanded {
+		width: min(312px, calc(100vw - 24px));
 	}
 
 	.mini,
@@ -382,9 +383,10 @@ function formatTime(seconds: number) {
 	.mini {
 		display: flex;
 		align-items: center;
-		gap: 12px;
-		padding: 10px;
-		border-radius: 20px;
+		gap: 8px;
+		min-height: 54px;
+		padding: 7px 8px;
+		border-radius: 16px;
 		cursor: pointer;
 		outline: none;
 		transition: transform 220ms ease, border-color 220ms ease, background 220ms ease;
@@ -404,10 +406,10 @@ function formatTime(seconds: number) {
 	.cover-mini {
 		position: relative;
 		z-index: 2;
-		width: 46px;
-		height: 46px;
+		width: 38px;
+		height: 38px;
 		object-fit: cover;
-		border-radius: 14px;
+		border-radius: 12px;
 		background: rgba(255, 255, 255, 0.08);
 	}
 
@@ -440,8 +442,8 @@ function formatTime(seconds: number) {
 	}
 
 	.mini-visualizer {
-		width: 28px;
-		height: 24px;
+		width: 20px;
+		height: 18px;
 		opacity: 0.45;
 	}
 
@@ -486,10 +488,9 @@ function formatTime(seconds: number) {
 
 	.eyebrow {
 		color: var(--music-accent);
-		font-size: 10px;
+		font-size: 9px;
 		font-weight: 700;
 		line-height: 1.1;
-		margin-bottom: 2px;
 		text-transform: uppercase;
 		letter-spacing: 0;
 	}
@@ -506,13 +507,13 @@ function formatTime(seconds: number) {
 	}
 
 	.title {
-		font-size: 14px;
+		font-size: 12.5px;
 		font-weight: 800;
 		line-height: 1.25;
 	}
 
 	.artist {
-		font-size: 12px;
+		font-size: 10.5px;
 		opacity: 0.65;
 		line-height: 1.25;
 	}
@@ -550,25 +551,27 @@ function formatTime(seconds: number) {
 	}
 
 	.icon-btn {
-		width: 40px;
-		height: 40px;
-		font-size: 24px;
+		width: 34px;
+		height: 34px;
+		font-size: 21px;
 	}
 
 	.panel {
-		margin-top: 10px;
-		border-radius: 26px;
-		padding: 16px;
+		margin-top: 8px;
+		border-radius: 20px;
+		padding: 12px;
+		max-height: min(62vh, 380px);
+		overflow-y: auto;
 		animation: panel-in 180ms ease-out;
 	}
 
 	.hero {
 		position: relative;
 		width: 100%;
-		aspect-ratio: 1 / 0.72;
+		aspect-ratio: 2 / 1;
 		overflow: hidden;
-		border-radius: 20px;
-		margin-bottom: 14px;
+		border-radius: 16px;
+		margin-bottom: 10px;
 		background: rgba(255, 255, 255, 0.08);
 	}
 
@@ -586,15 +589,15 @@ function formatTime(seconds: number) {
 	}
 
 	.song-title {
-		font-size: 18px;
+		font-size: 16px;
 		font-weight: 850;
 		line-height: 1.3;
 	}
 
 	.song-artist {
-		font-size: 13px;
+		font-size: 12px;
 		opacity: 0.66;
-		margin-bottom: 14px;
+		margin-bottom: 10px;
 	}
 
 	.progress-row {
@@ -639,19 +642,19 @@ function formatTime(seconds: number) {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		margin: 14px 0;
+		margin: 10px 0;
 	}
 
 	.controls button {
-		width: 40px;
-		height: 40px;
-		font-size: 22px;
+		width: 34px;
+		height: 34px;
+		font-size: 20px;
 	}
 
 	.controls .play-main {
-		width: 52px;
-		height: 52px;
-		font-size: 30px;
+		width: 44px;
+		height: 44px;
+		font-size: 26px;
 		background: var(--music-accent);
 		color: #06101f;
 		border-color: transparent;
@@ -667,10 +670,10 @@ function formatTime(seconds: number) {
 		display: grid;
 		grid-template-columns: 24px 1fr;
 		align-items: center;
-		gap: 10px;
-		margin-bottom: 14px;
+		gap: 8px;
+		margin-bottom: 10px;
 		color: rgba(255, 255, 255, 0.72);
-		font-size: 20px;
+		font-size: 18px;
 	}
 
 	.playlist-title {
@@ -681,7 +684,7 @@ function formatTime(seconds: number) {
 	}
 
 	.playlist {
-		max-height: 220px;
+		max-height: 96px;
 		overflow-y: auto;
 		display: flex;
 		flex-direction: column;
@@ -691,11 +694,11 @@ function formatTime(seconds: number) {
 
 	.track {
 		display: grid;
-		grid-template-columns: 42px 1fr 22px;
+		grid-template-columns: 34px 1fr 20px;
 		align-items: center;
-		gap: 10px;
+		gap: 8px;
 		width: 100%;
-		padding: 8px;
+		padding: 6px;
 		border: 1px solid transparent;
 		border-radius: 14px;
 		background: transparent;
@@ -718,20 +721,20 @@ function formatTime(seconds: number) {
 	}
 
 	.track img {
-		width: 42px;
-		height: 42px;
-		border-radius: 12px;
+		width: 34px;
+		height: 34px;
+		border-radius: 10px;
 		object-fit: cover;
 		background: rgba(255, 255, 255, 0.08);
 	}
 
 	.track-title {
-		font-size: 13px;
+		font-size: 12px;
 		font-weight: 700;
 	}
 
 	.track-artist {
-		font-size: 11px;
+		font-size: 10px;
 		opacity: 0.6;
 	}
 
@@ -767,14 +770,20 @@ function formatTime(seconds: number) {
 
 	@media (max-width: 768px) {
 		.music-player {
-			right: 12px;
-			left: 12px;
-			bottom: 12px;
+			right: 10px;
+			left: auto;
+			bottom: 10px;
+			width: min(286px, calc(100vw - 20px));
+		}
+
+		.music-player.expanded {
+			right: 10px;
+			left: 10px;
 			width: auto;
 		}
 
 		.panel {
-			max-height: 78vh;
+			max-height: 58vh;
 			overflow-y: auto;
 		}
 	}
