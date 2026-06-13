@@ -88,6 +88,20 @@ All commands are run from the root of the project, from a terminal:
 | `pnpm astro ...`           | Run CLI commands like `astro add`, `astro check`    |
 | `pnpm astro --help`        | Get help using the Astro CLI                        |
 
+## Supabase comments
+
+Anonymous comments use Supabase with moderation:
+
+1. Create a Supabase project.
+2. Copy `.env.example` to `.env` and fill:
+   - `PUBLIC_SUPABASE_URL`
+   - `PUBLIC_SUPABASE_ANON_KEY`
+3. Open Supabase SQL Editor and run `supabase/comments.sql`.
+4. Create your admin user in Supabase Auth.
+5. Add that user to `comment_admins` using the SQL snippet at the end of `supabase/comments.sql`.
+
+Readers can submit anonymous comments. Comments are stored as `pending` and only `approved` comments are visible publicly. Admin users can approve or delete comments from the blog UI.
+
 ## ✏️ Contributing
 
 Check out the [Contributing Guide](https://github.com/saicaca/fuwari/blob/main/CONTRIBUTING.md) for details on how to contribute to this project.
