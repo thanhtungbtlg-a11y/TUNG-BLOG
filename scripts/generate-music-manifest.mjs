@@ -26,7 +26,7 @@ const tracks = files.map((file, index) => {
 	const coverPathJpg = path.join(process.cwd(), "public", coverJpg);
 	const coverPathPng = path.join(process.cwd(), "public", coverPng);
 
-	let cover = "/music/covers/default.jpg";
+	let cover = "/favicon/favicon-dark-192.png";
 	if (fs.existsSync(coverPathJpg)) cover = coverJpg;
 	if (fs.existsSync(coverPathPng)) cover = coverPng;
 

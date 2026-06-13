@@ -11,6 +11,16 @@ rainbow-dark = linear-gradient(to right, oklch(0.70 0.10 0), oklch(0.70 0.10 30)
 :root
   --radius-large 1rem
   --content-delay 150ms
+  --card-shadow 0 18px 55px rgba(30, 45, 70, 0.10)
+  --card-shadow-hover 0 24px 70px rgba(30, 45, 70, 0.16)
+  --nav-shadow 0 18px 55px rgba(30, 45, 70, 0.12)
+  --music-shadow 0 24px 70px rgba(15, 23, 42, 0.28)
+
+:root.dark
+  --card-shadow 0 18px 55px rgba(0, 0, 0, 0.24)
+  --card-shadow-hover 0 26px 76px rgba(0, 0, 0, 0.34)
+  --nav-shadow 0 18px 55px rgba(0, 0, 0, 0.28)
+  --music-shadow 0 24px 70px rgba(0, 0, 0, 0.42)
 
 /* An util to define variables that vary with light and dark mode */
 define(vars)
@@ -24,8 +34,16 @@ define(vars)
 
 define({
   --primary: oklch(0.70 0.14 var(--hue)) oklch(0.75 0.14 var(--hue))
-  --page-bg: oklch(0.95 0.01 var(--hue)) oklch(0.16 0.014 var(--hue))
-  --card-bg: white oklch(0.23 0.015 var(--hue))
+  --page-bg: oklch(0.95 0.012 var(--hue)) oklch(0.145 0.014 var(--hue))
+  --page-grid: black(0.045) white(0.045)
+  --page-wash: oklch(0.98 0.012 var(--hue)) oklch(0.19 0.018 var(--hue))
+  --card-bg: white(0.86) oklch(0.22 0.018 var(--hue))
+  --card-bg-solid: white oklch(0.23 0.015 var(--hue))
+  --card-border: black(0.065) white(0.09)
+  --card-highlight: white(0.78) white(0.055)
+  --navbar-bg: white(0.74) oklch(0.18 0.018 var(--hue))
+  --banner-scrim: black(0.16) black(0.28)
+  --avatar-ring: oklch(0.82 0.09 var(--hue)) oklch(0.68 0.12 var(--hue))
 
   --btn-content: oklch(0.55 0.12 var(--hue)) oklch(0.75 0.1 var(--hue))
 
@@ -65,7 +83,10 @@ define({
   --link-hover: oklch(0.95 0.025 var(--hue)) oklch(0.40 0.08 var(--hue))
   --link-active: oklch(0.90 0.05 var(--hue)) oklch(0.35 0.07 var(--hue))
 
-  --float-panel-bg: white oklch(0.19 0.015 var(--hue))
+  --float-panel-bg: white(0.90) oklch(0.19 0.015 var(--hue))
+  --music-player-bg: oklch(0.17 0.02 var(--hue)) oklch(0.12 0.018 var(--hue))
+  --music-player-border: white(0.16) white(0.12)
+  --music-accent: oklch(0.76 0.13 var(--hue)) oklch(0.78 0.13 var(--hue))
 
   --scrollbar-bg-light: black(0.4)
   --scrollbar-bg-hover-light: black(0.5)

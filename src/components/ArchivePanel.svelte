@@ -5,11 +5,14 @@ import I18nKey from "../i18n/i18nKey";
 import { i18n } from "../i18n/translation";
 import { getPostUrlBySlug } from "../utils/url-utils";
 
-export let tags: string[];
-export let categories: string[];
+export let tags: string[] = [];
+export let categories: string[] = [];
 export let sortedPosts: Post[] = [];
 
-const params = new URLSearchParams(window.location.search);
+const params =
+	typeof window === "undefined"
+		? new URLSearchParams()
+		: new URLSearchParams(window.location.search);
 tags = params.has("tag") ? params.getAll("tag") : [];
 categories = params.has("category") ? params.getAll("category") : [];
 const uncategorized = params.get("uncategorized");
@@ -20,7 +23,7 @@ interface Post {
 		title: string;
 		tags: string[];
 		category?: string;
-		published: Date;
+		published: Date | string;
 	};
 }
 
@@ -31,9 +34,14 @@ interface Group {
 
 let groups: Group[] = [];
 
-function formatDate(date: Date) {
-	const month = (date.getMonth() + 1).toString().padStart(2, "0");
-	const day = date.getDate().toString().padStart(2, "0");
+function toDate(date: Date | string) {
+	return date instanceof Date ? date : new Date(date);
+}
+
+function formatDate(date: Date | string) {
+	const normalized = toDate(date);
+	const month = (normalized.getMonth() + 1).toString().padStart(2, "0");
+	const day = normalized.getDate().toString().padStart(2, "0");
 	return `${month}-${day}`;
 }
 
@@ -64,7 +72,7 @@ onMount(async () => {
 
 	const grouped = filteredPosts.reduce(
 		(acc, post) => {
-			const year = post.data.published.getFullYear();
+			const year = toDate(post.data.published).getFullYear();
 			if (!acc[year]) {
 				acc[year] = [];
 			}
@@ -85,7 +93,7 @@ onMount(async () => {
 });
 </script>
 
-<div class="card-base px-8 py-6">
+<div class="card-base interactive-card px-8 py-6">
     {#each groups as group}
         <div>
             <div class="flex flex-row w-full items-center h-[3.75rem]">

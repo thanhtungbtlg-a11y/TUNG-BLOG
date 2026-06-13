@@ -1,9 +1,23 @@
 [
   {
     "id": 1,
-    "title": "Lofi",
+    "title": "Beneath The Rain @ UK8qWJqEMF0",
     "artist": "Tung Notes",
-    "src": "/music/lofi.mp3",
-    "cover": "/music/covers/default.jpg"
+    "src": "/music/Beneath the Rain @ UK8qWJqEMF0.mp3",
+    "cover": "/favicon/favicon-dark-192.png"
+  },
+  {
+    "id": 2,
+    "title": "Daydream @ HEi3PWVdSAA",
+    "artist": "Tung Notes",
+    "src": "/music/Daydream @ HEi3PWVdSAA.mp3",
+    "cover": "/favicon/favicon-dark-192.png"
+  },
+  {
+    "id": 3,
+    "title": "Nom   Finding Peace ｜ Mini EP @ KYveUU9CQVw",
+    "artist": "Tung Notes",
+    "src": "/music/Nom - Finding Peace ｜ Mini EP @ kYveUU9CQVw.mp3",
+    "cover": "/favicon/favicon-dark-192.png"
   }
 ]

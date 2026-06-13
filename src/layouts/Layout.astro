@@ -3,6 +3,14 @@ import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 
+import "../styles/variables.styl";
+import "../styles/main.css";
+import "../styles/transition.css";
+import "../styles/scrollbar.css";
+import "../styles/markdown.css";
+import "../styles/markdown-extend.styl";
+import "../styles/expressive-code.css";
+import "../styles/photoswipe.css";
 import ConfigCarrier from "@components/ConfigCarrier.astro";
 import MusicPlayer from "@components/MusicPlayer.svelte";
 import Analytics from "@vercel/analytics/astro";
@@ -75,7 +83,7 @@ const bannerOffset =
 ---
 
 <!DOCTYPE html>
-<html lang={siteLang} class="bg-[var(--page-bg)] transition text-[14px] md:text-[16px]"
+<html lang={siteLang} class="bg-[var(--page-bg)] transition text-[14px] md:text-[16px] antialiased"
 	  data-overlayscrollbars-initialize
 >
 	<head>
