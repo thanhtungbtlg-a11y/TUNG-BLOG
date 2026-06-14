@@ -32,3 +32,6 @@ yarn.lock
 
 # local/source music files; published tracks live in public/music
 src/music/
+
+# local WordPress export files used for one-time imports
+*.WordPress.*.xml

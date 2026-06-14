@@ -14,7 +14,8 @@
 		"format": "biome format --write ./src",
 		"lint": "biome check --write ./src",
 		"preinstall": "npx only-allow pnpm",
-		"music": "node scripts/generate-music-manifest.mjs"
+		"music": "node scripts/generate-music-manifest.mjs",
+		"import-wordpress": "node scripts/import-wordpress.mjs"
 	},
 	"dependencies": {
 		"@astrojs/check": "^0.9.6",
@@ -72,8 +73,11 @@
 		"@types/markdown-it": "^14.1.2",
 		"@types/mdast": "^4.0.4",
 		"@types/sanitize-html": "^2.16.0",
+		"@types/turndown": "^5.0.6",
+		"fast-xml-parser": "^5.8.0",
 		"postcss-import": "^16.1.1",
-		"postcss-nesting": "^13.0.2"
+		"postcss-nesting": "^13.0.2",
+		"turndown": "^7.2.4"
 	},
 	"packageManager": "pnpm@9.14.4"
 }
