@@ -90,7 +90,7 @@ All commands are run from the root of the project, from a terminal:
 
 ## Supabase comments
 
-Anonymous comments use Supabase with moderation:
+Anonymous comments and post reactions use Supabase:
 
 1. Create a Supabase project.
 2. Copy `.env.example` to `.env` and fill:
@@ -103,6 +103,7 @@ Anonymous comments use Supabase with moderation:
 5. Add that user to `comment_admins` using the SQL snippet at the end of `supabase/comments.sql`.
 
 Readers can submit anonymous comments. Comments are stored as `pending` and only `approved` comments are visible publicly. Admin users can approve or delete comments from the blog UI.
+Post reaction counts are stored globally in Supabase, while each browser keeps only its current selected reaction to prevent normal repeat clicks.
 
 ## ✏️ Contributing
 

@@ -1,4 +1,4 @@
--- Supabase comments with anonymous submission and admin moderation.
+-- Supabase blog interactions with anonymous submission and admin moderation.
 -- Run this file once in Supabase SQL Editor.
 
 create extension if not exists pgcrypto;
@@ -99,3 +99,93 @@ create policy "Admins can read admin records"
 -- insert into public.comment_admins (user_id, email)
 -- select id, email from auth.users where email = 'your-admin-email@example.com'
 -- on conflict (user_id) do update set email = excluded.email;
+
+create table if not exists public.post_reaction_counts (
+	slug text primary key,
+	like_count integer not null default 0 check (like_count >= 0),
+	useful_count integer not null default 0 check (useful_count >= 0),
+	inspiring_count integer not null default 0 check (inspiring_count >= 0),
+	updated_at timestamptz not null default now(),
+	constraint post_reaction_counts_slug_length_check check (
+		char_length(btrim(slug)) between 1 and 180
+	)
+);
+
+alter table public.post_reaction_counts enable row level security;
+
+drop policy if exists "Anyone can read reaction counts" on public.post_reaction_counts;
+create policy "Anyone can read reaction counts"
+	on public.post_reaction_counts
+	for select
+	to anon, authenticated
+	using (true);
+
+grant select on table public.post_reaction_counts to anon, authenticated;
+
+create or replace function public.record_post_reaction(
+	p_slug text,
+	p_previous_reaction text default '',
+	p_next_reaction text default ''
+)
+returns public.post_reaction_counts
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+	v_slug text := btrim(p_slug);
+	v_previous text := coalesce(p_previous_reaction, '');
+	v_next text := coalesce(p_next_reaction, '');
+	v_counts public.post_reaction_counts;
+begin
+	if char_length(v_slug) not between 1 and 180 then
+		raise exception 'Invalid post slug';
+	end if;
+
+	if v_previous not in ('', 'like', 'useful', 'inspiring') then
+		raise exception 'Invalid previous reaction';
+	end if;
+
+	if v_next not in ('', 'like', 'useful', 'inspiring') then
+		raise exception 'Invalid next reaction';
+	end if;
+
+	insert into public.post_reaction_counts (slug)
+	values (v_slug)
+	on conflict (slug) do nothing;
+
+	if v_previous <> v_next then
+		update public.post_reaction_counts
+		set
+			like_count = greatest(
+				like_count
+					+ case when v_next = 'like' then 1 else 0 end
+					- case when v_previous = 'like' then 1 else 0 end,
+				0
+			),
+			useful_count = greatest(
+				useful_count
+					+ case when v_next = 'useful' then 1 else 0 end
+					- case when v_previous = 'useful' then 1 else 0 end,
+				0
+			),
+			inspiring_count = greatest(
+				inspiring_count
+					+ case when v_next = 'inspiring' then 1 else 0 end
+					- case when v_previous = 'inspiring' then 1 else 0 end,
+				0
+			),
+			updated_at = now()
+		where slug = v_slug;
+	end if;
+
+	select *
+	into v_counts
+	from public.post_reaction_counts
+	where slug = v_slug;
+
+	return v_counts;
+end;
+$$;
+
+grant execute on function public.record_post_reaction(text, text, text) to anon, authenticated;
