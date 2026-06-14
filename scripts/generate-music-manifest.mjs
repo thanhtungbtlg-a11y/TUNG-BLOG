@@ -42,19 +42,20 @@ console.log(`Generated ${tracks.length} tracks to public/music/manifest.json`);
 
 function parseTrackName(name) {
 	const cleanName = cleanBaseName(name);
-	const separator = " - ";
-	const separatorIndex = cleanName.lastIndexOf(separator);
+	const parts = cleanName.split(/\s+-\s+/);
 
-	if (separatorIndex === -1) {
+	if (parts.length < 2) {
 		return {
 			title: toDisplayTitle(cleanName),
 			artist: "Chưa rõ kênh",
 		};
 	}
 
+	const artist = parts.pop() ?? "";
+
 	return {
-		title: toDisplayTitle(cleanName.slice(0, separatorIndex)),
-		artist: toDisplayTitle(cleanName.slice(separatorIndex + separator.length)),
+		title: toDisplayTitle(parts.join(" - ")),
+		artist: toDisplayTitle(artist),
 	};
 }
 

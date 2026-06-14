@@ -12,6 +12,7 @@ interface Props {
 	class?: string;
 	entry: CollectionEntry<"posts">;
 	featured?: boolean;
+	pinned?: boolean;
 	title: string;
 	url: string;
 	published: Date;
@@ -26,6 +27,7 @@ interface Props {
 const {
 	entry,
 	featured = false,
+	pinned = false,
 	title,
 	url,
 	published,
@@ -41,14 +43,19 @@ const className = Astro.props.class;
 const hasCover = image !== undefined && image !== null && image !== "";
 
 const coverWidth = featured ? "42%" : "28%";
+const badge = pinned
+	? { icon: "material-symbols:push-pin-rounded", text: "Nổi bật" }
+	: featured
+		? { icon: "material-symbols:stars-rounded", text: "Mới nhất" }
+		: null;
 
 const { remarkPluginFrontmatter } = await entry.render();
 ---
 <div class:list={["card-base interactive-card flex flex-col-reverse md:flex-col w-full rounded-[var(--radius-large)] overflow-hidden relative", {"md:min-h-[18rem]": featured && hasCover}, className]} style={style}>
     <div class:list={["pl-6 md:pl-9 pr-6 md:pr-2 pt-6 md:pt-7 pb-6 relative", {"w-full md:w-[calc(100%_-_52px_-_12px)]": !hasCover, "w-full md:w-[calc(100%_-_var(--coverWidth)_-_12px)]": hasCover}]}>
-        {featured && <div class="inline-flex items-center gap-1.5 mb-3 rounded-full bg-[var(--btn-regular-bg)] px-3 py-1 text-xs font-bold text-[var(--btn-content)]">
-            <Icon name="material-symbols:stars-rounded" class="text-base" />
-            Mới nhất
+        {badge && <div class="inline-flex items-center gap-1.5 mb-3 rounded-full bg-[var(--btn-regular-bg)] px-3 py-1 text-xs font-bold text-[var(--btn-content)]">
+            <Icon name={badge.icon} class="text-base" />
+            {badge.text}
         </div>}
         <a href={url}
            class:list={["transition group w-full block font-bold mb-3 text-90",

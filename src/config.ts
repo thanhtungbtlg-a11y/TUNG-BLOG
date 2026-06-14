@@ -45,8 +45,8 @@ export const navBarConfig: NavBarConfig = {
 
 export const profileConfig: ProfileConfig = {
 	avatar: "assets/images/wp1892096.png", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
-	name: "Thanh Tùng",
-	bio: "Kỹ sư MEP | Đam mê thiết kế và công nghệ",
+	name: "Nguyễn Thanh Tùng",
+	bio: "Just a boy caught up in dreams and fantasies",
 	links: [
 		{
 			name: "Facebook",
