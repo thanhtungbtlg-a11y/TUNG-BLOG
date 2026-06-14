@@ -22,6 +22,7 @@ export const GET: APIRoute = async () => {
 				tags: post.data.tags ?? [],
 				category: post.data.category ?? "",
 				published: post.data.published,
+				content: toSearchText(post.body),
 			})),
 			tags,
 			categories,
@@ -33,3 +34,15 @@ export const GET: APIRoute = async () => {
 		},
 	);
 };
+
+function toSearchText(body: string) {
+	return body
+		.replace(/```[\s\S]*?```/g, " ")
+		.replace(/!\[[^\]]*]\([^)]*\)/g, " ")
+		.replace(/\[([^\]]+)]\([^)]*\)/g, "$1")
+		.replace(/<[^>]+>/g, " ")
+		.replace(/[#>*_`~|-]+/g, " ")
+		.replace(/\s+/g, " ")
+		.trim()
+		.slice(0, 12_000);
+}

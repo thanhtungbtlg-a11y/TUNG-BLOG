@@ -2,22 +2,29 @@
   {
     "id": 1,
     "title": "Beneath The Rain",
-    "artist": "Tung Notes",
+    "artist": "Chưa rõ kênh",
     "src": "/music/Beneath the Rain @ UK8qWJqEMF0.mp3",
     "cover": "/favicon/favicon-dark-192.png"
   },
   {
     "id": 2,
-    "title": "Nom - Finding Peace | Mini EP",
-    "artist": "Tung Notes",
+    "title": "Nom",
+    "artist": "Finding Peace | Mini EP",
     "src": "/music/Nom - Finding Peace ｜ Mini EP @ kYveUU9CQVw.mp3",
     "cover": "/favicon/favicon-dark-192.png"
   },
   {
     "id": 3,
-    "title": "Yumeutsutsu - Daydream",
-    "artist": "Tung Notes",
+    "title": "Yumeutsutsu",
+    "artist": "Daydream",
     "src": "/music/Yumeutsutsu - Daydream.mp3",
     "cover": "/music/covers/Yumeutsutsu - Daydream.jpg"
+  },
+  {
+    "id": 4,
+    "title": "More Than Words",
+    "artist": "Hitsujibungaku",
+    "src": "/music/more than words - Hitsujibungaku.mp3",
+    "cover": "/music/covers/more than words - Hitsujibungaku.jpg"
   }
 ]

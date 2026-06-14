@@ -40,16 +40,7 @@ export const siteConfig: SiteConfig = {
 };
 
 export const navBarConfig: NavBarConfig = {
-	links: [
-		LinkPreset.Home,
-		LinkPreset.Archive,
-		LinkPreset.About,
-		{
-			name: "GitHub",
-			url: "https://github.com/thanhtungbtlg-a11y", // Internal links should not include the base path, as it is automatically added
-			external: true, // Show an external link icon and will open in a new tab
-		},
-	],
+	links: [LinkPreset.Home, LinkPreset.Archive, LinkPreset.About],
 };
 
 export const profileConfig: ProfileConfig = {
@@ -58,21 +49,24 @@ export const profileConfig: ProfileConfig = {
 	bio: "Kỹ sư MEP | Đam mê thiết kế và công nghệ",
 	links: [
 		{
-			name: "Twitter",
-			icon: "fa6-brands:twitter", // Visit https://icones.js.org/ for icon codes
-			// You will need to install the corresponding icon set if it's not already included
-			// `pnpm add @iconify-json/<icon-set-name>`
-			url: "https://twitter.com",
+			name: "Facebook",
+			icon: "fa6-brands:facebook-f",
+			url: "https://www.facebook.com/tung0209.2k1/",
 		},
 		{
-			name: "Steam",
-			icon: "fa6-brands:steam",
-			url: "https://store.steampowered.com",
+			name: "Instagram",
+			icon: "fa6-brands:instagram",
+			url: "https://www.instagram.com/tung_0209/",
+		},
+		{
+			name: "WordPress",
+			icon: "fa6-brands:wordpress",
+			url: "https://thanhtung0209.home.blog",
 		},
 		{
 			name: "GitHub",
 			icon: "fa6-brands:github",
-			url: "https://github.com/thanhtungbtlg-a11y/TUNG-BLOG",
+			url: "https://github.com/thanhtungbtlg-a11y",
 		},
 	],
 };

@@ -12,6 +12,7 @@ type SearchIndexPost = {
 	tags: string[];
 	category: string;
 	published: string;
+	content: string;
 };
 
 type SearchIndexTag = {
@@ -32,6 +33,7 @@ type CommandItem = {
 	url: string;
 	icon: string;
 	weight?: number;
+	keywords?: string;
 };
 
 type SearchIndex = {
@@ -147,6 +149,15 @@ $: commandItems = [
 		url: post.url,
 		icon: "material-symbols:article-outline-rounded",
 		weight: 7,
+		keywords: [
+			post.title,
+			post.description,
+			post.category,
+			...post.tags,
+			post.content,
+		]
+			.filter(Boolean)
+			.join(" "),
 	})),
 	...searchIndex.tags.map((tag) => ({
 		type: "tag" as const,
@@ -170,7 +181,9 @@ $: filteredItems = (
 	query
 		? commandItems
 				.map((item) => {
-					const haystack = normalize(`${item.title} ${item.description}`);
+					const haystack = normalize(
+						`${item.title} ${item.description} ${item.keywords ?? ""}`,
+					);
 					const title = normalize(item.title);
 					let score = 0;
 					if (title === query) score += 40;
@@ -238,7 +251,7 @@ function handleInputKeydown(event: KeyboardEvent) {
 					bind:this={searchInput}
 					bind:value={keyword}
 					onkeydown={handleInputKeydown}
-					placeholder="Tìm bài viết, thẻ, danh mục"
+					placeholder="Tìm tiêu đề, nội dung, thẻ, danh mục"
 					aria-label="Command search"
 				/>
 				<button class="command-close" aria-label="Close search" onclick={closePalette}>

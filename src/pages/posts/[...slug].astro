@@ -13,6 +13,7 @@ import { licenseConfig } from "src/config";
 import ImageWrapper from "../../components/misc/ImageWrapper.astro";
 import PostMetadata from "../../components/PostMeta.astro";
 import PostReactions from "../../components/PostReactions.svelte";
+import PostShare from "../../components/PostShare.svelte";
 import RelatedPosts from "../../components/RelatedPosts.astro";
 import { profileConfig, siteConfig } from "../../config";
 import { formatDateToYYYYMMDD } from "../../utils/date-utils";
@@ -30,6 +31,10 @@ const { Content, headings } = await entry.render();
 
 const { remarkPluginFrontmatter } = await entry.render();
 const relatedPosts = await getRelatedPosts(entry, 3);
+const shareUrl = new URL(
+	getPostUrlBySlug(entry.slug),
+	Astro.site ?? Astro.url.origin,
+).toString();
 
 const jsonLd = {
 	"@context": "https://schema.org",
@@ -115,6 +120,7 @@ const jsonLd = {
         </div>
     </div>
 
+    <PostShare title={entry.data.title} shareUrl={shareUrl} client:load />
     <PostReactions slug={entry.slug} client:load />
     <AnonymousComments slug={entry.slug} client:load />
     <RelatedPosts posts={relatedPosts} />
