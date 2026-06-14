@@ -10,6 +10,23 @@ type Track = {
 	cover: string;
 };
 
+type PlayerTabState = {
+	id: string;
+	openedAt: number;
+	seenAt: number;
+};
+
+type PlaybackState = {
+	tabId: string;
+	currentIndex: number;
+	currentTime: number;
+	isPlaying: boolean;
+	volume: number;
+	shuffle: boolean;
+	repeat: "off" | "one" | "all";
+	updatedAt: number;
+};
+
 let audio: HTMLAudioElement;
 
 let tracks: Track[] = [];
@@ -23,17 +40,26 @@ let currentTime = 0;
 let duration = 0;
 
 const STORAGE_KEY = "music-player-pro";
-const ACTIVE_PLAYER_KEY = "music-player-active-tab";
+const PLAYER_TABS_KEY = "music-player-tabs";
+const PLAYBACK_STATE_KEY = "music-player-playback-state";
 const PLAYER_CHANNEL = "music-player-sync";
-const TAB_ID = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+const TAB_OPENED_AT = Date.now();
+const TAB_ID = `${TAB_OPENED_AT}-${Math.random().toString(36).slice(2)}`;
 const DEFAULT_COVER = "/favicon/favicon-dark-192.png";
 const DEFAULT_VOLUME = 0.55;
 const AUTOPLAY_START_VOLUME = 0.04;
 const FADE_IN_MS = 2200;
+const TAB_HEARTBEAT_MS = 1500;
+const TAB_STALE_MS = 6000;
+const PLAYBACK_SYNC_MS = 1000;
 
 let fadeFrame = 0;
 let autoplayFallbackCleanup: (() => void) | null = null;
 let playerChannel: BroadcastChannel | null = null;
+let heartbeatTimer = 0;
+let playbackSyncTimer = 0;
+let isPrimaryTab = false;
+let tracksReady = false;
 
 $: currentTrack = tracks[currentIndex];
 $: progressPercent =
@@ -69,18 +95,30 @@ onMount(async () => {
 		audio.volume = volume;
 	}
 
-	void attemptAutoplay();
+	tracksReady = true;
+	await syncFromPlaybackState();
+	updateLeadership();
+
+	if (isPrimaryTab) {
+		void activatePrimaryTab();
+	}
+
 	setTimeout(() => {
-		if (!isPlaying) queueAutoplayAfterInteraction();
+		if (isPrimaryTab && !isPlaying) queueAutoplayAfterInteraction();
 	}, 700);
 });
 
 onDestroy(() => {
 	clearAutoplayFallback();
 	cancelVolumeFade();
-	playerChannel?.close();
 	if (typeof window !== "undefined") {
+		writePlaybackState();
+		window.clearInterval(heartbeatTimer);
+		window.clearInterval(playbackSyncTimer);
+		unregisterTab();
+		playerChannel?.close();
 		window.removeEventListener("storage", handleStorageSync);
+		window.removeEventListener("pagehide", handlePageHide);
 	}
 });
 
@@ -105,6 +143,10 @@ function saveState() {
 
 async function play(fadeIn = false) {
 	if (!audio || !currentTrack) return;
+	if (!isPrimaryTab) {
+		await syncFromPlaybackState();
+		return false;
+	}
 
 	try {
 		if (fadeIn) {
@@ -137,47 +179,222 @@ function pause() {
 	cancelVolumeFade();
 	audio.pause();
 	isPlaying = false;
+	writePlaybackState({ isPlaying: false });
 }
 
 function setupCrossTabSync() {
+	registerTab();
+	updateLeadership();
+
 	if ("BroadcastChannel" in window) {
 		playerChannel = new BroadcastChannel(PLAYER_CHANNEL);
 		playerChannel.onmessage = (event) => {
-			if (
-				event.data?.type === "player-started" &&
-				event.data.tabId !== TAB_ID
-			) {
-				pauseFromAnotherTab();
+			if (event.data?.tabId === TAB_ID) return;
+			if (event.data?.type === "tabs-changed") updateLeadership();
+			if (event.data?.type === "playback-state" && !isPrimaryTab) {
+				void syncFromPlaybackState();
 			}
 		};
 	}
 
 	window.addEventListener("storage", handleStorageSync);
+	window.addEventListener("pagehide", handlePageHide);
+
+	heartbeatTimer = window.setInterval(() => {
+		registerTab();
+		updateLeadership();
+	}, TAB_HEARTBEAT_MS);
+
+	playbackSyncTimer = window.setInterval(() => {
+		if (isPrimaryTab) writePlaybackState();
+	}, PLAYBACK_SYNC_MS);
 }
 
-function announcePlayback() {
-	const payload = {
-		type: "player-started",
+function registerTab() {
+	const tabs = getLiveTabs();
+	const existing = tabs.find((tab) => tab.id === TAB_ID);
+	const nextTabs = tabs
+		.filter((tab) => tab.id !== TAB_ID)
+		.concat({
+			id: TAB_ID,
+			openedAt: existing?.openedAt ?? TAB_OPENED_AT,
+			seenAt: Date.now(),
+		})
+		.sort((a, b) => a.openedAt - b.openedAt);
+
+	localStorage.setItem(PLAYER_TABS_KEY, JSON.stringify(nextTabs));
+	broadcastPlayerEvent("tabs-changed");
+}
+
+function unregisterTab() {
+	const nextTabs = getLiveTabs().filter((tab) => tab.id !== TAB_ID);
+	localStorage.setItem(PLAYER_TABS_KEY, JSON.stringify(nextTabs));
+	broadcastPlayerEvent("tabs-changed");
+}
+
+function getLiveTabs() {
+	const now = Date.now();
+	return readTabs().filter((tab) => now - tab.seenAt < TAB_STALE_MS);
+}
+
+function readTabs(): PlayerTabState[] {
+	try {
+		const tabs = JSON.parse(localStorage.getItem(PLAYER_TABS_KEY) || "[]");
+		if (!Array.isArray(tabs)) return [];
+
+		return tabs
+			.filter(
+				(tab): tab is PlayerTabState =>
+					typeof tab?.id === "string" &&
+					Number.isFinite(tab.openedAt) &&
+					Number.isFinite(tab.seenAt),
+			)
+			.sort((a, b) => a.openedAt - b.openedAt);
+	} catch {
+		return [];
+	}
+}
+
+function updateLeadership() {
+	const primaryTabId = getLiveTabs()[0]?.id;
+	const nextIsPrimary = primaryTabId === TAB_ID || !primaryTabId;
+	const wasPrimary = isPrimaryTab;
+	isPrimaryTab = nextIsPrimary;
+
+	if (!tracksReady) return;
+
+	if (isPrimaryTab && !wasPrimary) {
+		void activatePrimaryTab();
+		return;
+	}
+
+	if (!isPrimaryTab && wasPrimary) {
+		clearAutoplayFallback();
+		pauseLocal();
+	}
+}
+
+async function activatePrimaryTab() {
+	clearAutoplayFallback();
+
+	const previousState = await syncFromPlaybackState();
+	if (previousState?.isPlaying) {
+		const didPlay = await play(false);
+		if (!didPlay) queueAutoplayAfterInteraction();
+		return;
+	}
+
+	if (previousState) return;
+
+	void attemptAutoplay();
+}
+
+function broadcastPlayerEvent(type: "tabs-changed" | "playback-state") {
+	playerChannel?.postMessage({
+		type,
 		tabId: TAB_ID,
 		at: Date.now(),
-	};
-
-	playerChannel?.postMessage(payload);
-	localStorage.setItem(ACTIVE_PLAYER_KEY, JSON.stringify(payload));
+	});
 }
 
 function handleStorageSync(event: StorageEvent) {
-	if (event.key !== ACTIVE_PLAYER_KEY || !event.newValue) return;
+	if (event.key === PLAYER_TABS_KEY) {
+		updateLeadership();
+		return;
+	}
 
-	try {
-		const payload = JSON.parse(event.newValue);
-		if (payload?.tabId !== TAB_ID) {
-			pauseFromAnotherTab();
-		}
-	} catch {}
+	if (event.key === PLAYBACK_STATE_KEY && !isPrimaryTab) {
+		void syncFromPlaybackState();
+	}
 }
 
-function pauseFromAnotherTab() {
+function readPlaybackState(): PlaybackState | null {
+	try {
+		const state = JSON.parse(
+			localStorage.getItem(PLAYBACK_STATE_KEY) || "null",
+		);
+		if (
+			!state ||
+			typeof state.tabId !== "string" ||
+			!Number.isFinite(state.currentIndex) ||
+			!Number.isFinite(state.currentTime)
+		) {
+			return null;
+		}
+
+		return {
+			tabId: state.tabId,
+			currentIndex: state.currentIndex,
+			currentTime: state.currentTime,
+			isPlaying: Boolean(state.isPlaying),
+			volume: clampVolume(state.volume ?? DEFAULT_VOLUME),
+			shuffle: Boolean(state.shuffle),
+			repeat:
+				state.repeat === "off" ||
+				state.repeat === "one" ||
+				state.repeat === "all"
+					? state.repeat
+					: "all",
+			updatedAt: Number.isFinite(state.updatedAt)
+				? state.updatedAt
+				: Date.now(),
+		};
+	} catch {
+		return null;
+	}
+}
+
+async function syncFromPlaybackState() {
+	const state = readPlaybackState();
+	if (!state || state.tabId === TAB_ID || !tracks.length) return state;
+
+	const nextIndex = Math.min(
+		Math.max(Math.round(state.currentIndex), 0),
+		tracks.length - 1,
+	);
+	const shouldReload = nextIndex !== currentIndex;
+
+	currentIndex = nextIndex;
+	volume = clampVolume(state.volume);
+	shuffle = state.shuffle;
+	repeat = state.repeat;
+	currentTime = Math.max(state.currentTime, 0);
+
+	await tick();
+
+	if (audio) {
+		audio.volume = volume;
+		if (shouldReload) audio.load();
+		if (Number.isFinite(currentTime)) {
+			try {
+				audio.currentTime = currentTime;
+			} catch {}
+		}
+	}
+
+	return state;
+}
+
+function writePlaybackState(overrides: Partial<PlaybackState> = {}) {
+	if (!isPrimaryTab && !overrides.isPlaying) return;
+
+	const state: PlaybackState = {
+		tabId: TAB_ID,
+		currentIndex,
+		currentTime: audio?.currentTime ?? currentTime,
+		isPlaying: audio ? !audio.paused : isPlaying,
+		volume,
+		shuffle,
+		repeat,
+		updatedAt: Date.now(),
+		...overrides,
+	};
+
+	localStorage.setItem(PLAYBACK_STATE_KEY, JSON.stringify(state));
+	broadcastPlayerEvent("playback-state");
+}
+
+function pauseLocal() {
 	if (!audio || audio.paused) return;
 
 	cancelVolumeFade();
@@ -185,8 +402,18 @@ function pauseFromAnotherTab() {
 	isPlaying = false;
 }
 
+function handlePageHide() {
+	writePlaybackState({ isPlaying });
+	unregisterTab();
+}
+
 async function togglePlay() {
 	clearAutoplayFallback();
+	if (!isPrimaryTab) {
+		await syncFromPlaybackState();
+		return;
+	}
+
 	if (isPlaying) {
 		pause();
 	} else {
@@ -195,6 +422,8 @@ async function togglePlay() {
 }
 
 async function attemptAutoplay() {
+	if (!isPrimaryTab) return;
+
 	const didPlay = await play(true);
 	if (!didPlay) {
 		queueAutoplayAfterInteraction();
@@ -202,6 +431,7 @@ async function attemptAutoplay() {
 }
 
 function queueAutoplayAfterInteraction() {
+	if (!isPrimaryTab) return;
 	if (autoplayFallbackCleanup) return;
 
 	let cleanup = () => {};
@@ -214,7 +444,7 @@ function queueAutoplayAfterInteraction() {
 		}
 
 		cleanup();
-		void play(true);
+		if (isPrimaryTab) void play(true);
 	};
 
 	cleanup = () => {
@@ -238,10 +468,15 @@ function clearAutoplayFallback() {
 
 async function changeTrack(index: number, autoPlay = true) {
 	if (!tracks.length) return;
+	if (!isPrimaryTab) {
+		await syncFromPlaybackState();
+		return;
+	}
 
 	currentIndex = (index + tracks.length) % tracks.length;
 	currentTime = 0;
 	saveState();
+	writePlaybackState();
 
 	setTimeout(async () => {
 		if (audio) {
@@ -281,6 +516,7 @@ async function onEnded() {
 		await nextTrack();
 	} else {
 		isPlaying = false;
+		writePlaybackState({ isPlaying: false });
 	}
 }
 
@@ -293,9 +529,10 @@ function onTimeUpdate() {
 function seek(event: Event) {
 	const input = event.target as HTMLInputElement;
 	const value = Number(input.value);
-	if (!audio) return;
+	if (!audio || !isPrimaryTab) return;
 	audio.currentTime = value;
 	currentTime = value;
+	writePlaybackState();
 }
 
 function changeVolume(event: Event) {
@@ -304,6 +541,7 @@ function changeVolume(event: Event) {
 	volume = clampVolume(Number(input.value));
 	if (audio) audio.volume = volume;
 	saveState();
+	if (isPrimaryTab) writePlaybackState();
 }
 
 function toggleExpanded() {
@@ -311,16 +549,20 @@ function toggleExpanded() {
 }
 
 function toggleShuffle() {
+	if (!isPrimaryTab) return;
 	shuffle = !shuffle;
 	saveState();
+	writePlaybackState();
 }
 
 function toggleRepeat() {
+	if (!isPrimaryTab) return;
 	if (repeat === "off") repeat = "all";
 	else if (repeat === "all") repeat = "one";
 	else repeat = "off";
 
 	saveState();
+	writePlaybackState();
 }
 
 function handlePlayClick(event: MouseEvent) {
@@ -330,11 +572,12 @@ function handlePlayClick(event: MouseEvent) {
 
 function handleAudioPlay() {
 	isPlaying = true;
-	announcePlayback();
+	writePlaybackState({ isPlaying: true });
 }
 
 function handleAudioPause() {
 	isPlaying = false;
+	if (isPrimaryTab) writePlaybackState({ isPlaying: false });
 }
 
 function useFallbackCover(event: Event) {

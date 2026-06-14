@@ -7,6 +7,8 @@ image: ""
 tags: []
 category: "WordPress"
 lang: vi
+pinned: true
+pinOrder: 1
 draft: false
 ---
 

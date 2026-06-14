@@ -20,6 +20,16 @@ async function getRawSortedPosts() {
 			if (orderA !== orderB) return orderA - orderB;
 		}
 
+		const latestA = a.data.latest ? 0 : 1;
+		const latestB = b.data.latest ? 0 : 1;
+		if (latestA !== latestB) return latestA - latestB;
+
+		if (a.data.latest && b.data.latest) {
+			const orderA = a.data.latestOrder ?? 0;
+			const orderB = b.data.latestOrder ?? 0;
+			if (orderA !== orderB) return orderA - orderB;
+		}
+
 		const dateA = new Date(a.data.published);
 		const dateB = new Date(b.data.published);
 		return dateA > dateB ? -1 : 1;

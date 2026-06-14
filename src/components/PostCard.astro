@@ -13,6 +13,7 @@ interface Props {
 	entry: CollectionEntry<"posts">;
 	featured?: boolean;
 	pinned?: boolean;
+	latest?: boolean;
 	title: string;
 	url: string;
 	published: Date;
@@ -28,6 +29,7 @@ const {
 	entry,
 	featured = false,
 	pinned = false,
+	latest = false,
 	title,
 	url,
 	published,
@@ -45,7 +47,7 @@ const hasCover = image !== undefined && image !== null && image !== "";
 const coverWidth = featured ? "42%" : "28%";
 const badge = pinned
 	? { icon: "material-symbols:push-pin", text: "Nổi bật" }
-	: featured
+	: latest
 		? { icon: "material-symbols:stars-rounded", text: "Mới nhất" }
 		: null;
 

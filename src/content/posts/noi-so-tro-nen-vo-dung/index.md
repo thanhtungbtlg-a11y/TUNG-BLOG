@@ -6,6 +6,8 @@ image: ""
 tags: []
 category: "WordPress"
 lang: vi
+latest: true
+latestOrder: 1
 draft: false
 ---
 
