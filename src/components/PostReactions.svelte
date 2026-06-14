@@ -237,9 +237,6 @@ function isReactionId(value: unknown): value is ReactionId {
 <div class="reaction-panel card-base onload-animation">
 	<div class="reaction-copy">
 		<div class="reaction-title">Phản ứng của bạn</div>
-		<div class="reaction-subtitle">
-			{supabase ? "Đồng bộ cảm xúc qua Supabase" : "Lưu trên trình duyệt hiện tại"}
-		</div>
 		{#if error}
 			<div class="reaction-error" role="alert">{error}</div>
 		{/if}
@@ -256,7 +253,6 @@ function isReactionId(value: unknown): value is ReactionId {
 				onclick={() => toggleReaction(reaction.id)}
 			>
 				<span class="reaction-emoji" aria-hidden="true">{reaction.emoji}</span>
-				<span class="reaction-label">{reaction.label}</span>
 				<strong>{state.counts[reaction.id]}</strong>
 			</button>
 		{/each}
@@ -278,12 +274,6 @@ function isReactionId(value: unknown): value is ReactionId {
 		color: rgb(0 0 0 / 0.84);
 	}
 
-	.reaction-subtitle {
-		margin-top: 0.125rem;
-		font-size: 0.82rem;
-		color: rgb(0 0 0 / 0.45);
-	}
-
 	.reaction-error {
 		margin-top: 0.25rem;
 		color: #d04444;
@@ -293,10 +283,6 @@ function isReactionId(value: unknown): value is ReactionId {
 
 	:global(.dark) .reaction-title {
 		color: rgb(255 255 255 / 0.9);
-	}
-
-	:global(.dark) .reaction-subtitle {
-		color: rgb(255 255 255 / 0.45);
 	}
 
 	.reaction-actions {
@@ -315,7 +301,7 @@ function isReactionId(value: unknown): value is ReactionId {
 		border-radius: 999px;
 		background: var(--btn-regular-bg);
 		color: var(--btn-content);
-		padding: 0 0.58rem 0 0.46rem;
+		padding: 0 0.5rem 0 0.42rem;
 		font: inherit;
 		font-weight: 750;
 		cursor: pointer;
@@ -353,10 +339,6 @@ function isReactionId(value: unknown): value is ReactionId {
 		font-size: 1.18rem;
 		line-height: 1;
 		transition: transform 160ms ease;
-	}
-
-	.reaction-label {
-		font-size: 0.86rem;
 	}
 
 	button strong {
