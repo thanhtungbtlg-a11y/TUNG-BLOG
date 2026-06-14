@@ -1,6 +1,6 @@
 <script lang="ts">
 import Icon from "@iconify/svelte";
-import { onMount } from "svelte";
+import { onDestroy, onMount, tick } from "svelte";
 
 type Track = {
 	id: number;
@@ -18,12 +18,18 @@ let isPlaying = false;
 let expanded = false;
 let shuffle = false;
 let repeat: "off" | "one" | "all" = "all";
-let volume = 0.8;
+let volume = 0.55;
 let currentTime = 0;
 let duration = 0;
 
 const STORAGE_KEY = "music-player-pro";
 const DEFAULT_COVER = "/favicon/favicon-dark-192.png";
+const DEFAULT_VOLUME = 0.55;
+const AUTOPLAY_START_VOLUME = 0.04;
+const FADE_IN_MS = 2200;
+
+let fadeFrame = 0;
+let autoplayFallbackCleanup: (() => void) | null = null;
 
 $: currentTrack = tracks[currentIndex];
 $: progressPercent =
@@ -44,15 +50,28 @@ onMount(async () => {
 		try {
 			const state = JSON.parse(saved);
 			currentIndex = state.currentIndex ?? 0;
-			volume = state.volume ?? 0.8;
+			volume = clampVolume(state.volume ?? DEFAULT_VOLUME);
 			shuffle = state.shuffle ?? false;
 			repeat = state.repeat ?? "all";
 		} catch {}
 	}
 
+	if (currentIndex >= tracks.length) currentIndex = 0;
+	await tick();
+
 	if (audio) {
 		audio.volume = volume;
 	}
+
+	void attemptAutoplay();
+	setTimeout(() => {
+		if (!isPlaying) queueAutoplayAfterInteraction();
+	}, 700);
+});
+
+onDestroy(() => {
+	clearAutoplayFallback();
+	cancelVolumeFade();
 });
 
 function handleMiniKeydown(event: KeyboardEvent) {
@@ -74,30 +93,91 @@ function saveState() {
 	);
 }
 
-async function play() {
+async function play(fadeIn = false) {
 	if (!audio || !currentTrack) return;
 
 	try {
+		if (fadeIn) {
+			const targetVolume = clampVolume(volume || DEFAULT_VOLUME);
+			cancelVolumeFade();
+			audio.volume = Math.min(AUTOPLAY_START_VOLUME, targetVolume);
+		}
+
 		await audio.play();
 		isPlaying = true;
+
+		if (fadeIn) {
+			fadeToVolume(clampVolume(volume || DEFAULT_VOLUME));
+		}
+
+		return true;
 	} catch (err) {
-		if (err instanceof DOMException && err.name === "NotAllowedError") return;
+		if (fadeIn) {
+			audio.volume = clampVolume(volume || DEFAULT_VOLUME);
+		}
+		if (err instanceof DOMException && err.name === "NotAllowedError")
+			return false;
 		console.error("Play error:", err);
+		return false;
 	}
 }
 
 function pause() {
 	if (!audio) return;
+	cancelVolumeFade();
 	audio.pause();
 	isPlaying = false;
 }
 
 async function togglePlay() {
+	clearAutoplayFallback();
 	if (isPlaying) {
 		pause();
 	} else {
 		await play();
 	}
+}
+
+async function attemptAutoplay() {
+	const didPlay = await play(true);
+	if (!didPlay) {
+		queueAutoplayAfterInteraction();
+	}
+}
+
+function queueAutoplayAfterInteraction() {
+	if (autoplayFallbackCleanup) return;
+
+	let cleanup = () => {};
+	const resume = (event: Event) => {
+		if (
+			event.target instanceof Element &&
+			event.target.closest(".music-player")
+		) {
+			return;
+		}
+
+		cleanup();
+		void play(true);
+	};
+
+	cleanup = () => {
+		document.removeEventListener("pointerdown", resume, true);
+		document.removeEventListener("click", resume, true);
+		document.removeEventListener("touchstart", resume, true);
+		document.removeEventListener("keydown", resume, true);
+		autoplayFallbackCleanup = null;
+	};
+
+	autoplayFallbackCleanup = cleanup;
+	document.addEventListener("pointerdown", resume, true);
+	document.addEventListener("click", resume, true);
+	document.addEventListener("touchstart", resume, true);
+	document.addEventListener("keydown", resume, true);
+}
+
+function clearAutoplayFallback() {
+	autoplayFallbackCleanup?.();
 }
 
 async function changeTrack(index: number, autoPlay = true) {
@@ -164,7 +244,8 @@ function seek(event: Event) {
 
 function changeVolume(event: Event) {
 	const input = event.target as HTMLInputElement;
-	volume = Number(input.value);
+	cancelVolumeFade();
+	volume = clampVolume(Number(input.value));
 	if (audio) audio.volume = volume;
 	saveState();
 }
@@ -195,6 +276,48 @@ function useFallbackCover(event: Event) {
 	const img = event.currentTarget as HTMLImageElement;
 	if (img.src.endsWith(DEFAULT_COVER)) return;
 	img.src = DEFAULT_COVER;
+}
+
+function clampVolume(value: number) {
+	return Math.min(
+		Math.max(Number.isFinite(value) ? value : DEFAULT_VOLUME, 0),
+		1,
+	);
+}
+
+function cancelVolumeFade() {
+	if (!fadeFrame) return;
+	cancelAnimationFrame(fadeFrame);
+	fadeFrame = 0;
+}
+
+function fadeToVolume(targetVolume: number) {
+	if (!audio) return;
+
+	cancelVolumeFade();
+
+	const fromVolume = audio.volume;
+	const startedAt = performance.now();
+
+	const step = (time: number) => {
+		if (!audio || !isPlaying) {
+			fadeFrame = 0;
+			return;
+		}
+
+		const progress = Math.min((time - startedAt) / FADE_IN_MS, 1);
+		const eased = 1 - (1 - progress) ** 3;
+		audio.volume = fromVolume + (targetVolume - fromVolume) * eased;
+
+		if (progress < 1) {
+			fadeFrame = requestAnimationFrame(step);
+		} else {
+			audio.volume = targetVolume;
+			fadeFrame = 0;
+		}
+	};
+
+	fadeFrame = requestAnimationFrame(step);
 }
 
 function formatTime(seconds: number) {
@@ -236,7 +359,7 @@ function formatTime(seconds: number) {
 
 			<div class="mini-info">
 				<div class="eyebrow">Now playing</div>
-				<div class="title">{currentTrack.title}</div>
+				<div class="title" title={currentTrack.title}>{currentTrack.title}</div>
 				<div class="artist">{currentTrack.artist}</div>
 			</div>
 
@@ -263,7 +386,7 @@ function formatTime(seconds: number) {
 					<div class="hero-shade"></div>
 				</div>
 
-				<div class="song-title">{currentTrack.title}</div>
+				<div class="song-title" title={currentTrack.title}>{currentTrack.title}</div>
 				<div class="song-artist">{currentTrack.artist}</div>
 
 				<div class="progress-row">
@@ -328,11 +451,12 @@ function formatTime(seconds: number) {
 							class="track"
 							class:active={index === currentIndex}
 							aria-label={`Play ${track.title}`}
+							title={`${track.title} - ${track.artist}`}
 							onclick={() => changeTrack(index)}
 						>
 							<img src={track.cover} alt={track.title} onerror={useFallbackCover} />
 							<div>
-								<div class="track-title">{track.title}</div>
+								<div class="track-title" title={track.title}>{track.title}</div>
 								<div class="track-artist">{track.artist}</div>
 							</div>
 							{#if index === currentIndex}
@@ -497,9 +621,7 @@ function formatTime(seconds: number) {
 
 	.title,
 	.artist,
-	.song-title,
 	.song-artist,
-	.track-title,
 	.track-artist {
 		overflow: hidden;
 		white-space: nowrap;
@@ -592,6 +714,7 @@ function formatTime(seconds: number) {
 		font-size: 16px;
 		font-weight: 850;
 		line-height: 1.3;
+		overflow-wrap: anywhere;
 	}
 
 	.song-artist {
@@ -731,6 +854,8 @@ function formatTime(seconds: number) {
 	.track-title {
 		font-size: 12px;
 		font-weight: 700;
+		line-height: 1.25;
+		overflow-wrap: anywhere;
 	}
 
 	.track-artist {

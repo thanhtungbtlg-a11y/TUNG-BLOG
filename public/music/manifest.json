@@ -1,23 +1,23 @@
 [
   {
     "id": 1,
-    "title": "Beneath The Rain @ UK8qWJqEMF0",
+    "title": "Beneath The Rain",
     "artist": "Tung Notes",
     "src": "/music/Beneath the Rain @ UK8qWJqEMF0.mp3",
     "cover": "/favicon/favicon-dark-192.png"
   },
   {
     "id": 2,
-    "title": "Daydream @ HEi3PWVdSAA",
+    "title": "Nom - Finding Peace | Mini EP",
     "artist": "Tung Notes",
-    "src": "/music/Daydream @ HEi3PWVdSAA.mp3",
+    "src": "/music/Nom - Finding Peace ｜ Mini EP @ kYveUU9CQVw.mp3",
     "cover": "/favicon/favicon-dark-192.png"
   },
   {
     "id": 3,
-    "title": "Nom   Finding Peace ｜ Mini EP @ KYveUU9CQVw",
+    "title": "Yumeutsutsu - Daydream",
     "artist": "Tung Notes",
-    "src": "/music/Nom - Finding Peace ｜ Mini EP @ kYveUU9CQVw.mp3",
-    "cover": "/favicon/favicon-dark-192.png"
+    "src": "/music/Yumeutsutsu - Daydream.mp3",
+    "cover": "/music/covers/Yumeutsutsu - Daydream.jpg"
   }
 ]

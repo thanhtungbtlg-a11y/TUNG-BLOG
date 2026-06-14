@@ -15,10 +15,7 @@ const files = fs
 
 const tracks = files.map((file, index) => {
 	const name = file.replace(/\.mp3$/i, "");
-	const cleanName = name
-		.replace(/^\d+[-_\s]*/, "")
-		.replace(/[-_]/g, " ")
-		.replace(/\b\w/g, (char) => char.toUpperCase());
+	const cleanName = toDisplayTitle(name);
 
 	const coverJpg = `/music/covers/${name}.jpg`;
 	const coverPng = `/music/covers/${name}.png`;
@@ -42,3 +39,14 @@ const tracks = files.map((file, index) => {
 fs.writeFileSync(outputFile, JSON.stringify(tracks, null, 2), "utf-8");
 
 console.log(`Generated ${tracks.length} tracks to public/music/manifest.json`);
+
+function toDisplayTitle(name) {
+	return name
+		.replace(/^\d+[-_\s]*/, "")
+		.replace(/\s+@\s*[a-z0-9_-]{6,}$/i, "")
+		.replace(/_/g, " ")
+		.replace(/\s*[｜|]\s*/g, " | ")
+		.replace(/\s{2,}/g, " ")
+		.trim()
+		.replace(/\b\w/g, (char) => char.toUpperCase());
+}
