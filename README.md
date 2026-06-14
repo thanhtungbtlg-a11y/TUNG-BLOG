@@ -2,7 +2,7 @@
 
 Blog cá nhân của Thanh Tùng, viết bằng Astro và deploy trên Vercel.
 
-Website: [tung-blog.vercel.app](https://tung-blog.vercel.app)
+Website: [www.thanhtung0209.com](https://www.thanhtung0209.com)
 
 ## Nội Dung
 
