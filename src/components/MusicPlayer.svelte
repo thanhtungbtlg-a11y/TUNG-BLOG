@@ -23,6 +23,9 @@ let currentTime = 0;
 let duration = 0;
 
 const STORAGE_KEY = "music-player-pro";
+const ACTIVE_PLAYER_KEY = "music-player-active-tab";
+const PLAYER_CHANNEL = "music-player-sync";
+const TAB_ID = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 const DEFAULT_COVER = "/favicon/favicon-dark-192.png";
 const DEFAULT_VOLUME = 0.55;
 const AUTOPLAY_START_VOLUME = 0.04;
@@ -30,6 +33,7 @@ const FADE_IN_MS = 2200;
 
 let fadeFrame = 0;
 let autoplayFallbackCleanup: (() => void) | null = null;
+let playerChannel: BroadcastChannel | null = null;
 
 $: currentTrack = tracks[currentIndex];
 $: progressPercent =
@@ -37,6 +41,8 @@ $: progressPercent =
 $: volumePercent = Math.round(volume * 100);
 
 onMount(async () => {
+	setupCrossTabSync();
+
 	try {
 		const res = await fetch("/music/manifest.json");
 		tracks = await res.json();
@@ -72,6 +78,10 @@ onMount(async () => {
 onDestroy(() => {
 	clearAutoplayFallback();
 	cancelVolumeFade();
+	playerChannel?.close();
+	if (typeof window !== "undefined") {
+		window.removeEventListener("storage", handleStorageSync);
+	}
 });
 
 function handleMiniKeydown(event: KeyboardEvent) {
@@ -124,6 +134,52 @@ async function play(fadeIn = false) {
 
 function pause() {
 	if (!audio) return;
+	cancelVolumeFade();
+	audio.pause();
+	isPlaying = false;
+}
+
+function setupCrossTabSync() {
+	if ("BroadcastChannel" in window) {
+		playerChannel = new BroadcastChannel(PLAYER_CHANNEL);
+		playerChannel.onmessage = (event) => {
+			if (
+				event.data?.type === "player-started" &&
+				event.data.tabId !== TAB_ID
+			) {
+				pauseFromAnotherTab();
+			}
+		};
+	}
+
+	window.addEventListener("storage", handleStorageSync);
+}
+
+function announcePlayback() {
+	const payload = {
+		type: "player-started",
+		tabId: TAB_ID,
+		at: Date.now(),
+	};
+
+	playerChannel?.postMessage(payload);
+	localStorage.setItem(ACTIVE_PLAYER_KEY, JSON.stringify(payload));
+}
+
+function handleStorageSync(event: StorageEvent) {
+	if (event.key !== ACTIVE_PLAYER_KEY || !event.newValue) return;
+
+	try {
+		const payload = JSON.parse(event.newValue);
+		if (payload?.tabId !== TAB_ID) {
+			pauseFromAnotherTab();
+		}
+	} catch {}
+}
+
+function pauseFromAnotherTab() {
+	if (!audio || audio.paused) return;
+
 	cancelVolumeFade();
 	audio.pause();
 	isPlaying = false;
@@ -272,6 +328,15 @@ function handlePlayClick(event: MouseEvent) {
 	void togglePlay();
 }
 
+function handleAudioPlay() {
+	isPlaying = true;
+	announcePlayback();
+}
+
+function handleAudioPause() {
+	isPlaying = false;
+}
+
 function useFallbackCover(event: Event) {
 	const img = event.currentTarget as HTMLImageElement;
 	if (img.src.endsWith(DEFAULT_COVER)) return;
@@ -336,8 +401,8 @@ function formatTime(seconds: number) {
 	<audio
 		bind:this={audio}
 		src={currentTrack.src}
-		onplay={() => (isPlaying = true)}
-		onpause={() => (isPlaying = false)}
+		onplay={handleAudioPlay}
+		onpause={handleAudioPause}
 		ontimeupdate={onTimeUpdate}
 		onloadedmetadata={onTimeUpdate}
 		onended={onEnded}
