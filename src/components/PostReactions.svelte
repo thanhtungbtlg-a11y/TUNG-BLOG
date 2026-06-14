@@ -1,9 +1,8 @@
 <script lang="ts">
-import Icon from "@iconify/svelte";
 import { createClient } from "@supabase/supabase-js";
 import { onMount } from "svelte";
 
-type ReactionId = "like" | "useful" | "inspiring";
+type ReactionId = "like" | "love" | "haha" | "wow" | "sad" | "angry";
 type ReactionState = {
 	active: ReactionId | "";
 	counts: Record<ReactionId, number>;
@@ -11,29 +10,55 @@ type ReactionState = {
 
 type ReactionCountsRow = {
 	like_count?: number;
-	useful_count?: number;
-	inspiring_count?: number;
+	love_count?: number;
+	haha_count?: number;
+	wow_count?: number;
+	sad_count?: number;
+	angry_count?: number;
 };
 
+const reactionIds: ReactionId[] = [
+	"like",
+	"love",
+	"haha",
+	"wow",
+	"sad",
+	"angry",
+];
 const reactions: Array<{
 	id: ReactionId;
 	label: string;
-	icon: string;
+	emoji: string;
 }> = [
 	{
 		id: "like",
 		label: "Like",
-		icon: "material-symbols:favorite-outline-rounded",
+		emoji: "👍",
 	},
 	{
-		id: "useful",
-		label: "Useful",
-		icon: "material-symbols:tips-and-updates-outline-rounded",
+		id: "love",
+		label: "Tym",
+		emoji: "❤️",
 	},
 	{
-		id: "inspiring",
-		label: "Inspiring",
-		icon: "material-symbols:bolt-rounded",
+		id: "haha",
+		label: "Haha",
+		emoji: "😂",
+	},
+	{
+		id: "wow",
+		label: "Woa",
+		emoji: "😮",
+	},
+	{
+		id: "sad",
+		label: "Buồn",
+		emoji: "😢",
+	},
+	{
+		id: "angry",
+		label: "Phẫn nộ",
+		emoji: "😡",
 	},
 ];
 
@@ -53,11 +78,7 @@ const supabase =
 
 let state = $state<ReactionState>({
 	active: "",
-	counts: {
-		like: 0,
-		useful: 0,
-		inspiring: 0,
-	},
+	counts: createEmptyCounts(),
 });
 let saving = $state(false);
 let error = $state("");
@@ -76,7 +97,7 @@ onMount(() => {
 			if (!supabase && parsed?.counts) {
 				state.counts = {
 					...state.counts,
-					...parsed.counts,
+					...pickValidCounts(parsed.counts),
 				};
 			}
 		} catch {}
@@ -100,7 +121,9 @@ async function loadReactionCounts() {
 
 	const { data, error: loadError } = await supabase
 		.from("post_reaction_counts")
-		.select("like_count, useful_count, inspiring_count")
+		.select(
+			"like_count, love_count, haha_count, wow_count, sad_count, angry_count",
+		)
 		.eq("slug", slug)
 		.maybeSingle();
 
@@ -173,13 +196,41 @@ function getNextState(
 function rowToCounts(row: ReactionCountsRow) {
 	return {
 		like: row.like_count ?? 0,
-		useful: row.useful_count ?? 0,
-		inspiring: row.inspiring_count ?? 0,
+		love: row.love_count ?? 0,
+		haha: row.haha_count ?? 0,
+		wow: row.wow_count ?? 0,
+		sad: row.sad_count ?? 0,
+		angry: row.angry_count ?? 0,
+	};
+}
+
+function pickValidCounts(value: unknown) {
+	const counts = createEmptyCounts();
+	if (!value || typeof value !== "object") return counts;
+
+	for (const id of reactionIds) {
+		const count = (value as Partial<Record<ReactionId, unknown>>)[id];
+		if (typeof count === "number" && Number.isFinite(count)) {
+			counts[id] = Math.max(Math.floor(count), 0);
+		}
+	}
+
+	return counts;
+}
+
+function createEmptyCounts(): Record<ReactionId, number> {
+	return {
+		like: 0,
+		love: 0,
+		haha: 0,
+		wow: 0,
+		sad: 0,
+		angry: 0,
 	};
 }
 
 function isReactionId(value: unknown): value is ReactionId {
-	return value === "like" || value === "useful" || value === "inspiring";
+	return reactionIds.includes(value as ReactionId);
 }
 </script>
 
@@ -187,7 +238,7 @@ function isReactionId(value: unknown): value is ReactionId {
 	<div class="reaction-copy">
 		<div class="reaction-title">Phản ứng của bạn</div>
 		<div class="reaction-subtitle">
-			{supabase ? "Đồng bộ qua Supabase" : "Lưu trên trình duyệt hiện tại"}
+			{supabase ? "Đồng bộ cảm xúc qua Supabase" : "Lưu trên trình duyệt hiện tại"}
 		</div>
 		{#if error}
 			<div class="reaction-error" role="alert">{error}</div>
@@ -198,12 +249,14 @@ function isReactionId(value: unknown): value is ReactionId {
 			<button
 				data-reaction-button
 				class:active={state.active === reaction.id}
+				aria-label={reaction.label}
 				aria-pressed={state.active === reaction.id}
 				disabled={saving}
+				title={reaction.label}
 				onclick={() => toggleReaction(reaction.id)}
 			>
-				<Icon icon={reaction.icon} />
-				<span>{reaction.label}</span>
+				<span class="reaction-emoji" aria-hidden="true">{reaction.emoji}</span>
+				<span class="reaction-label">{reaction.label}</span>
 				<strong>{state.counts[reaction.id]}</strong>
 			</button>
 		{/each}
@@ -249,22 +302,22 @@ function isReactionId(value: unknown): value is ReactionId {
 	.reaction-actions {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.5rem;
+		gap: 0.45rem;
 		justify-content: flex-end;
 	}
 
 	button {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.45rem;
+		gap: 0.38rem;
 		min-height: 2.5rem;
 		border: 1px solid var(--card-border);
-		border-radius: 0.85rem;
+		border-radius: 999px;
 		background: var(--btn-regular-bg);
 		color: var(--btn-content);
-		padding: 0 0.75rem;
+		padding: 0 0.58rem 0 0.46rem;
 		font: inherit;
-		font-weight: 700;
+		font-weight: 750;
 		cursor: pointer;
 		transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
 	}
@@ -278,6 +331,10 @@ function isReactionId(value: unknown): value is ReactionId {
 		outline: none;
 	}
 
+	button.active .reaction-emoji {
+		transform: scale(1.15);
+	}
+
 	button:disabled {
 		cursor: wait;
 		opacity: 0.72;
@@ -285,6 +342,21 @@ function isReactionId(value: unknown): value is ReactionId {
 
 	button:active {
 		transform: scale(0.97);
+	}
+
+	.reaction-emoji {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.55rem;
+		height: 1.55rem;
+		font-size: 1.18rem;
+		line-height: 1;
+		transition: transform 160ms ease;
+	}
+
+	.reaction-label {
+		font-size: 0.86rem;
 	}
 
 	button strong {
@@ -304,12 +376,19 @@ function isReactionId(value: unknown): value is ReactionId {
 		}
 
 		.reaction-actions {
-			justify-content: stretch;
+			display: grid;
+			grid-template-columns: repeat(3, minmax(0, 1fr));
 		}
 
 		button {
-			flex: 1 1 30%;
 			justify-content: center;
+			min-width: 0;
+		}
+	}
+
+	@media (max-width: 420px) {
+		.reaction-actions {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
 	}
 </style>

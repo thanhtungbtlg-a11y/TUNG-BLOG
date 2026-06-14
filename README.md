@@ -103,7 +103,7 @@ Anonymous comments and post reactions use Supabase:
 5. Add that user to `comment_admins` using the SQL snippet at the end of `supabase/comments.sql`.
 
 Readers can submit anonymous comments. Comments are stored as `pending` and only `approved` comments are visible publicly. Admin users can approve or delete comments from the blog UI.
-Post reaction counts are stored globally in Supabase, while each browser keeps only its current selected reaction to prevent normal repeat clicks.
+Facebook-style post reaction counts (`Like`, `Tym`, `Haha`, `Woa`, `Buồn`, `Phẫn nộ`) are stored globally in Supabase, while each browser keeps only its current selected reaction to prevent normal repeat clicks.
 
 ## ✏️ Contributing
 

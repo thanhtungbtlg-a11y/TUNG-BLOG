@@ -103,13 +103,23 @@ create policy "Admins can read admin records"
 create table if not exists public.post_reaction_counts (
 	slug text primary key,
 	like_count integer not null default 0 check (like_count >= 0),
-	useful_count integer not null default 0 check (useful_count >= 0),
-	inspiring_count integer not null default 0 check (inspiring_count >= 0),
+	love_count integer not null default 0 check (love_count >= 0),
+	haha_count integer not null default 0 check (haha_count >= 0),
+	wow_count integer not null default 0 check (wow_count >= 0),
+	sad_count integer not null default 0 check (sad_count >= 0),
+	angry_count integer not null default 0 check (angry_count >= 0),
 	updated_at timestamptz not null default now(),
 	constraint post_reaction_counts_slug_length_check check (
 		char_length(btrim(slug)) between 1 and 180
 	)
 );
+
+alter table public.post_reaction_counts
+	add column if not exists love_count integer not null default 0 check (love_count >= 0),
+	add column if not exists haha_count integer not null default 0 check (haha_count >= 0),
+	add column if not exists wow_count integer not null default 0 check (wow_count >= 0),
+	add column if not exists sad_count integer not null default 0 check (sad_count >= 0),
+	add column if not exists angry_count integer not null default 0 check (angry_count >= 0);
 
 alter table public.post_reaction_counts enable row level security;
 
@@ -142,11 +152,11 @@ begin
 		raise exception 'Invalid post slug';
 	end if;
 
-	if v_previous not in ('', 'like', 'useful', 'inspiring') then
+	if v_previous not in ('', 'like', 'love', 'haha', 'wow', 'sad', 'angry') then
 		raise exception 'Invalid previous reaction';
 	end if;
 
-	if v_next not in ('', 'like', 'useful', 'inspiring') then
+	if v_next not in ('', 'like', 'love', 'haha', 'wow', 'sad', 'angry') then
 		raise exception 'Invalid next reaction';
 	end if;
 
@@ -163,16 +173,34 @@ begin
 					- case when v_previous = 'like' then 1 else 0 end,
 				0
 			),
-			useful_count = greatest(
-				useful_count
-					+ case when v_next = 'useful' then 1 else 0 end
-					- case when v_previous = 'useful' then 1 else 0 end,
+			love_count = greatest(
+				love_count
+					+ case when v_next = 'love' then 1 else 0 end
+					- case when v_previous = 'love' then 1 else 0 end,
 				0
 			),
-			inspiring_count = greatest(
-				inspiring_count
-					+ case when v_next = 'inspiring' then 1 else 0 end
-					- case when v_previous = 'inspiring' then 1 else 0 end,
+			haha_count = greatest(
+				haha_count
+					+ case when v_next = 'haha' then 1 else 0 end
+					- case when v_previous = 'haha' then 1 else 0 end,
+				0
+			),
+			wow_count = greatest(
+				wow_count
+					+ case when v_next = 'wow' then 1 else 0 end
+					- case when v_previous = 'wow' then 1 else 0 end,
+				0
+			),
+			sad_count = greatest(
+				sad_count
+					+ case when v_next = 'sad' then 1 else 0 end
+					- case when v_previous = 'sad' then 1 else 0 end,
+				0
+			),
+			angry_count = greatest(
+				angry_count
+					+ case when v_next = 'angry' then 1 else 0 end
+					- case when v_previous = 'angry' then 1 else 0 end,
 				0
 			),
 			updated_at = now()
