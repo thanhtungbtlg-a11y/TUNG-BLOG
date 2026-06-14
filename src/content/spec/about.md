@@ -1,9 +1,9 @@
-# About
-This is the demo site for [Fuwari](https://github.com/saicaca/fuwari).
+# Về Mình
 
-::github{repo="saicaca/fuwari"}
+Chào bạn, mình là Thanh Tùng.
 
-> ### Sources of images used in this site
-> - [Unsplash](https://unsplash.com/)
-> - [星と少女](https://www.pixiv.net/artworks/108916539) by [Stella](https://www.pixiv.net/users/93273965)
-> - [Rabbit - v1.4 Showcase](https://civitai.com/posts/586908) by [Rabbit_YourMajesty](https://civitai.com/user/Rabbit_YourMajesty)
+Đây là blog cá nhân nơi mình lưu lại những suy nghĩ, kỷ niệm, những lần tự hỏi về công việc, cuộc sống, gia đình, tình yêu và những ngày rất bình thường nhưng vẫn đáng nhớ.
+
+Mình từng viết blog trên WordPress, sau đó chuyển các bài viết cũ về website riêng này để có một góc nhỏ gọn gàng hơn, chủ động hơn và đúng tinh thần của mình hơn.
+
+Nếu bạn đang đọc đến đây, cảm ơn bạn đã ghé qua.
