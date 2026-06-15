@@ -40,7 +40,12 @@ export const siteConfig: SiteConfig = {
 };
 
 export const navBarConfig: NavBarConfig = {
-	links: [LinkPreset.Home, LinkPreset.Archive, LinkPreset.About],
+	links: [
+		LinkPreset.Home,
+		LinkPreset.Archive,
+		{ name: "CV/Portfolio", url: "/portfolio/" },
+		LinkPreset.About,
+	],
 };
 
 export const profileConfig: ProfileConfig = {

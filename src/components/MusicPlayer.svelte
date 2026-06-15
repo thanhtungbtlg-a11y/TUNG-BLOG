@@ -643,6 +643,7 @@ function formatTime(seconds: number) {
 {#if currentTrack}
 	<audio
 		bind:this={audio}
+		preload="metadata"
 		src={currentTrack.src}
 		onplay={handleAudioPlay}
 		onpause={handleAudioPause}

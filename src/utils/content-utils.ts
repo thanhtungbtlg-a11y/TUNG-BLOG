@@ -3,36 +3,40 @@ import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import { getCategoryUrl } from "@utils/url-utils.ts";
 
-// // Retrieve posts and sort them by publication date
-async function getRawSortedPosts() {
+type PostsSortMode = "featured" | "date";
+
+// Retrieve posts and sort them for home/feed surfaces or by original timeline.
+async function getRawSortedPosts(sortMode: PostsSortMode = "featured") {
 	const allBlogPosts = await getCollection("posts", ({ data }) => {
 		return import.meta.env.PROD ? data.draft !== true : true;
 	});
 
 	const sorted = allBlogPosts.sort((a, b) => {
-		const pinnedA = a.data.pinned ? 0 : 1;
-		const pinnedB = b.data.pinned ? 0 : 1;
-		if (pinnedA !== pinnedB) return pinnedA - pinnedB;
+		if (sortMode === "featured") {
+			const pinnedA = a.data.pinned ? 0 : 1;
+			const pinnedB = b.data.pinned ? 0 : 1;
+			if (pinnedA !== pinnedB) return pinnedA - pinnedB;
 
-		if (a.data.pinned && b.data.pinned) {
-			const orderA = a.data.pinOrder ?? 0;
-			const orderB = b.data.pinOrder ?? 0;
-			if (orderA !== orderB) return orderA - orderB;
-		}
+			if (a.data.pinned && b.data.pinned) {
+				const orderA = a.data.pinOrder ?? 0;
+				const orderB = b.data.pinOrder ?? 0;
+				if (orderA !== orderB) return orderA - orderB;
+			}
 
-		const latestA = a.data.latest ? 0 : 1;
-		const latestB = b.data.latest ? 0 : 1;
-		if (latestA !== latestB) return latestA - latestB;
+			const latestA = a.data.latest ? 0 : 1;
+			const latestB = b.data.latest ? 0 : 1;
+			if (latestA !== latestB) return latestA - latestB;
 
-		if (a.data.latest && b.data.latest) {
-			const orderA = a.data.latestOrder ?? 0;
-			const orderB = b.data.latestOrder ?? 0;
-			if (orderA !== orderB) return orderA - orderB;
+			if (a.data.latest && b.data.latest) {
+				const orderA = a.data.latestOrder ?? 0;
+				const orderB = b.data.latestOrder ?? 0;
+				if (orderA !== orderB) return orderA - orderB;
+			}
 		}
 
 		const dateA = new Date(a.data.published);
 		const dateB = new Date(b.data.published);
-		return dateA > dateB ? -1 : 1;
+		return dateB.getTime() - dateA.getTime();
 	});
 	return sorted;
 }
@@ -67,6 +71,16 @@ export async function getSortedPostsList(): Promise<PostForList[]> {
 	}));
 
 	return sortedPostsList;
+}
+
+export async function getChronologicalPostsList(): Promise<PostForList[]> {
+	const sortedFullPosts = await getRawSortedPosts("date");
+
+	return sortedFullPosts.map((post) => ({
+		slug: post.slug,
+		body: post.body,
+		data: post.data,
+	}));
 }
 
 export async function getRelatedPosts(
