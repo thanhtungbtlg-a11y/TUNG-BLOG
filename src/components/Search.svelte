@@ -46,6 +46,8 @@ let open = false;
 let keyword = "";
 let activeIndex = 0;
 let searchInput: HTMLInputElement;
+let searchLoaded = false;
+let searchLoading = false;
 let searchIndex: SearchIndex = {
 	posts: [],
 	tags: [],
@@ -71,6 +73,14 @@ const quickActions: CommandItem[] = [
 	},
 	{
 		type: "page",
+		title: "Hồ sơ",
+		description: "LinkedIn, liên hệ, định hướng nghề nghiệp",
+		url: url("/portfolio/"),
+		icon: "fa6-brands:linkedin-in",
+		weight: 9,
+	},
+	{
+		type: "page",
 		title: "About",
 		description: "Thông tin cá nhân",
 		url: url("/about/"),
@@ -90,6 +100,7 @@ const tagUrl = (tag: string) => url(`/archive/?tag=${encodeURIComponent(tag)}`);
 const openPalette = () => {
 	open = true;
 	activeIndex = 0;
+	void loadSearchIndex();
 	setTimeout(() => searchInput?.focus(), 0);
 };
 
@@ -105,15 +116,6 @@ const togglePanel = () => {
 };
 
 onMount(() => {
-	fetch(url("/search-index.json"))
-		.then((res) => res.json())
-		.then((data: SearchIndex) => {
-			searchIndex = data;
-		})
-		.catch((error) => {
-			console.error("Cannot load search index:", error);
-		});
-
 	const onKeydown = (event: KeyboardEvent) => {
 		const isCommandK =
 			(event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k";
@@ -134,6 +136,21 @@ onMount(() => {
 	window.addEventListener("keydown", onKeydown);
 	return () => window.removeEventListener("keydown", onKeydown);
 });
+
+async function loadSearchIndex() {
+	if (searchLoaded || searchLoading) return;
+
+	searchLoading = true;
+	try {
+		const res = await fetch(url("/search-index.json"));
+		searchIndex = await res.json();
+		searchLoaded = true;
+	} catch (error) {
+		console.error("Cannot load search index:", error);
+	} finally {
+		searchLoading = false;
+	}
+}
 
 $: query = normalize(keyword.trim());
 

@@ -49,17 +49,20 @@ const DEFAULT_COVER = "/favicon/favicon-dark-192.png";
 const DEFAULT_VOLUME = 0.55;
 const AUTOPLAY_START_VOLUME = 0.04;
 const FADE_IN_MS = 2200;
+const AUTOPLAY_IDLE_DELAY_MS = 9000;
 const TAB_HEARTBEAT_MS = 1500;
 const TAB_STALE_MS = 6000;
 const PLAYBACK_SYNC_MS = 1000;
 
 let fadeFrame = 0;
+let autoplayDelayTimer = 0;
 let autoplayFallbackCleanup: (() => void) | null = null;
 let playerChannel: BroadcastChannel | null = null;
 let heartbeatTimer = 0;
 let playbackSyncTimer = 0;
 let isPrimaryTab = false;
 let tracksReady = false;
+let audioLoadedIndex = -1;
 
 $: currentTrack = tracks[currentIndex];
 $: progressPercent =
@@ -102,13 +105,10 @@ onMount(async () => {
 	if (isPrimaryTab) {
 		void activatePrimaryTab();
 	}
-
-	setTimeout(() => {
-		if (isPrimaryTab && !isPlaying) queueAutoplayAfterInteraction();
-	}, 700);
 });
 
 onDestroy(() => {
+	clearAutoplayDelay();
 	clearAutoplayFallback();
 	cancelVolumeFade();
 	if (typeof window !== "undefined") {
@@ -149,6 +149,14 @@ async function play(fadeIn = false) {
 	}
 
 	try {
+		ensureAudioSource();
+
+		if (currentTime > 0 && Math.abs(audio.currentTime - currentTime) > 1) {
+			try {
+				audio.currentTime = currentTime;
+			} catch {}
+		}
+
 		if (fadeIn) {
 			const targetVolume = clampVolume(volume || DEFAULT_VOLUME);
 			cancelVolumeFade();
@@ -269,6 +277,7 @@ function updateLeadership() {
 	}
 
 	if (!isPrimaryTab && wasPrimary) {
+		clearAutoplayDelay();
 		clearAutoplayFallback();
 		pauseLocal();
 	}
@@ -286,7 +295,7 @@ async function activatePrimaryTab() {
 
 	if (previousState) return;
 
-	void attemptAutoplay();
+	scheduleAutoplay();
 }
 
 function broadcastPlayerEvent(type: "tabs-changed" | "playback-state") {
@@ -364,7 +373,7 @@ async function syncFromPlaybackState() {
 
 	if (audio) {
 		audio.volume = volume;
-		if (shouldReload) audio.load();
+		if (shouldReload) audioLoadedIndex = -1;
 		if (Number.isFinite(currentTime)) {
 			try {
 				audio.currentTime = currentTime;
@@ -408,6 +417,7 @@ function handlePageHide() {
 }
 
 async function togglePlay() {
+	clearAutoplayDelay();
 	clearAutoplayFallback();
 	if (!isPrimaryTab) {
 		await syncFromPlaybackState();
@@ -427,7 +437,10 @@ async function attemptAutoplay() {
 	const didPlay = await play(true);
 	if (!didPlay) {
 		queueAutoplayAfterInteraction();
+		return;
 	}
+
+	clearAutoplayFallback();
 }
 
 function queueAutoplayAfterInteraction() {
@@ -443,6 +456,7 @@ function queueAutoplayAfterInteraction() {
 			return;
 		}
 
+		clearAutoplayDelay();
 		cleanup();
 		if (isPrimaryTab) void play(true);
 	};
@@ -462,6 +476,24 @@ function queueAutoplayAfterInteraction() {
 	document.addEventListener("keydown", resume, true);
 }
 
+function scheduleAutoplay() {
+	if (!isPrimaryTab || isPlaying) return;
+
+	queueAutoplayAfterInteraction();
+
+	if (autoplayDelayTimer) return;
+	autoplayDelayTimer = window.setTimeout(() => {
+		autoplayDelayTimer = 0;
+		if (isPrimaryTab && !isPlaying) void attemptAutoplay();
+	}, AUTOPLAY_IDLE_DELAY_MS);
+}
+
+function clearAutoplayDelay() {
+	if (!autoplayDelayTimer) return;
+	window.clearTimeout(autoplayDelayTimer);
+	autoplayDelayTimer = 0;
+}
+
 function clearAutoplayFallback() {
 	autoplayFallbackCleanup?.();
 }
@@ -475,12 +507,14 @@ async function changeTrack(index: number, autoPlay = true) {
 
 	currentIndex = (index + tracks.length) % tracks.length;
 	currentTime = 0;
+	duration = 0;
+	audioLoadedIndex = -1;
 	saveState();
 	writePlaybackState();
 
 	setTimeout(async () => {
 		if (audio) {
-			audio.load();
+			ensureAudioSource();
 			if (autoPlay) await play();
 		}
 	}, 0);
@@ -530,6 +564,7 @@ function seek(event: Event) {
 	const input = event.target as HTMLInputElement;
 	const value = Number(input.value);
 	if (!audio || !isPrimaryTab) return;
+	ensureAudioSource();
 	audio.currentTime = value;
 	currentTime = value;
 	writePlaybackState();
@@ -578,6 +613,20 @@ function handleAudioPlay() {
 function handleAudioPause() {
 	isPlaying = false;
 	if (isPrimaryTab) writePlaybackState({ isPlaying: false });
+}
+
+function ensureAudioSource() {
+	if (!audio || !currentTrack) return;
+	if (
+		audioLoadedIndex === currentIndex &&
+		audio.getAttribute("src") === currentTrack.src
+	) {
+		return;
+	}
+
+	audio.src = currentTrack.src;
+	audio.load();
+	audioLoadedIndex = currentIndex;
 }
 
 function useFallbackCover(event: Event) {
@@ -643,8 +692,7 @@ function formatTime(seconds: number) {
 {#if currentTrack}
 	<audio
 		bind:this={audio}
-		preload="metadata"
-		src={currentTrack.src}
+		preload="none"
 		onplay={handleAudioPlay}
 		onpause={handleAudioPause}
 		ontimeupdate={onTimeUpdate}

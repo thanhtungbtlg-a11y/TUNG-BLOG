@@ -14,6 +14,7 @@ import ImageWrapper from "../../components/misc/ImageWrapper.astro";
 import PostMetadata from "../../components/PostMeta.astro";
 import PostReactions from "../../components/PostReactions.svelte";
 import PostShare from "../../components/PostShare.svelte";
+import PostTools from "../../components/PostTools.svelte";
 import RelatedPosts from "../../components/RelatedPosts.astro";
 import { profileConfig, siteConfig } from "../../config";
 import { formatDateToYYYYMMDD } from "../../utils/date-utils";
@@ -81,7 +82,6 @@ const jsonLd = {
             <!-- title -->
             <div class="relative onload-animation">
                 <div
-                    data-pagefind-body data-pagefind-weight="10" data-pagefind-meta="title"
                     class="transition w-full block font-bold mb-3
                     text-3xl md:text-[2.25rem]/[2.75rem]
                     text-black/90 dark:text-white/90
@@ -103,6 +103,14 @@ const jsonLd = {
                 ></PostMetadata>
                 {!entry.data.image && <div class="border-[var(--line-divider)] border-dashed border-b-[1px] mb-5"></div>}
             </div>
+
+            <PostTools
+                slug={entry.slug}
+                title={entry.data.title}
+                url={shareUrl}
+                published={formatDateToYYYYMMDD(entry.data.published)}
+                client:load
+            />
 
             <!-- always show cover as long as it has one -->
 
@@ -129,9 +137,9 @@ const jsonLd = {
         </div>
     </div>
 
-    <PostShare title={entry.data.title} shareUrl={shareUrl} client:load />
-    <PostReactions slug={entry.slug} client:load />
-    <AnonymousComments slug={entry.slug} client:load />
+    <PostShare title={entry.data.title} shareUrl={shareUrl} client:visible />
+    <PostReactions slug={entry.slug} client:visible />
+    <AnonymousComments slug={entry.slug} client:visible />
     <RelatedPosts posts={relatedPosts} />
 
     <div class="flex flex-col md:flex-row justify-between mb-4 gap-4 overflow-hidden w-full">

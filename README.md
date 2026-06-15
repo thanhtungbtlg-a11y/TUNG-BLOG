@@ -7,7 +7,7 @@ Website: [www.thanhtung0209.com](https://www.thanhtung0209.com)
 ## Nội Dung
 
 - Bài viết cá nhân được import từ WordPress.
-- Tìm kiếm bài viết bằng Pagefind.
+- Tìm kiếm nhanh bằng Ctrl + K, nạp index khi cần để giảm bundle ban đầu.
 - Dark mode, theme presets, reading progress và active TOC.
 - Music player nhỏ gọn.
 - Bình luận ẩn danh qua Supabase, cần duyệt trước khi hiển thị.
@@ -40,10 +40,18 @@ pnpm check
 ## Viết Bài Mới
 
 ```sh
-pnpm new-post ten-bai-viet
+pnpm new-post
 ```
 
-Bài viết nằm trong `src/content/posts/`.
+Script sẽ hỏi tiêu đề, ngày, category, tag, ảnh bìa, trạng thái ghim và trạng thái mới nhất rồi tạo bài trong `src/content/posts/`.
+
+Có thể truyền nhanh tiêu đề nếu muốn:
+
+```sh
+pnpm new-post "Tiêu đề bài viết"
+```
+
+Chỉ bài có `pinned: true` mới nằm trong nhóm bài ghim. Chỉ bài có `latest: true` mới nằm trong nhóm mới nhất bên dưới bài ghim.
 
 ## Import Từ WordPress
 

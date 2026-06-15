@@ -231,6 +231,64 @@ body::before {
         linear-gradient(to right, var(--page-bg), transparent 24%, transparent 76%, var(--page-bg));
 }
 
+html.reading-mode #sidebar {
+    display: none;
+}
+
+html.reading-mode #toc-wrapper {
+    opacity: 0;
+    pointer-events: none;
+}
+
+html.reading-mode #main-grid {
+    max-width: min(48rem, calc(100vw - 2rem));
+    grid-auto-columns: 0 !important;
+    grid-template-columns: minmax(0, 48rem) !important;
+    justify-content: center;
+}
+
+html.reading-mode #main-grid > * {
+    grid-column: 1 / -1 !important;
+}
+
+html.reading-mode #swup-container {
+    grid-column: 1 / -1 !important;
+}
+
+html.reading-mode #content-wrapper {
+    max-width: 48rem;
+    margin-inline: auto;
+}
+
+html.reading-mode #post-container {
+    padding-block: 2.2rem 1.4rem;
+}
+
+html.reading-mode .markdown-content {
+    font-size: 1.06rem;
+    line-height: 1.9;
+}
+
+html.reading-mode .markdown-content p,
+html.reading-mode .markdown-content li {
+    line-height: 1.9;
+}
+
+html.reading-mode .music-player {
+    opacity: 0.58;
+    transform: scale(0.82);
+    transform-origin: right bottom;
+    transition:
+        opacity 180ms ease,
+        transform 180ms ease;
+}
+
+html.reading-mode .music-player:hover,
+html.reading-mode .music-player.expanded {
+    opacity: 1;
+    transform: scale(0.92);
+}
+
 @media (prefers-reduced-motion: reduce) {
     html {
         scroll-behavior: auto;
