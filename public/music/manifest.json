@@ -1,16 +1,9 @@
 [
   {
     "id": 1,
-    "title": "Yumeutsutsu - Daydream",
-    "artist": "Kenshi Yonezu",
-    "src": "/music/Yumeutsutsu - Daydream - Kenshi Yonezu.mp3",
-    "cover": "/music/covers/Yumeutsutsu - Daydream - Kenshi Yonezu.jpg"
-  },
-  {
-    "id": 2,
-    "title": "More Than Words",
-    "artist": "Hitsujibungaku",
-    "src": "/music/more than words - Hitsujibungaku.mp3",
-    "cover": "/music/covers/more than words - Hitsujibungaku.jpg"
+    "title": "낭만",
+    "artist": "Sea Pearl",
+    "src": "/music/낭만 - Sea Pearl.mp3",
+    "cover": "/music/covers/낭만 - Sea Pearl.jpg"
   }
 ]
