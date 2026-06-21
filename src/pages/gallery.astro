@@ -1,0 +1,238 @@
+---
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { Icon } from "astro-icon/components";
+import fs from "node:fs/promises";
+import path from "node:path";
+import sharp from "sharp";
+import galleryMetadata from "../data/gallery.json";
+
+type GalleryMetadata = {
+	filename: string;
+	title?: string;
+	description?: string;
+	date?: string;
+	width?: number;
+	height?: number;
+};
+
+type GalleryItem = Required<Pick<GalleryMetadata, "filename">> & {
+	src: string;
+	title: string;
+	description: string;
+	date: string;
+	width: number;
+	height: number;
+};
+
+const galleryDirectory = path.join(process.cwd(), "public", "gallery");
+const supportedExtensions = new Set([
+	".jpg",
+	".jpeg",
+	".png",
+	".webp",
+	".avif",
+	".gif",
+]);
+const metadataByFilename = new Map(
+	(galleryMetadata as GalleryMetadata[]).map((item) => [item.filename, item]),
+);
+
+await fs.mkdir(galleryDirectory, { recursive: true });
+const directoryEntries = await fs.readdir(galleryDirectory, {
+	withFileTypes: true,
+});
+const imageFiles = directoryEntries
+	.filter(
+		(entry) =>
+			entry.isFile() &&
+			supportedExtensions.has(path.extname(entry.name).toLowerCase()),
+	)
+	.map((entry) => entry.name);
+
+const galleryItems: GalleryItem[] = await Promise.all(
+	imageFiles.map(async (filename) => {
+		const savedMetadata = metadataByFilename.get(filename);
+		const imageMetadata = await sharp(path.join(galleryDirectory, filename), {
+			animated: true,
+		}).metadata();
+		const fallbackTitle = path
+			.parse(filename)
+			.name.replace(/^\d{4}-\d{2}-\d{2}-/, "")
+			.replace(/[-_]+/g, " ")
+			.trim();
+
+		return {
+			filename,
+			src: `/gallery/${encodeURIComponent(filename)}`,
+			title: savedMetadata?.title?.trim() || fallbackTitle,
+			description: savedMetadata?.description?.trim() || "",
+			date: savedMetadata?.date?.trim() || "",
+			width: savedMetadata?.width || imageMetadata.width || 1600,
+			height: savedMetadata?.height || imageMetadata.height || 1200,
+		};
+	}),
+);
+
+galleryItems.sort((a, b) => {
+	if (a.date !== b.date) return b.date.localeCompare(a.date);
+	return b.filename.localeCompare(a.filename, "vi");
+});
+
+const dateFormatter = new Intl.DateTimeFormat("vi-VN", {
+	year: "numeric",
+	month: "long",
+	day: "numeric",
+});
+
+function formatDate(value: string) {
+	if (!value) return "";
+	const date = new Date(`${value}T00:00:00`);
+	return Number.isNaN(date.getTime()) ? value : dateFormatter.format(date);
+}
+---
+
+<MainGridLayout
+	title="Kho ảnh"
+	description="Những bức ảnh và khoảnh khắc được lưu lại bởi Nguyễn Thanh Tùng."
+>
+	<header class="gallery-header mb-5 px-1">
+		<div class="flex items-center gap-3">
+			<div class="gallery-heading-icon" aria-hidden="true">
+				<Icon name="material-symbols:photo-library-outline-rounded" />
+			</div>
+			<div>
+				<h1 class="text-3xl font-bold text-90">Kho ảnh</h1>
+				<p class="mt-1 text-sm text-50">
+					{galleryItems.length > 0
+						? `${galleryItems.length} khoảnh khắc được lưu lại`
+						: "Những khoảnh khắc đang chờ được lưu lại"}
+				</p>
+			</div>
+		</div>
+	</header>
+
+	{galleryItems.length > 0 ? (
+		<section class="photo-gallery" aria-label="Kho ảnh của Nguyễn Thanh Tùng">
+			{galleryItems.map((item) => (
+				<figure class="gallery-card card-base interactive-card">
+					<a
+						href={item.src}
+						data-pswp-width={item.width}
+						data-pswp-height={item.height}
+						aria-label={`Xem ảnh ${item.title}`}
+						class="gallery-image-link"
+					>
+						<img
+							src={item.src}
+							alt={item.title}
+							width={item.width}
+							height={item.height}
+							loading="lazy"
+							decoding="async"
+						/>
+					</a>
+					{(item.title || item.description || item.date) && (
+						<figcaption class="gallery-caption">
+							<div class="flex items-start justify-between gap-3">
+								<h2 class="font-semibold text-90 leading-snug">{item.title}</h2>
+								{item.date && (
+									<time class="shrink-0 text-xs text-40" datetime={item.date}>
+										{formatDate(item.date)}
+									</time>
+								)}
+							</div>
+							{item.description && (
+								<p class="mt-2 text-sm leading-relaxed text-60">{item.description}</p>
+							)}
+						</figcaption>
+					)}
+				</figure>
+			))}
+		</section>
+	) : (
+		<div class="gallery-empty card-base text-50">
+			<Icon name="material-symbols:add-photo-alternate-outline-rounded" aria-hidden="true" />
+			<p>Chưa có ảnh trong kho.</p>
+		</div>
+	)}
+</MainGridLayout>
+
+<style>
+	.gallery-header {
+		border-bottom: 1px solid var(--line-divider);
+		padding-bottom: 1rem;
+	}
+
+	.gallery-heading-icon {
+		display: grid;
+		width: 2.75rem;
+		height: 2.75rem;
+		place-items: center;
+		border-radius: 8px;
+		background: var(--btn-regular-bg);
+		color: var(--primary);
+		font-size: 1.5rem;
+	}
+
+	.photo-gallery {
+		column-count: 1;
+		column-gap: 1rem;
+	}
+
+	.gallery-card {
+		display: inline-block;
+		width: 100%;
+		margin: 0 0 1rem;
+		break-inside: avoid;
+		overflow: hidden;
+	}
+
+	.gallery-image-link {
+		display: block;
+		overflow: hidden;
+		cursor: zoom-in;
+		background: var(--btn-regular-bg);
+	}
+
+	.gallery-image-link img {
+		display: block;
+		width: 100%;
+		height: auto;
+		transition: transform 180ms ease, filter 180ms ease;
+	}
+
+	.gallery-image-link:hover img {
+		transform: scale(1.025);
+		filter: saturate(1.04);
+	}
+
+	.gallery-caption {
+		padding: 0.9rem 1rem 1rem;
+		border-top: 1px solid var(--line-divider);
+	}
+
+	.gallery-empty {
+		display: grid;
+		min-height: 13rem;
+		place-content: center;
+		justify-items: center;
+		gap: 0.75rem;
+	}
+
+	.gallery-empty :global(svg) {
+		font-size: 2.5rem;
+		color: var(--primary);
+	}
+
+	@media (min-width: 640px) {
+		.photo-gallery {
+			column-count: 2;
+		}
+	}
+
+	@media (min-width: 1280px) {
+		.photo-gallery {
+			column-count: 3;
+		}
+	}
+</style>

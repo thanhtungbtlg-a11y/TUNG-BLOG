@@ -73,10 +73,18 @@ const quickActions: CommandItem[] = [
 	},
 	{
 		type: "page",
+		title: "Kho ảnh",
+		description: "Ảnh và những khoảnh khắc",
+		url: url("/gallery/"),
+		icon: "material-symbols:photo-library-outline-rounded",
+		weight: 9,
+	},
+	{
+		type: "page",
 		title: "Hồ sơ",
-		description: "LinkedIn, liên hệ, định hướng nghề nghiệp",
+		description: "Kinh nghiệm và định hướng nghề nghiệp",
 		url: url("/portfolio/"),
-		icon: "fa6-brands:linkedin-in",
+		icon: "material-symbols:person-outline-rounded",
 		weight: 9,
 	},
 	{

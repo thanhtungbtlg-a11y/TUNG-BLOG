@@ -43,6 +43,7 @@ export const navBarConfig: NavBarConfig = {
 	links: [
 		LinkPreset.Home,
 		LinkPreset.Archive,
+		{ name: "Kho ảnh", url: "/gallery/" },
 		{ name: "Hồ sơ", url: "/portfolio/" },
 		LinkPreset.About,
 	],
@@ -69,11 +70,6 @@ export const profileConfig: ProfileConfig = {
 			url: "https://thanhtung0209.home.blog",
 		},
 		{
-			name: "LinkedIn",
-			icon: "fa6-brands:linkedin-in",
-			url: "https://www.linkedin.com/in/tung0209/",
-		},
-		{
 			name: "GitHub",
 			icon: "fa6-brands:github",
 			url: "https://github.com/thanhtungbtlg-a11y",
@@ -81,7 +77,7 @@ export const profileConfig: ProfileConfig = {
 		{
 			name: "Email",
 			icon: "fa6-regular:envelope",
-			url: "mailto:thanhtungbtlg@gmail.com",
+			url: "https://mail.google.com/mail/?view=cm&fs=1&to=thanhtungbtlg%40gmail.com",
 		},
 	],
 };
