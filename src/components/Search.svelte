@@ -42,6 +42,14 @@ type SearchIndex = {
 	categories: SearchIndexCategory[];
 };
 
+declare global {
+	interface Window {
+		__pendingBlogSearchOpen?: boolean;
+	}
+}
+
+const SEARCH_OPEN_EVENT = "blog:open-search";
+
 let open = false;
 let keyword = "";
 let activeIndex = 0;
@@ -118,12 +126,11 @@ const closePalette = () => {
 	activeIndex = 0;
 };
 
-const togglePanel = () => {
-	if (open) closePalette();
-	else openPalette();
-};
-
 onMount(() => {
+	const onOpenSearch = () => {
+		window.__pendingBlogSearchOpen = false;
+		openPalette();
+	};
 	const onKeydown = (event: KeyboardEvent) => {
 		const isCommandK =
 			(event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k";
@@ -141,8 +148,14 @@ onMount(() => {
 		}
 	};
 
-	window.addEventListener("keydown", onKeydown);
-	return () => window.removeEventListener("keydown", onKeydown);
+	window.addEventListener("keydown", onKeydown, true);
+	window.addEventListener(SEARCH_OPEN_EVENT, onOpenSearch);
+	if (window.__pendingBlogSearchOpen) queueMicrotask(onOpenSearch);
+
+	return () => {
+		window.removeEventListener("keydown", onKeydown, true);
+		window.removeEventListener(SEARCH_OPEN_EVENT, onOpenSearch);
+	};
 });
 
 async function loadSearchIndex() {
@@ -248,17 +261,17 @@ function handleInputKeydown(event: KeyboardEvent) {
 </script>
 
 <button
+	type="button"
 	id="search-bar"
 	aria-label={i18n(I18nKey.search)}
 	class="hidden lg:flex transition-all items-center h-11 mr-2 rounded-lg px-3 gap-2 bg-black/[0.04] hover:bg-black/[0.06] focus-visible:bg-black/[0.06] dark:bg-white/5 dark:hover:bg-white/10 dark:focus-visible:bg-white/10 text-black/50 dark:text-white/50"
-	onclick={openPalette}
 >
 	<Icon icon="material-symbols:search" class="text-[1.25rem] text-black/30 dark:text-white/30" />
 	<span class="text-sm min-w-36 text-left">{i18n(I18nKey.search)}</span>
 </button>
 
 <button
-	onclick={togglePanel}
+	type="button"
 	aria-label="Search Panel"
 	id="search-switch"
 	class="btn-plain scale-animation lg:!hidden rounded-lg w-11 h-11 active:scale-90"

@@ -3,9 +3,11 @@ import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import Icon from "@iconify/svelte";
 import { getDefaultHue, getHue, setHue } from "@utils/setting-utils";
+import { onMount } from "svelte";
 
-let hue = getHue();
-const defaultHue = getDefaultHue();
+let hue = 250;
+let defaultHue = 250;
+let settingsReady = false;
 const presets = [
 	{ name: "Ocean", hue: 200, colors: ["#38bdf8", "#0f766e"] },
 	{ name: "Sakura", hue: 345, colors: ["#fb7185", "#c084fc"] },
@@ -21,12 +23,19 @@ function applyPreset(nextHue: number) {
 	hue = nextHue;
 }
 
-$: if (hue || hue === 0) {
+onMount(() => {
+	defaultHue = getDefaultHue();
+	hue = getHue();
+	settingsReady = true;
+});
+
+$: if (settingsReady && (hue || hue === 0)) {
 	setHue(hue);
 }
 </script>
 
-<div id="display-setting" class="float-panel float-panel-closed absolute transition-all w-80 right-4 px-4 py-4">
+<div id="display-setting" class="float-panel-closed absolute transition-all w-80 max-w-[calc(100vw-2rem)] top-11 -right-12 lg:-right-2 pt-5">
+<div class="card-base float-panel !top-0 px-4 py-4">
     <div class="flex flex-row gap-2 mb-3 items-center justify-between">
         <div class="flex gap-2 font-bold text-lg text-neutral-900 dark:text-neutral-100 transition relative ml-3
             before:w-1 before:h-4 before:rounded-md before:bg-[var(--primary)]
@@ -70,6 +79,7 @@ $: if (hue || hue === 0) {
             {/each}
         </div>
     </div>
+</div>
 </div>
 
 
