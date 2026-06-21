@@ -22,6 +22,14 @@ body::before {
     mask-image: linear-gradient(to bottom, black 0%, black 48%, transparent 92%);
 }
 
+body:not(.enable-banner)::before {
+    background-image:
+        linear-gradient(var(--page-grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--page-grid) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: none;
+}
+
 @layer components {
     .card-base {
         @apply rounded-[var(--radius-large)] overflow-hidden bg-[var(--card-bg)] transition;
