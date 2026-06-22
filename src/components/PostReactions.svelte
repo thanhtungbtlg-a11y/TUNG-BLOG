@@ -1,6 +1,10 @@
 <script lang="ts">
-import { createClient } from "@supabase/supabase-js";
 import { onMount } from "svelte";
+import {
+	createSupabaseQuery,
+	supabaseConfigured,
+	supabaseRest,
+} from "../utils/supabase-rest";
 
 type ReactionId = "like" | "love" | "haha" | "wow" | "sad" | "angry";
 type ReactionState = {
@@ -64,18 +68,6 @@ const reactions: Array<{
 
 let { slug } = $props<{ slug: string }>();
 
-const env = import.meta.env as Record<string, string | undefined>;
-const supabaseUrl = env.PUBLIC_SUPABASE_URL ?? env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey =
-	env.PUBLIC_SUPABASE_ANON_KEY ??
-	env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
-	env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
-	env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-const supabase =
-	supabaseUrl && supabaseAnonKey
-		? createClient(supabaseUrl, supabaseAnonKey)
-		: null;
-
 let state = $state<ReactionState>({
 	active: "",
 	counts: createEmptyCounts(),
@@ -94,7 +86,7 @@ onMount(() => {
 				state.active = parsed.active;
 			}
 
-			if (!supabase && parsed?.counts) {
+			if (!supabaseConfigured && parsed?.counts) {
 				state.counts = {
 					...state.counts,
 					...pickValidCounts(parsed.counts),
@@ -103,7 +95,7 @@ onMount(() => {
 		} catch {}
 	}
 
-	if (supabase) void loadReactionCounts();
+	if (supabaseConfigured) void loadReactionCounts();
 });
 
 function save() {
@@ -111,28 +103,25 @@ function save() {
 		storageKey,
 		JSON.stringify({
 			active: state.active,
-			counts: supabase ? undefined : state.counts,
+			counts: supabaseConfigured ? undefined : state.counts,
 		}),
 	);
 }
 
 async function loadReactionCounts() {
-	if (!supabase) return;
-
-	const { data, error: loadError } = await supabase
-		.from("post_reaction_counts")
-		.select(
-			"like_count, love_count, haha_count, wow_count, sad_count, angry_count",
-		)
-		.eq("slug", slug)
-		.maybeSingle();
-
-	if (loadError) {
+	try {
+		const rows = await supabaseRest<ReactionCountsRow[]>(
+			createSupabaseQuery("post_reaction_counts", {
+				select:
+					"like_count,love_count,haha_count,wow_count,sad_count,angry_count",
+				slug: `eq.${slug}`,
+				limit: "1",
+			}),
+		);
+		if (rows[0]) state.counts = rowToCounts(rows[0]);
+	} catch {
 		error = "Chưa tải được cảm xúc.";
-		return;
 	}
-
-	if (data) state.counts = rowToCounts(data);
 }
 
 async function toggleReaction(id: ReactionId) {
@@ -147,27 +136,29 @@ async function toggleReaction(id: ReactionId) {
 	save();
 	error = "";
 
-	if (!supabase) return;
+	if (!supabaseConfigured) return;
 
 	saving = true;
-	const { data, error: saveError } = await supabase.rpc(
-		"record_post_reaction",
-		{
-			p_slug: slug,
-			p_previous_reaction: previous,
-			p_next_reaction: next,
-		},
-	);
-	saving = false;
-
-	if (saveError) {
+	try {
+		const data = await supabaseRest<ReactionCountsRow>(
+			"rpc/record_post_reaction",
+			{
+				method: "POST",
+				body: JSON.stringify({
+					p_slug: slug,
+					p_previous_reaction: previous,
+					p_next_reaction: next,
+				}),
+			},
+		);
+		state.counts = rowToCounts(data);
+	} catch {
 		state = previousState;
 		save();
-		error = "Chưa lưu được cảm xúc. Bạn chạy lại SQL Supabase chưa?";
-		return;
+		error = "Chưa lưu được cảm xúc.";
+	} finally {
+		saving = false;
 	}
-
-	if (data) state.counts = rowToCounts(data);
 }
 
 function getNextState(

@@ -8,12 +8,22 @@ interface Props {
 	alt?: string;
 	position?: string;
 	basePath?: string;
+	widths?: number[];
+	sizes?: string;
 }
 
 import { Image } from "astro:assets";
 import { url } from "../../utils/url-utils";
 
-const { id, src, alt, position = "center", basePath = "/" } = Astro.props;
+const {
+	id,
+	src,
+	alt,
+	position = "center",
+	basePath = "/",
+	widths,
+	sizes,
+} = Astro.props;
 const className = Astro.props.class;
 
 const isLocal = !(
@@ -50,8 +60,8 @@ const imageQuality = id === "banner" ? 78 : 72;
 ---
 <div id={id} class:list={[className, 'overflow-hidden relative image-wrapper']}>
     <div class="image-soft-overlay transition absolute inset-0 pointer-events-none"></div>
-    {isLocal && img && <Image src={img} alt={alt || ""} class={imageClass} style={imageStyle} loading={loading} decoding="async" quality={imageQuality}/>}
-    {!isLocal && <img src={isPublic ? url(src) : src} alt={alt || ""} class={imageClass} style={imageStyle} loading={loading} decoding="async"/>}
+    {isLocal && img && <Image src={img} alt={alt || ""} class={imageClass} style={imageStyle} loading={loading} decoding="async" fetchpriority={loading === "eager" ? "high" : "low"} quality={imageQuality} widths={widths} sizes={sizes}/>}
+    {!isLocal && <img src={isPublic ? url(src) : src} alt={alt || ""} class={imageClass} style={imageStyle} loading={loading} decoding="async" fetchpriority={loading === "eager" ? "high" : "low"}/>}
 </div>
 
 <style>

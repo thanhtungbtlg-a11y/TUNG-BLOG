@@ -1,0 +1,27 @@
+---
+import { getCollection } from "astro:content";
+import AdminDashboard from "@components/AdminDashboard.svelte";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+
+const entries = await getCollection("posts");
+const posts = entries
+	.map((entry) => ({
+		slug: entry.slug,
+		title: entry.data.title,
+		published: entry.data.published.toISOString().slice(0, 10),
+		category: entry.data.category ?? "",
+		pinned: entry.data.pinned ?? false,
+		latest: entry.data.latest ?? false,
+		draft: entry.data.draft ?? false,
+	}))
+	.sort((a, b) => b.published.localeCompare(a.published));
+---
+
+<MainGridLayout
+	title="Quản trị"
+	description="Quản trị bài viết và bình luận"
+	wide={true}
+	hidePlayer={true}
+>
+	<AdminDashboard posts={posts} client:load />
+</MainGridLayout>
