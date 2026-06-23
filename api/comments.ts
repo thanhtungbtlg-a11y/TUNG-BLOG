@@ -29,7 +29,6 @@ export default async function handler(
 		const slug = String(body.slug ?? "").trim();
 		const content = String(body.body ?? "").trim();
 		const honeypot = String(body.website ?? "").trim();
-		const startedAt = Number(body.startedAt ?? 0);
 
 		if (honeypot) {
 			response.status(202).json({ accepted: true });
@@ -42,12 +41,6 @@ export default async function handler(
 		if (!content || content.length > maxLength) {
 			response.status(400).json({
 				error: `Bình luận phải có từ 1 đến ${maxLength} ký tự.`,
-			});
-			return;
-		}
-		if (!startedAt || Date.now() - startedAt < 2_000) {
-			response.status(429).json({
-				error: "Bạn gửi hơi nhanh. Hãy đọc lại bình luận rồi thử lần nữa.",
 			});
 			return;
 		}

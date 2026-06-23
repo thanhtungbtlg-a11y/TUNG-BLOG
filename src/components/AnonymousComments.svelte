@@ -23,7 +23,6 @@ let notice = $state("");
 let loading = $state(true);
 let submitting = $state(false);
 let website = $state("");
-let startedAt = $state(Date.now());
 
 onMount(() => {
 	if (!supabaseConfigured) {
@@ -77,7 +76,6 @@ async function createComment() {
 				slug,
 				body: trimmed,
 				website,
-				startedAt,
 			}),
 		});
 		const result = await response.json();
@@ -86,7 +84,6 @@ async function createComment() {
 		}
 		body = "";
 		website = "";
-		startedAt = Date.now();
 		notice = "Bình luận đã gửi và đang chờ duyệt.";
 	} catch (submitError) {
 		error =
