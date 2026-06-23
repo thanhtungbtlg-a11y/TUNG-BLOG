@@ -51,6 +51,85 @@ async function githubFetch(pathname: string, init: RequestInit = {}) {
 	return response.json();
 }
 
+type RepositoryFileChange = {
+	path: string;
+	content?: Buffer;
+};
+
+export async function commitRepositoryFiles(
+	changes: RepositoryFileChange[],
+	message: string,
+) {
+	if (changes.length === 0) return;
+
+	const { repository, branch } = getConfig();
+	const refPath = `heads/${branch}`;
+	const ref = await githubFetch(
+		`/repos/${repository}/git/ref/${encodePath(refPath)}`,
+	);
+	const parentSha = String(ref.object?.sha ?? "");
+	if (!parentSha) {
+		throw new AdminRequestError("Không đọc được nhánh GitHub hiện tại.", 502);
+	}
+
+	const parent = await githubFetch(
+		`/repos/${repository}/git/commits/${parentSha}`,
+	);
+	const tree = await Promise.all(
+		changes.map(async (change) => {
+			if (!change.content) {
+				return {
+					path: change.path,
+					mode: "100644",
+					type: "blob",
+					sha: null,
+				};
+			}
+
+			const blob = await githubFetch(`/repos/${repository}/git/blobs`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					content: change.content.toString("base64"),
+					encoding: "base64",
+				}),
+			});
+			return {
+				path: change.path,
+				mode: "100644",
+				type: "blob",
+				sha: blob.sha,
+			};
+		}),
+	);
+
+	const nextTree = await githubFetch(`/repos/${repository}/git/trees`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			base_tree: parent.tree.sha,
+			tree,
+		}),
+	});
+	const commit = await githubFetch(`/repos/${repository}/git/commits`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			message,
+			tree: nextTree.sha,
+			parents: [parentSha],
+		}),
+	});
+
+	await githubFetch(`/repos/${repository}/git/refs/${encodePath(refPath)}`, {
+		method: "PATCH",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ sha: commit.sha, force: false }),
+	});
+
+	return { sha: commit.sha as string };
+}
+
 function postPath(slug: string) {
 	return `src/content/posts/${slug}/index.md`;
 }
@@ -65,15 +144,29 @@ export function validateSlug(slug: string) {
 }
 
 export async function readRepositoryFile(pathname: string) {
+	const file = await readRepositoryFileBase64(pathname);
+	return {
+		content: Buffer.from(file.contentBase64, "base64").toString("utf8"),
+		sha: file.sha,
+	};
+}
+
+export async function readRepositoryFileBase64(pathname: string) {
 	const { repository, branch } = getConfig();
 	const data = await githubFetch(
 		`/repos/${repository}/contents/${encodePath(pathname)}?ref=${encodeURIComponent(branch)}`,
 	);
-	const content = Buffer.from(
-		data.content.replace(/\n/g, ""),
-		"base64",
-	).toString("utf8");
-	return { content, sha: data.sha as string };
+	let contentBase64 = String(data.content ?? "").replace(/\n/g, "");
+	if (!contentBase64 && data.sha) {
+		const blob = await githubFetch(
+			`/repos/${repository}/git/blobs/${encodeURIComponent(data.sha)}`,
+		);
+		contentBase64 = String(blob.content ?? "").replace(/\n/g, "");
+	}
+	return {
+		contentBase64,
+		sha: data.sha as string,
+	};
 }
 
 export async function readPost(slug: string) {

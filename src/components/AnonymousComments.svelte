@@ -22,6 +22,8 @@ let error = $state("");
 let notice = $state("");
 let loading = $state(true);
 let submitting = $state(false);
+let website = $state("");
+let startedAt = $state(Date.now());
 
 onMount(() => {
 	if (!supabaseConfigured) {
@@ -68,15 +70,29 @@ async function createComment() {
 	notice = "";
 
 	try {
-		await supabaseRest("blog_comments", {
+		const response = await fetch("/api/comments", {
 			method: "POST",
-			headers: { Prefer: "return=minimal" },
-			body: JSON.stringify({ slug, body: trimmed, status: "pending" }),
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				slug,
+				body: trimmed,
+				website,
+				startedAt,
+			}),
 		});
+		const result = await response.json();
+		if (!response.ok) {
+			throw new Error(result.error ?? "Chưa gửi được bình luận.");
+		}
 		body = "";
+		website = "";
+		startedAt = Date.now();
 		notice = "Bình luận đã gửi và đang chờ duyệt.";
-	} catch {
-		error = "Chưa gửi được bình luận. Thử lại sau nhé.";
+	} catch (submitError) {
+		error =
+			submitError instanceof Error
+				? submitError.message
+				: "Chưa gửi được bình luận. Thử lại sau nhé.";
 	} finally {
 		submitting = false;
 	}
@@ -116,6 +132,10 @@ function resetMessages() {
 		</div>
 	{:else}
 		<div class="comment-form">
+			<label class="website-field" aria-hidden="true">
+				Website
+				<input bind:value={website} tabindex="-1" autocomplete="off" />
+			</label>
 			<textarea
 				data-comment-input
 				aria-label="Bình luận ẩn danh"
@@ -222,8 +242,18 @@ function resetMessages() {
 	}
 
 	.comment-form {
+		position: relative;
 		display: grid;
 		gap: 0.65rem;
+	}
+
+	.website-field {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
 	}
 
 	textarea {

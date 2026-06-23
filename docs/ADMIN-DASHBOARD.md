@@ -15,6 +15,21 @@ Các biến Supabase đang dùng cho comment vẫn giữ nguyên:
 
 - `PUBLIC_SUPABASE_URL`
 - `PUBLIC_SUPABASE_ANON_KEY` hoặc `PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `SUPABASE_SECRET_KEY` (khuyên dùng) hoặc `SUPABASE_SERVICE_ROLE_KEY`: lấy ở
+  Supabase Project Settings > API Keys; chỉ thêm trên Vercel, tuyệt đối không
+  đặt tiền tố `PUBLIC_`.
+
+Để nhận email khi có comment chờ duyệt, thêm:
+
+- `RESEND_API_KEY`: API key tạo tại Resend.
+- `COMMENT_NOTIFICATION_TO`: `thanhtungbtlg@gmail.com`.
+- `COMMENT_NOTIFICATION_FROM`: địa chỉ gửi thuộc domain đã xác minh; trong lúc
+  thử nghiệm có thể dùng `Thanh Tung Blog <onboarding@resend.dev>`.
+- `COMMENT_RATE_LIMIT_SECRET`: một chuỗi ngẫu nhiên dài.
+- `PUBLIC_SITE_URL`: `https://www.thanhtung0209.com`.
+
+Chạy lại toàn bộ `supabase/comments.sql` trong Supabase SQL Editor để tạo hàm
+gửi comment có rate limit. Script có thể chạy lại an toàn.
 
 Sau khi thêm biến, redeploy website một lần.
 
@@ -39,3 +54,17 @@ Sau khi thêm biến, redeploy website một lần.
 
 Chuyển sang tab **Bình luận** để lọc theo trạng thái hoặc bài viết, duyệt và
 xóa bình luận. Người đọc không còn thấy phần đăng nhập quản trị trong từng bài.
+
+Comment mới được gửi qua Vercel API, giới hạn 3 lượt trong 15 phút cho mỗi địa
+chỉ IP đã băm, chặn nội dung trùng trong 24 giờ và có honeypot chống bot. IP gốc
+không được lưu trong database.
+
+## Media Library
+
+- Mở tab **Kho ảnh** trong `/admin/`.
+- Nhập mô tả trước khi tải ảnh để dùng làm alt text.
+- Ảnh được thu nhỏ và tạo đồng thời bản WebP cùng AVIF trong `public/media/`.
+- Có thể tìm theo tên/mô tả, đổi tên, sửa mô tả, sao chép mã ảnh hoặc chèn vào
+  bài đang mở.
+- Nút xóa sẽ xóa cả hai định dạng. Kiểm tra các bài đang dùng ảnh trước khi xóa.
+- Mỗi thao tác tạo một commit GitHub; Vercel tự triển khai bản mới.

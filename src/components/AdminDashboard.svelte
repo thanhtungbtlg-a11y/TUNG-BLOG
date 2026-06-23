@@ -38,6 +38,18 @@ type BlogComment = {
 	created_at: string;
 };
 
+type MediaItem = {
+	id: string;
+	name: string;
+	webp: string;
+	avif: string;
+	alt: string;
+	width: number;
+	height: number;
+	size: number;
+	createdAt: string;
+};
+
 let { posts: initialPosts } = $props<{ posts: PostSummary[] }>();
 
 const env = import.meta.env as Record<string, string | undefined>;
@@ -58,18 +70,23 @@ let authReady = $state(false);
 let isAdmin = $state(false);
 let email = $state("");
 let password = $state("");
-let activeTab = $state<"posts" | "comments">("posts");
+let activeTab = $state<"posts" | "media" | "comments">("posts");
 let selectedSlug = $state("");
 let postSearch = $state("");
 let commentStatus = $state<"all" | "pending" | "approved">("pending");
 let commentSlug = $state("all");
 let comments = $state<BlogComment[]>([]);
+let media = $state<MediaItem[]>([]);
+let mediaSearch = $state("");
+let mediaAlt = $state("");
+let mediaLoaded = $state(false);
 let editor = $state(createEmptyPost());
 let busy = $state(false);
 let uploading = $state(false);
 let error = $state("");
 let notice = $state("");
 let fileInput: HTMLInputElement;
+let mediaFileInput: HTMLInputElement;
 let bodyTextarea: HTMLTextAreaElement;
 
 onMount(() => {
@@ -138,6 +155,8 @@ async function signOut() {
 	selectedSlug = "";
 	editor = createEmptyPost();
 	comments = [];
+	media = [];
+	mediaLoaded = false;
 }
 
 function createEmptyPost(): EditorPost {
@@ -276,6 +295,129 @@ async function uploadImage(event: Event) {
 		uploading = false;
 		input.value = "";
 	}
+}
+
+async function openMediaTab() {
+	activeTab = "media";
+	if (!mediaLoaded) await loadMedia();
+}
+
+async function loadMedia() {
+	if (!isAdmin) return;
+	mediaLoaded = false;
+	clearMessages();
+	try {
+		const result = await adminFetch("/api/admin/media");
+		media = (result.items ?? []) as MediaItem[];
+		mediaLoaded = true;
+	} catch (loadError) {
+		error = errorMessage(loadError);
+	}
+}
+
+async function uploadMedia(event: Event) {
+	const input = event.currentTarget as HTMLInputElement;
+	const file = input.files?.[0];
+	if (!file) return;
+
+	uploading = true;
+	clearMessages();
+	try {
+		const compressed = await compressImage(file);
+		const result = await adminFetch("/api/admin/media", {
+			method: "POST",
+			body: JSON.stringify({
+				name: file.name,
+				alt: mediaAlt.trim(),
+				contentBase64: await blobToBase64(compressed),
+			}),
+		});
+		media = [result.item as MediaItem, ...media];
+		mediaAlt = "";
+		notice = "Đã thêm ảnh WebP/AVIF. Vercel đang triển khai ảnh mới.";
+	} catch (uploadError) {
+		error = errorMessage(uploadError);
+	} finally {
+		uploading = false;
+		input.value = "";
+	}
+}
+
+async function saveMedia(item: MediaItem) {
+	if (busy) return;
+	busy = true;
+	clearMessages();
+	try {
+		const result = await adminFetch("/api/admin/media", {
+			method: "PATCH",
+			body: JSON.stringify({ id: item.id, name: item.name, alt: item.alt }),
+		});
+		const index = media.findIndex((entry) => entry.id === item.id);
+		if (index >= 0) media[index] = result.item as MediaItem;
+		notice = "Đã cập nhật ảnh. Vercel đang triển khai thay đổi.";
+	} catch (saveError) {
+		error = errorMessage(saveError);
+	} finally {
+		busy = false;
+	}
+}
+
+async function deleteMedia(item: MediaItem) {
+	if (
+		busy ||
+		!window.confirm(
+			`Xóa ảnh “${item.name}”? Các bài đang dùng ảnh này có thể bị mất ảnh.`,
+		)
+	)
+		return;
+	busy = true;
+	clearMessages();
+	try {
+		await adminFetch("/api/admin/media", {
+			method: "DELETE",
+			body: JSON.stringify({ id: item.id }),
+		});
+		media = media.filter((entry) => entry.id !== item.id);
+		notice = "Đã xóa ảnh khỏi thư viện.";
+	} catch (deleteError) {
+		error = errorMessage(deleteError);
+	} finally {
+		busy = false;
+	}
+}
+
+function mediaMarkdown(item: MediaItem) {
+	const alt = escapeHtml(item.alt || item.name);
+	return `<picture>\n  <source srcset="${item.avif}" type="image/avif">\n  <img src="${item.webp}" alt="${alt}" width="${item.width}" height="${item.height}" loading="lazy">\n</picture>`;
+}
+
+async function reuseMedia(item: MediaItem) {
+	insertMediaMarkdown(mediaMarkdown(item));
+	activeTab = "posts";
+	await tick();
+	bodyTextarea?.focus();
+	notice = "Đã chèn ảnh vào nội dung bài đang mở.";
+}
+
+async function copyMedia(item: MediaItem) {
+	await navigator.clipboard.writeText(mediaMarkdown(item));
+	notice = "Đã sao chép mã ảnh.";
+}
+
+function insertMediaMarkdown(value: string) {
+	const start = bodyTextarea?.selectionStart ?? editor.body.length;
+	const end = bodyTextarea?.selectionEnd ?? start;
+	const markdown = `\n\n${value}\n\n`;
+	editor.body = `${editor.body.slice(0, start)}${markdown}${editor.body.slice(end)}`;
+}
+
+function visibleMedia() {
+	const query = mediaSearch.trim().toLocaleLowerCase("vi");
+	return media.filter((item) =>
+		query
+			? `${item.name} ${item.alt}`.toLocaleLowerCase("vi").includes(query)
+			: true,
+	);
 }
 
 function insertImageMarkdown(filename: string) {
@@ -427,6 +569,24 @@ function clearMessages() {
 function errorMessage(value: unknown) {
 	return value instanceof Error ? value.message : "Yêu cầu chưa hoàn tất.";
 }
+function formatBytes(value: number) {
+	if (value < 1024) return `${value} B`;
+	if (value < 1024 * 1024) return `${Math.round(value / 1024)} KB`;
+	return `${(value / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function escapeHtml(value: string) {
+	return value.replace(/[&<>"']/g, (character) => {
+		const entities: Record<string, string> = {
+			"&": "&amp;",
+			"<": "&lt;",
+			">": "&gt;",
+			'"': "&quot;",
+			"'": "&#39;",
+		};
+		return entities[character];
+	});
+}
 </script>
 
 {#if !authReady}
@@ -459,6 +619,9 @@ function errorMessage(value: unknown) {
 		<nav class="admin-tabs" aria-label="Khu vực quản trị">
 			<button class:active={activeTab === "posts"} type="button" onclick={() => (activeTab = "posts")}>
 				<Icon icon="material-symbols:article-outline-rounded" /> Bài viết
+			</button>
+			<button class:active={activeTab === "media"} type="button" onclick={openMediaTab}>
+				<Icon icon="material-symbols:photo-library-outline-rounded" /> Kho ảnh
 			</button>
 			<button class:active={activeTab === "comments"} type="button" onclick={() => (activeTab = "comments")}>
 				<Icon icon="material-symbols:forum-outline-rounded" /> Bình luận
@@ -508,6 +671,9 @@ function errorMessage(value: unknown) {
 
 					<div class="editor-toolbar">
 						<strong>Nội dung</strong>
+						<button type="button" onclick={openMediaTab} title="Mở kho ảnh">
+							<Icon icon="material-symbols:photo-library-outline-rounded" /> Kho ảnh
+						</button>
 						<button type="button" disabled={uploading} onclick={() => fileInput.click()} title="Tải và chèn ảnh">
 							<Icon icon="material-symbols:add-photo-alternate-outline-rounded" /> {uploading ? "Đang tải" : "Ảnh"}
 						</button>
@@ -521,6 +687,51 @@ function errorMessage(value: unknown) {
 					</div>
 				</form>
 			</div>
+		{:else if activeTab === "media"}
+			<section class="media-library">
+				<div class="media-tools">
+					<label class="search-field">
+						<Icon icon="material-symbols:search-rounded" />
+						<input aria-label="Tìm ảnh" placeholder="Tìm theo tên hoặc mô tả" bind:value={mediaSearch} />
+					</label>
+					<label class="media-alt-field">
+						<span>Mô tả ảnh mới</span>
+						<input placeholder="Nội dung ảnh dành cho người đọc và SEO" bind:value={mediaAlt} />
+					</label>
+					<button class="media-upload-button" type="button" disabled={uploading} onclick={() => mediaFileInput.click()}>
+						<Icon icon="material-symbols:upload-rounded" /> {uploading ? "Đang tối ưu" : "Tải ảnh"}
+					</button>
+					<input class="file-input" bind:this={mediaFileInput} type="file" accept="image/*" onchange={uploadMedia} />
+				</div>
+
+				{#if !mediaLoaded}
+					<div class="empty-state"><Icon icon="material-symbols:progress-activity" /> Đang tải kho ảnh...</div>
+				{:else if visibleMedia().length === 0}
+					<div class="empty-state"><Icon icon="material-symbols:photo-library-outline-rounded" /> Chưa có ảnh phù hợp.</div>
+				{:else}
+					<div class="media-grid">
+						{#each visibleMedia() as item (item.id)}
+							<article class="media-card">
+								<picture>
+									<source srcset={item.avif} type="image/avif" />
+									<img src={item.webp} alt={item.alt || item.name} loading="lazy" width={item.width} height={item.height} />
+								</picture>
+								<div class="media-card-body">
+									<label>Tên tệp<input bind:value={item.name} /></label>
+									<label>Mô tả<input bind:value={item.alt} placeholder="Mô tả nội dung ảnh" /></label>
+									<small>{item.width}×{item.height} · {formatBytes(item.size)}</small>
+									<div class="media-actions">
+										<button type="button" onclick={() => reuseMedia(item)} title="Chèn vào bài đang mở"><Icon icon="material-symbols:add-photo-alternate-outline-rounded" /> Chèn</button>
+										<button class="icon-button" type="button" onclick={() => copyMedia(item)} title="Sao chép mã ảnh" aria-label="Sao chép mã ảnh"><Icon icon="material-symbols:content-copy-outline-rounded" /></button>
+										<button class="icon-button" type="button" onclick={() => saveMedia(item)} disabled={busy} title="Lưu tên và mô tả" aria-label="Lưu tên và mô tả"><Icon icon="material-symbols:save-outline-rounded" /></button>
+										<button class="icon-button danger" type="button" onclick={() => deleteMedia(item)} disabled={busy} title="Xóa ảnh" aria-label="Xóa ảnh"><Icon icon="material-symbols:delete-outline-rounded" /></button>
+									</div>
+								</div>
+							</article>
+						{/each}
+					</div>
+				{/if}
+			</section>
 		{:else}
 			<div class="comment-tools">
 				<select aria-label="Trạng thái" bind:value={commentStatus}>
@@ -851,6 +1062,10 @@ function errorMessage(value: unknown) {
 		min-height: 2rem;
 	}
 
+	.editor-toolbar strong {
+		margin-right: auto;
+	}
+
 	.file-input {
 		display: none;
 	}
@@ -866,6 +1081,82 @@ function errorMessage(value: unknown) {
 
 	.editor-actions {
 		justify-content: flex-end;
+	}
+
+	.media-library {
+		padding-top: 0.75rem;
+		border-top: 1px solid var(--line-divider);
+	}
+
+	.media-tools {
+		display: grid;
+		grid-template-columns: minmax(12rem, 0.8fr) minmax(16rem, 1.2fr) auto;
+		align-items: end;
+		gap: 0.65rem;
+		margin-bottom: 0.9rem;
+	}
+
+	.media-alt-field span {
+		min-height: 1rem;
+	}
+
+	.media-upload-button {
+		border-color: transparent;
+		background: var(--primary);
+		color: white;
+	}
+
+	.media-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 0.75rem;
+	}
+
+	.media-card {
+		display: grid;
+		grid-template-rows: 11rem auto;
+		overflow: hidden;
+		border: 1px solid var(--card-border);
+		border-radius: 6px;
+		background: color-mix(in oklch, var(--card-bg), transparent 8%);
+	}
+
+	.media-card picture,
+	.media-card img {
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
+	.media-card img {
+		object-fit: cover;
+		background: var(--btn-regular-bg);
+	}
+
+	.media-card-body {
+		display: grid;
+		align-content: start;
+		gap: 0.55rem;
+		padding: 0.7rem;
+	}
+
+	.media-card-body small {
+		color: var(--meta-color);
+	}
+
+	.media-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.35rem;
+		margin-top: 0.15rem;
+	}
+
+	.media-actions > :first-child {
+		margin-right: auto;
+	}
+
+	.media-actions .danger {
+		color: #dc2626;
 	}
 
 	.comment-tools {
@@ -944,6 +1235,10 @@ function errorMessage(value: unknown) {
 		.post-editor {
 			padding-left: 0;
 		}
+
+		.media-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
 	}
 
 	@media (max-width: 640px) {
@@ -963,6 +1258,11 @@ function errorMessage(value: unknown) {
 		.comment-tools {
 			align-items: stretch;
 			flex-direction: column;
+		}
+
+		.media-tools,
+		.media-grid {
+			grid-template-columns: 1fr;
 		}
 
 		.comment-tools select {

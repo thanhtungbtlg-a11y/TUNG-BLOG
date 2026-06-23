@@ -63,15 +63,85 @@ create policy "Admins can read all comments"
 	using (public.is_comment_admin());
 
 drop policy if exists "Anyone can submit pending comments" on public.blog_comments;
-create policy "Anyone can submit pending comments"
-	on public.blog_comments
-	for insert
-	to anon, authenticated
-	with check (
-		status = 'pending'
-		and char_length(btrim(body)) between 1 and 600
-		and char_length(btrim(slug)) between 1 and 180
-	);
+
+create table if not exists public.comment_submission_log (
+	id uuid primary key default gen_random_uuid(),
+	ip_hash text not null,
+	body_hash text not null,
+	slug text not null,
+	created_at timestamptz not null default now()
+);
+
+create index if not exists comment_submission_log_ip_created_idx
+	on public.comment_submission_log (ip_hash, created_at desc);
+
+create index if not exists comment_submission_log_duplicate_idx
+	on public.comment_submission_log (ip_hash, body_hash, created_at desc);
+
+alter table public.comment_submission_log enable row level security;
+revoke all on table public.comment_submission_log from anon, authenticated;
+
+create or replace function public.submit_blog_comment(
+	p_slug text,
+	p_body text,
+	p_ip_hash text,
+	p_body_hash text
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+	v_slug text := btrim(p_slug);
+	v_body text := btrim(p_body);
+	v_id uuid;
+begin
+	if char_length(v_slug) not between 1 and 180
+		or v_slug !~ '^[a-z0-9]+(-[a-z0-9]+)*$' then
+		raise exception 'INVALID_SLUG';
+	end if;
+	if char_length(v_body) not between 1 and 600 then
+		raise exception 'INVALID_BODY';
+	end if;
+
+	perform pg_advisory_xact_lock(hashtext(p_ip_hash));
+	if (
+		select count(*)
+		from public.comment_submission_log
+		where ip_hash = p_ip_hash
+			and created_at >= now() - interval '15 minutes'
+	) >= 3 then
+		raise exception 'RATE_LIMIT';
+	end if;
+	if exists (
+		select 1
+		from public.comment_submission_log
+		where ip_hash = p_ip_hash
+			and body_hash = p_body_hash
+			and created_at >= now() - interval '24 hours'
+	) then
+		raise exception 'DUPLICATE';
+	end if;
+
+	insert into public.blog_comments (slug, body, status)
+	values (v_slug, v_body, 'pending')
+	returning id into v_id;
+
+	insert into public.comment_submission_log (ip_hash, body_hash, slug)
+	values (p_ip_hash, p_body_hash, v_slug);
+
+	delete from public.comment_submission_log
+	where created_at < now() - interval '7 days';
+
+	return v_id;
+end;
+$$;
+
+revoke all on function public.submit_blog_comment(text, text, text, text)
+	from public, anon, authenticated;
+grant execute on function public.submit_blog_comment(text, text, text, text)
+	to service_role;
 
 drop policy if exists "Admins can update comments" on public.blog_comments;
 create policy "Admins can update comments"

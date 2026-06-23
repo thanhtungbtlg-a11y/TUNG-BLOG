@@ -77,7 +77,7 @@ export const profileConfig: ProfileConfig = {
 		{
 			name: "Email",
 			icon: "fa6-regular:envelope",
-			url: "https://mail.google.com/mail/?view=cm&fs=1&to=thanhtungbtlg%40gmail.com",
+			url: "mailto:thanhtungbtlg@gmail.com",
 		},
 	],
 };
