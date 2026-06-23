@@ -42,12 +42,19 @@ type MediaItem = {
 	id: string;
 	name: string;
 	webp: string;
-	avif: string;
+	avif?: string;
 	alt: string;
 	width: number;
 	height: number;
 	size: number;
 	createdAt: string;
+};
+
+type PostApiResult = {
+	data?: Partial<Omit<EditorPost, "slug" | "tags" | "body">> & {
+		tags?: string[];
+	};
+	body?: string;
 };
 
 let { posts: initialPosts } = $props<{ posts: PostSummary[] }>();
@@ -189,7 +196,7 @@ async function loadPost(slug: string) {
 	busy = true;
 	clearMessages();
 	try {
-		const result = await adminFetch(
+		const result = await adminFetch<PostApiResult>(
 			`/api/admin/post/${encodeURIComponent(slug)}`,
 		);
 		const data = result.data ?? {};
@@ -278,7 +285,7 @@ async function uploadImage(event: Event) {
 		const compressed = await compressImage(file);
 		const stem = slugify(file.name.replace(/\.[^.]+$/, "")) || "image";
 		const filename = `${Date.now()}-${stem}.webp`;
-		const result = await adminFetch("/api/admin/upload", {
+		const result = await adminFetch<{ filename: string }>("/api/admin/upload", {
 			method: "POST",
 			body: JSON.stringify({
 				slug,
@@ -307,7 +314,7 @@ async function loadMedia() {
 	mediaLoaded = false;
 	clearMessages();
 	try {
-		const result = await adminFetch("/api/admin/media");
+		const result = await adminFetch<{ items: MediaItem[] }>("/api/admin/media");
 		media = (result.items ?? []) as MediaItem[];
 		mediaLoaded = true;
 	} catch (loadError) {
@@ -324,12 +331,14 @@ async function uploadMedia(event: Event) {
 	clearMessages();
 	try {
 		const compressed = await compressImage(file);
-		const result = await adminFetch("/api/admin/media", {
+		const dimensions = await imageDimensions(compressed);
+		const result = await adminFetch<{ item: MediaItem }>("/api/admin/media", {
 			method: "POST",
 			body: JSON.stringify({
 				name: file.name,
 				alt: mediaAlt.trim(),
 				contentBase64: await blobToBase64(compressed),
+				...dimensions,
 			}),
 		});
 		media = [result.item as MediaItem, ...media];
@@ -348,7 +357,7 @@ async function saveMedia(item: MediaItem) {
 	busy = true;
 	clearMessages();
 	try {
-		const result = await adminFetch("/api/admin/media", {
+		const result = await adminFetch<{ item: MediaItem }>("/api/admin/media", {
 			method: "PATCH",
 			body: JSON.stringify({ id: item.id, name: item.name, alt: item.alt }),
 		});
@@ -388,7 +397,10 @@ async function deleteMedia(item: MediaItem) {
 
 function mediaMarkdown(item: MediaItem) {
 	const alt = escapeHtml(item.alt || item.name);
-	return `<picture>\n  <source srcset="${item.avif}" type="image/avif">\n  <img src="${item.webp}" alt="${alt}" width="${item.width}" height="${item.height}" loading="lazy">\n</picture>`;
+	const avif = item.avif
+		? `\n  <source srcset="${item.avif}" type="image/avif">`
+		: "";
+	return `<picture>${avif}\n  <img src="${item.webp}" alt="${alt}" width="${item.width}" height="${item.height}" loading="lazy">\n</picture>`;
 }
 
 async function reuseMedia(item: MediaItem) {
@@ -501,7 +513,10 @@ function commentSlugs() {
 	return [...new Set(comments.map((comment) => comment.slug))].sort();
 }
 
-async function adminFetch(path: string, init: RequestInit = {}) {
+async function adminFetch<T = Record<string, unknown>>(
+	path: string,
+	init: RequestInit = {},
+): Promise<T> {
 	if (!session?.access_token) throw new Error("Bạn chưa đăng nhập.");
 	const response = await fetch(path, {
 		...init,
@@ -511,9 +526,24 @@ async function adminFetch(path: string, init: RequestInit = {}) {
 			...init.headers,
 		},
 	});
-	const data = await response.json();
-	if (!response.ok) throw new Error(data.error ?? "Yêu cầu chưa hoàn tất.");
-	return data;
+	const responseText = await response.text();
+	let data: unknown = {};
+	try {
+		data = responseText ? JSON.parse(responseText) : {};
+	} catch {
+		data = {};
+	}
+	if (!response.ok) {
+		const serverMessage =
+			isRecord(data) && typeof data.error === "string" ? data.error : "";
+		throw new Error(
+			serverMessage ||
+				(response.status >= 500
+					? "Dịch vụ máy chủ đang tạm gián đoạn. Vui lòng thử lại sau."
+					: "Yêu cầu chưa hoàn tất."),
+		);
+	}
+	return data as T;
 }
 
 async function compressImage(file: File) {
@@ -541,6 +571,13 @@ async function blobToBase64(blob: Blob) {
 		binary += String.fromCharCode(...bytes.subarray(index, index + 0x8000));
 	}
 	return btoa(binary);
+}
+
+async function imageDimensions(blob: Blob) {
+	const bitmap = await createImageBitmap(blob);
+	const dimensions = { width: bitmap.width, height: bitmap.height };
+	bitmap.close();
+	return dimensions;
 }
 
 function slugify(value: string) {
@@ -586,6 +623,10 @@ function escapeHtml(value: string) {
 		};
 		return entities[character];
 	});
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null;
 }
 </script>
 
@@ -712,8 +753,8 @@ function escapeHtml(value: string) {
 					<div class="media-grid">
 						{#each visibleMedia() as item (item.id)}
 							<article class="media-card">
-								<picture>
-									<source srcset={item.avif} type="image/avif" />
+				<picture>
+					{#if item.avif}<source srcset={item.avif} type="image/avif" />{/if}
 									<img src={item.webp} alt={item.alt || item.name} loading="lazy" width={item.width} height={item.height} />
 								</picture>
 								<div class="media-card-body">

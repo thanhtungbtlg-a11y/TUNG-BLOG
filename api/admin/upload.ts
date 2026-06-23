@@ -1,8 +1,8 @@
 import {
 	normaliseAdminError,
 	requireAdminToken,
-} from "../../src/lib/admin-auth";
-import { savePostImage } from "../../src/lib/github-content";
+} from "../../src/lib/admin-auth.js";
+import { savePostImage } from "../../src/lib/github-content.js";
 
 type ApiRequest = {
 	method?: string;

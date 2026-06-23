@@ -1,5 +1,5 @@
 import matter from "gray-matter";
-import { AdminRequestError } from "./admin-auth";
+import { AdminRequestError } from "./admin-auth.js";
 
 const defaultRepository = "thanhtungbtlg-a11y/TUNG-BLOG";
 

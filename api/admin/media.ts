@@ -1,14 +1,13 @@
-import sharp from "sharp";
 import {
 	AdminRequestError,
 	normaliseAdminError,
 	requireAdminToken,
-} from "../../src/lib/admin-auth";
+} from "../../src/lib/admin-auth.js";
 import {
 	commitRepositoryFiles,
 	readRepositoryFile,
 	readRepositoryFileBase64,
-} from "../../src/lib/github-content";
+} from "../../src/lib/github-content.js";
 
 type ApiRequest = {
 	method?: string;
@@ -25,7 +24,7 @@ type MediaItem = {
 	id: string;
 	name: string;
 	webp: string;
-	avif: string;
+	avif?: string;
 	alt: string;
 	width: number;
 	height: number;
@@ -86,26 +85,16 @@ async function createMedia(body: Record<string, unknown>) {
 	const requestedName = safeName(String(body.name ?? "image")) || "image";
 	const name = uniqueName(requestedName, items);
 	const basePath = `${mediaDirectory}/${name}`;
-	const image = sharp(source, { failOn: "warning" }).rotate().resize({
-		width: 1920,
-		height: 1920,
-		fit: "inside",
-		withoutEnlargement: true,
-	});
-	const [webp, avif] = await Promise.all([
-		image.clone().webp({ quality: 82, effort: 4 }).toBuffer(),
-		image.clone().avif({ quality: 55, effort: 4 }).toBuffer(),
-	]);
-	const metadata = await sharp(webp).metadata();
+	const { webp, avif, width, height } = await optimiseImage(source, body);
 	const item: MediaItem = {
 		id,
 		name,
 		webp: `/media/${name}.webp`,
-		avif: `/media/${name}.avif`,
+		avif: avif ? `/media/${name}.avif` : undefined,
 		alt: cleanAlt(body.alt),
-		width: metadata.width ?? 0,
-		height: metadata.height ?? 0,
-		size: webp.length + avif.length,
+		width,
+		height,
+		size: webp.length + (avif?.length ?? 0),
 		createdAt: new Date().toISOString(),
 		aliases: [],
 	};
@@ -113,7 +102,7 @@ async function createMedia(body: Record<string, unknown>) {
 	await commitRepositoryFiles(
 		[
 			{ path: `${basePath}.webp`, content: webp },
-			{ path: `${basePath}.avif`, content: avif },
+			...(avif ? [{ path: `${basePath}.avif`, content: avif }] : []),
 			{ path: metadataPath, content: encodeItems([item, ...items]) },
 		],
 		`Add media: ${name}`,
@@ -135,7 +124,7 @@ async function updateMedia(body: Record<string, unknown>) {
 		...current,
 		name,
 		webp: `/media/${name}.webp`,
-		avif: `/media/${name}.avif`,
+		avif: current.avif ? `/media/${name}.avif` : undefined,
 		alt: cleanAlt(body.alt),
 		aliases:
 			name === current.name
@@ -148,20 +137,22 @@ async function updateMedia(body: Record<string, unknown>) {
 		{ path: metadataPath, content: encodeItems(items) },
 	];
 	if (name !== current.name) {
-		const [webp, avif] = await Promise.all([
-			readRepositoryFileBase64(`${mediaDirectory}/${current.name}.webp`),
-			readRepositoryFileBase64(`${mediaDirectory}/${current.name}.avif`),
-		]);
-		changes.push(
-			{
-				path: `${mediaDirectory}/${name}.webp`,
-				content: Buffer.from(webp.contentBase64, "base64"),
-			},
-			{
+		const webp = await readRepositoryFileBase64(
+			`${mediaDirectory}/${current.name}.webp`,
+		);
+		changes.push({
+			path: `${mediaDirectory}/${name}.webp`,
+			content: Buffer.from(webp.contentBase64, "base64"),
+		});
+		if (current.avif) {
+			const avif = await readRepositoryFileBase64(
+				`${mediaDirectory}/${current.name}.avif`,
+			);
+			changes.push({
 				path: `${mediaDirectory}/${name}.avif`,
 				content: Buffer.from(avif.contentBase64, "base64"),
-			},
-		);
+			});
+		}
 	}
 
 	await commitRepositoryFiles(changes, `Update media: ${current.name}`);
@@ -178,7 +169,7 @@ async function deleteMedia(body: Record<string, unknown>) {
 		[
 			...names.flatMap((name) => [
 				{ path: `${mediaDirectory}/${name}.webp` },
-				{ path: `${mediaDirectory}/${name}.avif` },
+				...(item.avif ? [{ path: `${mediaDirectory}/${name}.avif` }] : []),
 			]),
 			{
 				path: metadataPath,
@@ -235,4 +226,42 @@ function cleanAlt(value: unknown) {
 	return String(value ?? "")
 		.trim()
 		.slice(0, 240);
+}
+
+async function optimiseImage(source: Buffer, body: Record<string, unknown>) {
+	const fallback = {
+		webp: source,
+		avif: undefined as Buffer | undefined,
+		width: safeDimension(body.width),
+		height: safeDimension(body.height),
+	};
+
+	try {
+		const { default: sharp } = await import("sharp");
+		const image = sharp(source, { failOn: "warning" }).rotate().resize({
+			width: 1920,
+			height: 1920,
+			fit: "inside",
+			withoutEnlargement: true,
+		});
+		const [webp, avif] = await Promise.all([
+			image.clone().webp({ quality: 82, effort: 4 }).toBuffer(),
+			image.clone().avif({ quality: 55, effort: 4 }).toBuffer(),
+		]);
+		const metadata = await sharp(webp).metadata();
+		return {
+			webp,
+			avif,
+			width: metadata.width ?? fallback.width,
+			height: metadata.height ?? fallback.height,
+		};
+	} catch (error) {
+		console.warn("AVIF optimisation unavailable; using WebP fallback", error);
+		return fallback;
+	}
+}
+
+function safeDimension(value: unknown) {
+	const number = Number(value);
+	return Number.isFinite(number) ? Math.max(1, Math.round(number)) : 1;
 }
