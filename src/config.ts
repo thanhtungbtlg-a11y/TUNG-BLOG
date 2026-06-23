@@ -70,11 +70,6 @@ export const profileConfig: ProfileConfig = {
 			url: "https://thanhtung0209.home.blog",
 		},
 		{
-			name: "GitHub",
-			icon: "fa6-brands:github",
-			url: "https://github.com/thanhtungbtlg-a11y",
-		},
-		{
 			name: "Email",
 			icon: "fa6-regular:envelope",
 			url: "mailto:thanhtungbtlg@gmail.com",
