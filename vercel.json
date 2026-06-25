@@ -1,44 +1,46 @@
 {
-	"headers": [
+	"$schema": "https://openapi.vercel.sh/vercel.json",
+	"routes": [
 		{
-			"source": "/",
-			"headers": [
-				{
-					"key": "Link",
-					"value": "</.well-known/api-catalog>; rel=\"api-catalog\", </openapi.json>; rel=\"service-desc\"; type=\"application/vnd.oai.openapi+json\", </docs/api/>; rel=\"service-doc\"; type=\"text/html\", </.well-known/agent-skills/index.json>; rel=\"describedby\"; type=\"application/json\", </robots.txt>; rel=\"describedby\"; type=\"text/plain\""
-				}
-			]
-		},
-		{
-			"source": "/.well-known/api-catalog",
-			"headers": [
-				{
-					"key": "Content-Type",
-					"value": "application/linkset+json; charset=utf-8"
-				}
-			]
-		},
-		{
-			"source": "/.well-known/oauth-protected-resource",
-			"headers": [
-				{
-					"key": "Content-Type",
-					"value": "application/json; charset=utf-8"
-				}
-			]
-		}
-	],
-	"rewrites": [
-		{
-			"source": "/:path*",
+			"src": "/(.*)",
 			"has": [
 				{
 					"type": "header",
 					"key": "accept",
-					"value": ".*text/markdown.*"
+					"value": {
+						"re": ".*text/markdown.*"
+					}
 				}
 			],
-			"destination": "/api/markdown?path=:path*"
+			"dest": "/api/markdown?path=$1"
+		},
+		{
+			"src": "/",
+			"headers": {
+				"Link": "</.well-known/api-catalog>; rel=\"api-catalog\", </openapi.json>; rel=\"service-desc\"; type=\"application/vnd.oai.openapi+json\", </docs/api/>; rel=\"service-doc\"; type=\"text/html\", </.well-known/agent-skills/index.json>; rel=\"describedby\"; type=\"application/json\", </robots.txt>; rel=\"describedby\"; type=\"text/plain\""
+			},
+			"continue": true
+		},
+		{
+			"src": "/\\.well-known/api-catalog",
+			"headers": {
+				"Content-Type": "application/linkset+json; charset=utf-8"
+			},
+			"continue": true
+		},
+		{
+			"src": "/\\.well-known/oauth-protected-resource",
+			"headers": {
+				"Content-Type": "application/json; charset=utf-8"
+			},
+			"continue": true
+		},
+		{
+			"src": "/auth\\.md",
+			"headers": {
+				"Content-Type": "text/markdown; charset=utf-8"
+			},
+			"continue": true
 		}
 	]
 }
