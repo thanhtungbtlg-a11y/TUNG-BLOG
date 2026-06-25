@@ -1,0 +1,34 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="API Docs" description="Machine-readable API discovery notes for Thanh Tung Blog" hidePlayer={true}>
+	<main class="mx-auto max-w-3xl px-5 py-24 text-[var(--content-color)]">
+		<section class="card-base rounded-2xl p-6 md:p-8">
+			<p class="mb-3 text-sm font-bold uppercase tracking-[0.18em] text-[var(--primary)]">Agent discovery</p>
+			<h1 class="mb-5 text-3xl font-bold text-black/90 dark:text-white/90">Thanh Tung Blog API</h1>
+			<p class="mb-5 text-black/70 dark:text-white/70">
+				This page documents the small public/admin API surface used by the blog and its admin dashboard.
+				Machine-readable API metadata is available at <a class="link" href="/openapi.json">/openapi.json</a>
+				and <a class="link" href="/.well-known/api-catalog">/.well-known/api-catalog</a>.
+			</p>
+			<div class="space-y-5 text-sm leading-7 text-black/70 dark:text-white/70">
+				<div>
+					<h2 class="mb-2 text-xl font-bold text-black/85 dark:text-white/85">Comments</h2>
+					<p><code>POST /api/comments</code> accepts anonymous comments and stores them for owner moderation.</p>
+				</div>
+				<div>
+					<h2 class="mb-2 text-xl font-bold text-black/85 dark:text-white/85">Admin</h2>
+					<p>
+						<code>/api/admin/post/&#123;slug&#125;</code>, <code>/api/admin/media</code>, and
+						<code>/api/admin/upload</code> are owner-only endpoints protected by a bearer token.
+					</p>
+				</div>
+				<div>
+					<h2 class="mb-2 text-xl font-bold text-black/85 dark:text-white/85">Markdown for Agents</h2>
+					<p>Agents can request public pages with <code>Accept: text/markdown</code> to receive Markdown instead of HTML.</p>
+				</div>
+			</div>
+		</section>
+	</main>
+</Layout>

@@ -173,6 +173,155 @@ const bannerOffset =
 		<slot />
 		{!hidePlayer && <MusicPlayer client:idle />}
  		<Analytics />
+		<script is:inline>
+			(() => {
+				const registerWebMcpTools = () => {
+					const modelContext = navigator.modelContext;
+					if (!modelContext || typeof modelContext.registerTool !== "function") return;
+
+					if (window.__thanhTungWebMcpController) {
+						window.__thanhTungWebMcpController.abort();
+					}
+					const controller = new AbortController();
+					window.__thanhTungWebMcpController = controller;
+
+					const textResult = (value) => ({
+						content: [
+							{
+								type: "text",
+								text:
+									typeof value === "string"
+										? value
+										: JSON.stringify(value, null, 2),
+							},
+						],
+					});
+
+					const tools = [
+						{
+							name: "search_blog",
+							description:
+								"Search Thanh Tung Blog posts by title, tag, category, description, or body text.",
+							inputSchema: {
+								type: "object",
+								properties: {
+									query: {
+										type: "string",
+										description: "Search query.",
+									},
+									limit: {
+										type: "number",
+										description: "Maximum number of results.",
+										default: 5,
+									},
+								},
+								required: ["query"],
+							},
+							execute: async (input) => {
+								const query = String(input?.query ?? "")
+									.trim()
+									.toLowerCase();
+								const limit = Math.min(Math.max(Number(input?.limit ?? 5), 1), 10);
+								if (!query) return textResult([]);
+								const index = await fetch("/search-index.json").then((response) =>
+									response.json(),
+								);
+								const results = index.posts
+									.map((post) => {
+										const haystack = [
+											post.title,
+											post.description,
+											post.category,
+											...(post.tags ?? []),
+											post.content,
+										]
+											.join(" ")
+											.toLowerCase();
+										const titleMatch = post.title.toLowerCase().includes(query) ? 3 : 0;
+										const tagMatch = (post.tags ?? []).some((tag) =>
+											String(tag).toLowerCase().includes(query),
+										)
+											? 2
+											: 0;
+										const bodyMatch = haystack.includes(query) ? 1 : 0;
+										return { post, score: titleMatch + tagMatch + bodyMatch };
+									})
+									.filter((item) => item.score > 0)
+									.sort((a, b) => b.score - a.score)
+									.slice(0, limit)
+									.map(({ post }) => ({
+										title: post.title,
+										url: new URL(post.url, location.origin).toString(),
+										description: post.description,
+										category: post.category,
+										tags: post.tags,
+									}));
+								return textResult(results);
+							},
+						},
+						{
+							name: "get_current_page_markdown",
+							description:
+								"Return the current Thanh Tung Blog page as Markdown when available.",
+							inputSchema: {
+								type: "object",
+								properties: {},
+							},
+							execute: async () => {
+								const markdown = await fetch(location.pathname, {
+									headers: { Accept: "text/markdown" },
+								}).then((response) => response.text());
+								return textResult(markdown);
+							},
+						},
+						{
+							name: "open_blog_path",
+							description: "Navigate to a path on Thanh Tung Blog.",
+							inputSchema: {
+								type: "object",
+								properties: {
+									path: {
+										type: "string",
+										description: "Site path, for example /archive/ or /posts/example/.",
+									},
+								},
+								required: ["path"],
+							},
+							execute: async (input) => {
+								const rawPath = String(input?.path ?? "/")
+									.trim()
+									.replace(/^https?:\/\/[^/]+/i, "");
+								const path = rawPath.startsWith("/") ? rawPath : `/${rawPath}`;
+								location.assign(path);
+								return textResult(`Opening ${path}`);
+							},
+						},
+					];
+
+					for (const tool of tools) {
+						try {
+							modelContext.registerTool(tool, { signal: controller.signal });
+						} catch (error) {
+							try {
+								modelContext.registerTool(tool.name, tool, tool.execute, {
+									signal: controller.signal,
+								});
+							} catch (fallbackError) {
+								console.debug("WebMCP tool registration skipped", fallbackError);
+							}
+						}
+					}
+				};
+
+				if (document.readyState === "loading") {
+					document.addEventListener("DOMContentLoaded", registerWebMcpTools, {
+						once: true,
+					});
+				} else {
+					registerWebMcpTools();
+				}
+			})();
+		</script>
 		<!-- increase the page height during page transition to prevent the scrolling animation from jumping -->
 		<div id="page-height-extend" class="hidden h-[300vh]"></div>
 	</body>

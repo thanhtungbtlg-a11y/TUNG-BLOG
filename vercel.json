@@ -1,1 +1,44 @@
-{}
+{
+	"headers": [
+		{
+			"source": "/",
+			"headers": [
+				{
+					"key": "Link",
+					"value": "</.well-known/api-catalog>; rel=\"api-catalog\", </openapi.json>; rel=\"service-desc\"; type=\"application/vnd.oai.openapi+json\", </docs/api/>; rel=\"service-doc\"; type=\"text/html\", </.well-known/agent-skills/index.json>; rel=\"describedby\"; type=\"application/json\", </robots.txt>; rel=\"describedby\"; type=\"text/plain\""
+				}
+			]
+		},
+		{
+			"source": "/.well-known/api-catalog",
+			"headers": [
+				{
+					"key": "Content-Type",
+					"value": "application/linkset+json; charset=utf-8"
+				}
+			]
+		},
+		{
+			"source": "/.well-known/oauth-protected-resource",
+			"headers": [
+				{
+					"key": "Content-Type",
+					"value": "application/json; charset=utf-8"
+				}
+			]
+		}
+	],
+	"rewrites": [
+		{
+			"source": "/:path*",
+			"has": [
+				{
+					"type": "header",
+					"key": "accept",
+					"value": ".*text/markdown.*"
+				}
+			],
+			"destination": "/api/markdown?path=:path*"
+		}
+	]
+}

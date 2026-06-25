@@ -1,0 +1,9 @@
+{
+	"status": "ok",
+	"service": "Thanh Tung Blog",
+	"homepage": "https://www.thanhtung0209.com/",
+	"checks": {
+		"static_site": "ok",
+		"public_api_catalog": "ok"
+	}
+}

@@ -1,0 +1,11 @@
+{
+	"resource": "https://www.thanhtung0209.com/",
+	"resource_documentation": "https://www.thanhtung0209.com/auth.md",
+	"bearer_methods_supported": ["header"],
+	"scopes_supported": [
+		"comments:submit",
+		"admin:posts",
+		"admin:media"
+	],
+	"authorization_servers": []
+}

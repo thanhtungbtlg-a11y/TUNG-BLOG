@@ -1,0 +1,19 @@
+{
+	"$schema": "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
+	"skills": [
+		{
+			"name": "site-search",
+			"type": "skill-md",
+			"description": "Search Thanh Tung Blog posts, tags, categories, and post content through the public search index.",
+			"url": "https://www.thanhtung0209.com/.well-known/agent-skills/site-search/SKILL.md",
+			"digest": "sha256:192d5747873cbb5b407b07297b2956cba67f607288f0da8a26c595bac7a3e6c3"
+		},
+		{
+			"name": "blog-comments",
+			"type": "skill-md",
+			"description": "Submit anonymous comments for owner moderation on Thanh Tung Blog posts.",
+			"url": "https://www.thanhtung0209.com/.well-known/agent-skills/blog-comments/SKILL.md",
+			"digest": "sha256:bc7541413503ee056b2b128b79bd8d2c07a45fd1f36777aaede04cdad63a66e2"
+		}
+	]
+}

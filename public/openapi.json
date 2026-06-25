@@ -1,0 +1,216 @@
+{
+	"openapi": "3.1.0",
+	"info": {
+		"title": "Thanh Tung Blog API",
+		"version": "1.0.0",
+		"description": "Public and owner-admin API surface for thanhtung0209.com."
+	},
+	"servers": [
+		{
+			"url": "https://www.thanhtung0209.com"
+		}
+	],
+	"paths": {
+		"/api/comments": {
+			"post": {
+				"summary": "Submit an anonymous comment for moderation",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"required": ["slug", "body"],
+								"properties": {
+									"slug": {
+										"type": "string",
+										"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+									},
+									"body": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 600
+									},
+									"website": {
+										"type": "string",
+										"description": "Honeypot field. Human users should leave it empty."
+									}
+								}
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Comment accepted and waiting for moderation"
+					},
+					"400": {
+						"description": "Invalid or spam-like comment"
+					},
+					"429": {
+						"description": "Rate limit exceeded"
+					},
+					"503": {
+						"description": "Comment service is not configured"
+					}
+				}
+			}
+		},
+		"/api/admin/post/{slug}": {
+			"get": {
+				"summary": "Read one Markdown post from GitHub",
+				"security": [
+					{
+						"adminBearer": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "slug",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Post payload"
+					},
+					"401": {
+						"description": "Missing or invalid admin token"
+					}
+				}
+			},
+			"put": {
+				"summary": "Create or update one Markdown post in GitHub",
+				"security": [
+					{
+						"adminBearer": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "slug",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Saved post payload"
+					},
+					"401": {
+						"description": "Missing or invalid admin token"
+					}
+				}
+			}
+		},
+		"/api/admin/media": {
+			"get": {
+				"summary": "List media library items",
+				"security": [
+					{
+						"adminBearer": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Media item list"
+					},
+					"401": {
+						"description": "Missing or invalid admin token"
+					}
+				}
+			},
+			"post": {
+				"summary": "Create a media library item",
+				"security": [
+					{
+						"adminBearer": []
+					}
+				],
+				"responses": {
+					"201": {
+						"description": "Created media item"
+					},
+					"401": {
+						"description": "Missing or invalid admin token"
+					}
+				}
+			},
+			"patch": {
+				"summary": "Update media metadata or rename an item",
+				"security": [
+					{
+						"adminBearer": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Updated media item"
+					}
+				}
+			},
+			"delete": {
+				"summary": "Delete a media library item",
+				"security": [
+					{
+						"adminBearer": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Deleted media item id"
+					}
+				}
+			}
+		},
+		"/api/admin/upload": {
+			"post": {
+				"summary": "Upload an image into a post folder",
+				"security": [
+					{
+						"adminBearer": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Saved image payload"
+					}
+				}
+			}
+		},
+		"/api/mcp": {
+			"get": {
+				"summary": "Read basic MCP server information",
+				"responses": {
+					"200": {
+						"description": "MCP server metadata"
+					}
+				}
+			},
+			"post": {
+				"summary": "Call the MCP JSON-RPC endpoint",
+				"responses": {
+					"200": {
+						"description": "JSON-RPC response"
+					}
+				}
+			}
+		}
+	},
+	"components": {
+		"securitySchemes": {
+			"adminBearer": {
+				"type": "http",
+				"scheme": "bearer",
+				"description": "Owner-provisioned admin token. See /auth.md."
+			}
+		}
+	}
+}

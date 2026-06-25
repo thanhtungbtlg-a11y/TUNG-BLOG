@@ -1,0 +1,88 @@
+{
+	"linkset": [
+		{
+			"anchor": "https://www.thanhtung0209.com/api/comments",
+			"service-desc": [
+				{
+					"href": "https://www.thanhtung0209.com/openapi.json",
+					"type": "application/vnd.oai.openapi+json"
+				}
+			],
+			"service-doc": [
+				{
+					"href": "https://www.thanhtung0209.com/docs/api/",
+					"type": "text/html"
+				}
+			],
+			"status": [
+				{
+					"href": "https://www.thanhtung0209.com/health.json",
+					"type": "application/json"
+				}
+			]
+		},
+		{
+			"anchor": "https://www.thanhtung0209.com/api/admin/post/{slug}",
+			"service-desc": [
+				{
+					"href": "https://www.thanhtung0209.com/openapi.json",
+					"type": "application/vnd.oai.openapi+json"
+				}
+			],
+			"service-doc": [
+				{
+					"href": "https://www.thanhtung0209.com/docs/api/",
+					"type": "text/html"
+				}
+			],
+			"status": [
+				{
+					"href": "https://www.thanhtung0209.com/health.json",
+					"type": "application/json"
+				}
+			]
+		},
+		{
+			"anchor": "https://www.thanhtung0209.com/api/admin/media",
+			"service-desc": [
+				{
+					"href": "https://www.thanhtung0209.com/openapi.json",
+					"type": "application/vnd.oai.openapi+json"
+				}
+			],
+			"service-doc": [
+				{
+					"href": "https://www.thanhtung0209.com/docs/api/",
+					"type": "text/html"
+				}
+			],
+			"status": [
+				{
+					"href": "https://www.thanhtung0209.com/health.json",
+					"type": "application/json"
+				}
+			]
+		},
+		{
+			"anchor": "https://www.thanhtung0209.com/api/mcp",
+			"service-desc": [
+				{
+					"href": "https://www.thanhtung0209.com/openapi.json",
+					"type": "application/vnd.oai.openapi+json"
+				}
+			],
+			"service-doc": [
+				{
+					"href": "https://www.thanhtung0209.com/.well-known/mcp/server-card.json",
+					"type": "application/json"
+				}
+			],
+			"status": [
+				{
+					"href": "https://www.thanhtung0209.com/health.json",
+					"type": "application/json"
+				}
+			]
+		}
+	]
+}
