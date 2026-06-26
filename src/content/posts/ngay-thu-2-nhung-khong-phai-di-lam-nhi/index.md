@@ -2,7 +2,7 @@
 title: "Ngày thứ 2 nhưng không phải đi làm nhỉ?"
 published: 2023-01-16
 description: "Ngày thứ 2 nhưng không phải đi làm nhỉ. Dù vậy nhưng hôm nay ở nhà mình vẫn \"chạy\" như thường🤣. Ngày cuối đi làm, sáng vẫn đi làm giờ như bình thường, vẫn ngồi vào bà..."
-image: "./img-20230113-175556-2-3.jpg"
+image: "./img-20230113-175556-2-3.webp"
 tags: []
 category: "WordPress"
 lang: vi
@@ -11,7 +11,7 @@ draft: false
 
 <!-- Imported from WordPress: https://thanhtung0209.home.blog/2023/01/16/ngay-thu-2-nhung-khong-phai-di-lam-nhi/ -->
 
-![](./img-20230113-175556-2-3.jpg)
+![](./img-20230113-175556-2-3.webp)
 
 Ngày thứ 2 nhưng không phải đi làm nhỉ. Dù vậy nhưng hôm nay ở nhà mình vẫn "chạy" như thường🤣.
 

@@ -12,6 +12,7 @@
 		"type-check": "tsc --noEmit --isolatedDeclarations",
 		"new-post": "node scripts/new-post.js",
 		"new-photo": "node scripts/new-gallery-photo.mjs",
+		"optimize-post-images": "node scripts/optimize-post-images.mjs",
 		"format": "biome format --write ./src",
 		"lint": "biome check --write ./src",
 		"preinstall": "npx only-allow pnpm",

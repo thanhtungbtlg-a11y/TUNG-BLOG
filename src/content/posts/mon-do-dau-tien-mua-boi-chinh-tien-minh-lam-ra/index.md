@@ -2,7 +2,7 @@
 title: "Món đồ đầu tiên mua bởi chính tiền mình làm ra."
 published: 2022-12-08
 description: "Như bạn thấy trong hình rồi đó. Là một chiếc tai nghe🙂. Mỗi khi stress hay muốn thêm năng lượng để làm việc, học tập thì mình sẽ tìm đến nhạc🙂. Mình thấy tinh thân c..."
-image: "./image-4.png"
+image: "./image-4.webp"
 tags: []
 category: "WordPress"
 lang: vi
@@ -15,7 +15,7 @@ Như bạn thấy trong hình rồi đó. Là một chiếc tai nghe🙂. Mỗi 
 
 Một mình sẽ ổn thôi, miễn là ở đó có âm nhạc. Đối với mình là vậy.
 
-![](./image-4.png)
+![](./image-4.webp)
 
 Về thể loại mình hay nghe thì thật ra mình không có một thể loại nhất định nào. Mình nghe thập cẩm🙂. Âm nhạc là ngôn ngữ không biên giới mà, bài nào mà não mình cảm thấy là hay thì mình sẽ nghe.
 

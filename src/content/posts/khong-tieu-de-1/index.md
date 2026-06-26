@@ -2,7 +2,7 @@
 title: "Không tiêu đề 1..."
 published: 2022-12-22
 description: "Vừa rồi mình phỏng vấn cho vị trí nhân viên chính thức không được tốt lắm. Đợt apply lần này mình muốn tự thử sức bản thân xem có thể đến được đâu nên cũng chuẩn bị sẵ..."
-image: "./image-9.png"
+image: "./image-9.webp"
 tags: []
 category: "WordPress"
 lang: vi
@@ -11,7 +11,7 @@ draft: false
 
 <!-- Imported from WordPress: https://thanhtung0209.home.blog/2022/12/22/khong-tieu-de-1/ -->
 
-![](./image-9.png)
+![](./image-9.webp)
 
 Vừa rồi mình phỏng vấn cho vị trí nhân viên chính thức không được tốt lắm. Đợt apply lần này mình muốn tự thử sức bản thân xem có thể đến được đâu nên cũng chuẩn bị sẵn tinh thần cho trường hợp xấu. Nhưng mà sau khi phỏng vấn xong, mình lại trách móc bản thân vì những câu trả lời chưa được tốt đó. "Đáng lẽ nên nói thế này", "Đáng lẽ bình tĩnh hơn, chậm lại một nhịp thì đã trả lời đúng hơn"... Sau đó, mình nghĩ _nếu có lần hai thì mình chắc chắn sẽ nói khác đi và làm tốt hơn._
 

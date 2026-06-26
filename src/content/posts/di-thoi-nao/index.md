@@ -2,7 +2,7 @@
 title: "いくよ (Đi thôi nào)"
 published: 2023-04-09
 description: "\"いくよ\" - \"đi thôi nào\", từ mà Satoshi hay nói với những người bạn đồng hành của mình khi bắt đầu chuyến đi mới cùng với những thử thách, điều thú vị mới đang đợi cậu ph..."
-image: "./image-4.png"
+image: "./image-4.webp"
 tags: []
 category: "WordPress"
 lang: vi
@@ -17,7 +17,7 @@ Tập cuối của "The Distant Blue Sky" đã được công chiếu rồi, nó
 
 Nếu bạn đang đoc blog này, mình mong bạn nên đọc thêm blog "The Distant Blue Sky" của mình nữa, sẽ giúp bạn hiểu thêm một chút về mình cũng như anime Pokemon🤣, link blog: [https://wordpress.com/post/thanhtung0209.home.blog/316](https://wordpress.com/post/thanhtung0209.home.blog/316)
 
-![](./image-4.png)
+![](./image-4.webp)
 
 "THE FIRST TAKE" là một kênh YouTube của Nhật Bản mời các ca sĩ biểu diễn một bài hát được thu âm trong một lần. Các video trong The First Take được quay trong studio, xen kẽ các cảnh quay và cận cảnh ca sĩ biểu diễn, với nền thường có màu trắng. Đoạn phim được ghi ở độ phân giải 4K với âm thanh chất lượng cao😗. Và nhân dịp kết thúc cuộc hành trình của Satoshi và bạn đồng hành của cậu - Pikachu, kênh đã mời một nhân vật đặc biệt để trình diễn một ca khúc cũng rất đặc biệt dành tặng người xem...
 

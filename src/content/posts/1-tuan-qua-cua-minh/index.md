@@ -2,7 +2,7 @@
 title: "1 tuần qua của mình."
 published: 2023-02-12
 description: "Thứ 2, đi khám ở Lagi sau đó luôn tiện qua thăm trường cấp 3 cũ. Thứ 3, hết buổi sáng đi khám ở bệnh viện da liễu. Thứ 4, sáng lấy xe máy ra chùi rửa (sau mấy tháng đi..."
-image: "./img-1051-copy-1.jpg"
+image: "./img-1051-copy-1.webp"
 tags: []
 category: "WordPress"
 lang: vi
@@ -23,6 +23,6 @@ Thứ 6 thì mình ở phòng suốt, lấy máy ảnh của Thầy ra mò chụ
 
 Hôm qua thì thẻ giao tới rồi.
 
-![](./img-1051-copy-1.jpg)
+![](./img-1051-copy-1.webp)
 
 Kỹ năng Photoshop của mình cũng được phết🤣. Tự học trên youtube lâu rồi giờ mới được dùng đến.

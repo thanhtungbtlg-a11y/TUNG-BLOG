@@ -2,7 +2,7 @@
 title: "Thông điệp từ một bộ phim cũ..."
 published: 2022-12-25
 description: "Bộ phim mình muốn đề cập đến có tên là Home Alone 2 : Lost in New York . Một bộ phim lấy khoảng thời gian Giáng sinh làm cột mốc sự kiện. Phần đầu có tên Home Alone ...."
-image: "./image-11.png"
+image: "./image-11.webp"
 tags: []
 category: "WordPress"
 lang: vi
@@ -13,7 +13,7 @@ draft: false
 
 Bộ phim mình muốn đề cập đến có tên là _Home Alone 2_: _Lost in New York_. Một bộ phim lấy khoảng thời gian Giáng sinh làm cột mốc sự kiện. Phần đầu có tên _Home Alone_. Cả 2 phần mình đều đã xem qua lúc còn nhỏ với cái tivi Sony đời cũ, phim hay lắm có gì bạn rảnh xem thử, đang mùa Giáng sinh luôn nè😆.
 
-![](./image-11.png)
+![](./image-11.webp)
 
 Một trích đoạn trong Home Alone 2 mà bản thân mình khi còn nhỏ đã từng xem qua nhưng với những suy nghĩ còn ngây ngô của một đứa trẻ, mình chưa hiểu hết được ý nghĩa thực sự của những lời thoại trong phim (thậm chí không có ấn tượng gì về lời thoại, nhưng hình ảnh bà lão với đàn bồ câu đặc biệt đó thì có😆). Để rồi gần đây lướt FB tình cờ xem lại, chợt nhận ra bộ phim tuổi thơ đã mang đến một thông điệp nghĩa hơn thế, chứ không dừng lại ở một bộ phim giải trí đơn thuần.
 
@@ -23,7 +23,7 @@ Mong cho những người mang trong mình trái tim bị tổn thương sẽ m�
 
 Đường link dẫn tới đoạn lời thoại trong phim: (_thực sự rất mong bạn đọc blog này có thể truy cập vào để xem vì nó thực sự hay_🙂) [https://www.facebook.com/watch/?v=517637088641227](https://www.facebook.com/watch/?v=517637088641227)
 
-![](./image-13.png)
+![](./image-13.webp)
 
 _If you aren't going_ to _use your heart_, _then_ what's the _difference if_ it _gets broken_?
 

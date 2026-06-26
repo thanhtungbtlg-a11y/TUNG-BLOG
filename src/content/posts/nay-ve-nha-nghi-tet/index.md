@@ -2,7 +2,7 @@
 title: "Nay về nhà nghỉ Tết."
 published: 2023-01-16
 description: "Ảnh chụp vào thứ 7 ngày 14 tháng 1. Như tiêu đề, do sáng nay xe chạy sớm nên về nhà sớm hơn mọi khi, về tới nhà cảm giác thoải mái hơn hẳn, bầu không khí ở đâu cũng tr..."
-image: "./img-20230114-180627-2-1.jpg"
+image: "./img-20230114-180627-2-1.webp"
 tags: []
 category: "WordPress"
 lang: vi
@@ -11,7 +11,7 @@ draft: false
 
 <!-- Imported from WordPress: https://thanhtung0209.home.blog/2023/01/16/nay-ve-nha-nghi-tet/ -->
 
-![](./img-20230114-180627-2-1.jpg)
+![](./img-20230114-180627-2-1.webp)
 
 _Ảnh chụp vào thứ 7 ngày 14 tháng 1._
 

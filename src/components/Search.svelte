@@ -34,6 +34,27 @@ type CommandItem = {
 	icon: string;
 	weight?: number;
 	keywords?: string;
+	tags?: string[];
+	category?: string;
+	published?: string;
+	content?: string;
+	snippet?: string;
+	badges?: string[];
+};
+
+type ParsedQuery = {
+	text: string;
+	normalizedText: string;
+	tags: string[];
+	categories: string[];
+	years: string[];
+	hasFilters: boolean;
+	badges: string[];
+};
+
+type HighlightPart = {
+	text: string;
+	match: boolean;
 };
 
 type SearchIndex = {
@@ -111,6 +132,109 @@ const normalize = (value: string) =>
 		.normalize("NFD")
 		.replace(/[\u0300-\u036f]/g, "");
 
+function parseSearchQuery(value: string): ParsedQuery {
+	const filters: ParsedQuery = {
+		text: value.trim(),
+		normalizedText: "",
+		tags: [],
+		categories: [],
+		years: [],
+		hasFilters: false,
+		badges: [],
+	};
+	const cleaned = value.replace(
+		/(tag|category|year):("[^"]+"|'[^']+'|\S+)/gi,
+		(_match, key: string, rawValue: string) => {
+			const item = rawValue.replace(/^['"]|['"]$/g, "").trim();
+			if (!item) return "";
+			filters.hasFilters = true;
+			if (key.toLowerCase() === "tag") {
+				filters.tags.push(item);
+				filters.badges.push(`#${item}`);
+			}
+			if (key.toLowerCase() === "category") {
+				filters.categories.push(item);
+				filters.badges.push(`category:${item}`);
+			}
+			if (key.toLowerCase() === "year") {
+				filters.years.push(item);
+				filters.badges.push(`year:${item}`);
+			}
+			return " ";
+		},
+	);
+	filters.text = cleaned.replace(/\s+/g, " ").trim();
+	filters.normalizedText = normalize(filters.text);
+	return filters;
+}
+
+function postYear(value?: string) {
+	if (!value) return "";
+	const date = new Date(value);
+	return Number.isNaN(date.getTime()) ? "" : String(date.getFullYear());
+}
+
+function matchesPostFilters(item: CommandItem, filters: ParsedQuery) {
+	if (!filters.hasFilters) return true;
+	if (item.type !== "post") return false;
+	const itemTags = (item.tags ?? []).map(normalize);
+	const itemCategory = normalize(item.category ?? "");
+	const itemYear = postYear(item.published);
+
+	return (
+		filters.tags.every((tag) =>
+			itemTags.some((itemTag) => itemTag.includes(normalize(tag))),
+		) &&
+		filters.categories.every((category) =>
+			itemCategory.includes(normalize(category)),
+		) &&
+		filters.years.every((year) => itemYear === year)
+	);
+}
+
+function createSnippet(content: string | undefined, term: string) {
+	if (!content) return "";
+	if (!term || !content) return "";
+	const normalizedContent = normalize(content);
+	const normalizedTerm = normalize(term);
+	const index = normalizedContent.indexOf(normalizedTerm);
+	if (index < 0) return "";
+	const start = Math.max(0, index - 58);
+	const end = Math.min(content.length, index + normalizedTerm.length + 92);
+	const prefix = start > 0 ? "..." : "";
+	const suffix = end < content.length ? "..." : "";
+	return `${prefix}${content.slice(start, end).trim()}${suffix}`;
+}
+
+function highlightParts(value: string, term: string): HighlightPart[] {
+	if (!term.trim()) return [{ text: value, match: false }];
+	const normalizedTerm = normalize(term.trim());
+	const normalizedValue = normalize(value);
+	const index = normalizedValue.indexOf(normalizedTerm);
+	if (index < 0) return [{ text: value, match: false }];
+
+	const map: number[] = [];
+	let normalizedCursor = "";
+	for (let sourceIndex = 0; sourceIndex < value.length; sourceIndex++) {
+		const normalizedCharacter = normalize(value[sourceIndex]);
+		for (let offset = 0; offset < normalizedCharacter.length; offset++) {
+			map[normalizedCursor.length + offset] = sourceIndex;
+		}
+		normalizedCursor += normalizedCharacter;
+	}
+
+	const start = map[index] ?? index;
+	const end =
+		(map[index + normalizedTerm.length] ?? start + normalizedTerm.length) ||
+		value.length;
+
+	return [
+		{ text: value.slice(0, start), match: false },
+		{ text: value.slice(start, end), match: true },
+		{ text: value.slice(end), match: false },
+	].filter((part) => part.text.length > 0);
+}
+
 const tagUrl = (tag: string) => url(`/archive/?tag=${encodeURIComponent(tag)}`);
 
 const openPalette = () => {
@@ -173,7 +297,8 @@ async function loadSearchIndex() {
 	}
 }
 
-$: query = normalize(keyword.trim());
+$: parsedQuery = parseSearchQuery(keyword);
+$: query = parsedQuery.normalizedText;
 
 $: commandItems = [
 	...quickActions,
@@ -187,6 +312,10 @@ $: commandItems = [
 		url: post.url,
 		icon: "material-symbols:article-outline-rounded",
 		weight: 7,
+		tags: post.tags,
+		category: post.category,
+		published: post.published,
+		content: post.content,
 		keywords: [
 			post.title,
 			post.description,
@@ -216,21 +345,46 @@ $: commandItems = [
 ];
 
 $: filteredItems = (
-	query
+	query || parsedQuery.hasFilters
 		? commandItems
 				.map((item) => {
+					if (!matchesPostFilters(item, parsedQuery)) {
+						return { ...item, score: -1 };
+					}
 					const haystack = normalize(
 						`${item.title} ${item.description} ${item.keywords ?? ""}`,
 					);
 					const title = normalize(item.title);
+					const snippet =
+						item.type === "post"
+							? createSnippet(item.content, parsedQuery.text)
+							: "";
 					let score = 0;
-					if (title === query) score += 40;
-					if (title.startsWith(query)) score += 24;
-					if (title.includes(query)) score += 12;
-					if (haystack.includes(query)) score += 5;
-					return { ...item, score: score + (item.weight ?? 0) };
+					if (!query && parsedQuery.hasFilters && item.type === "post")
+						score += 8;
+					if (query) {
+						if (title === query) score += 40;
+						if (title.startsWith(query)) score += 24;
+						if (title.includes(query)) score += 12;
+						if (haystack.includes(query)) score += 5;
+						if (snippet) score += 8;
+					}
+					return {
+						...item,
+						snippet,
+						badges:
+							item.type === "post"
+								? [postYear(item.published), item.category ?? ""].filter(
+										Boolean,
+									)
+								: [],
+						score: score + (item.weight ?? 0),
+					};
 				})
-				.filter((item) => item.score > (item.weight ?? 0))
+				.filter(
+					(item) =>
+						item.score > (item.weight ?? 0) || (!query && item.score > 0),
+				)
 				.sort((a, b) => b.score - a.score)
 		: commandItems
 				.filter((item) => item.type === "page" || item.type === "post")
@@ -289,13 +443,20 @@ function handleInputKeydown(event: KeyboardEvent) {
 					bind:this={searchInput}
 					bind:value={keyword}
 					onkeydown={handleInputKeydown}
-					placeholder="Tìm tiêu đề, nội dung, thẻ, danh mục"
+					placeholder="Tìm nội dung, hoặc dùng tag: category: year:"
 					aria-label="Command search"
 				/>
 				<button class="command-close" aria-label="Close search" onclick={closePalette}>
 					<Icon icon="material-symbols:close-rounded" />
 				</button>
 			</div>
+			{#if parsedQuery.badges.length}
+				<div class="command-filter-row">
+					{#each parsedQuery.badges as badge}
+						<span>{badge}</span>
+					{/each}
+				</div>
+			{/if}
 
 			<div class="command-results">
 				{#if filteredItems.length}
@@ -310,8 +471,23 @@ function handleInputKeydown(event: KeyboardEvent) {
 								<Icon icon={item.icon} />
 							</span>
 							<span class="command-copy">
-								<span class="command-title">{item.title}</span>
-								<span class="command-description">{item.description}</span>
+								<span class="command-title">
+									{#each highlightParts(item.title, parsedQuery.text) as part}
+										<span class:command-match={part.match}>{part.text}</span>
+									{/each}
+								</span>
+								<span class="command-description">
+									{#each highlightParts(item.snippet || item.description, parsedQuery.text) as part}
+										<span class:command-match={part.match}>{part.text}</span>
+									{/each}
+								</span>
+								{#if item.badges?.length}
+									<span class="command-badges">
+										{#each item.badges as badge}
+											<span>{badge}</span>
+										{/each}
+									</span>
+								{/if}
 							</span>
 							<Icon icon="material-symbols:arrow-forward-rounded" class="command-arrow" />
 						</button>
@@ -370,6 +546,28 @@ function handleInputKeydown(event: KeyboardEvent) {
 		gap: 0.5rem;
 		padding: 0.875rem;
 		border-bottom: 1px solid var(--card-border);
+	}
+
+	.command-filter-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.35rem;
+		padding: 0.55rem 0.875rem;
+		border-bottom: 1px solid var(--card-border);
+	}
+
+	.command-filter-row span,
+	.command-badges span {
+		display: inline-flex;
+		align-items: center;
+		min-height: 1.35rem;
+		padding: 0 0.45rem;
+		border: 1px solid color-mix(in oklch, var(--primary), transparent 65%);
+		border-radius: 999px;
+		background: color-mix(in oklch, var(--primary), transparent 88%);
+		color: var(--primary);
+		font-size: 0.7rem;
+		font-weight: 800;
 	}
 
 	.command-search-icon {
@@ -480,6 +678,19 @@ function handleInputKeydown(event: KeyboardEvent) {
 
 	:global(.dark) .command-description {
 		color: rgb(255 255 255 / 0.48);
+	}
+
+	.command-match {
+		border-radius: 0.25rem;
+		background: color-mix(in oklch, var(--primary), transparent 78%);
+		color: var(--primary);
+	}
+
+	.command-badges {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem;
+		margin-top: 0.15rem;
 	}
 
 	.command-arrow {

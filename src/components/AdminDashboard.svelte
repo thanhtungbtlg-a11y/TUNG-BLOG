@@ -1,6 +1,7 @@
 <script lang="ts">
 import Icon from "@iconify/svelte";
 import { createClient, type Session } from "@supabase/supabase-js";
+import MarkdownIt from "markdown-it";
 import { onMount, tick } from "svelte";
 
 type PostSummary = {
@@ -73,6 +74,13 @@ const supabaseKey =
 	"";
 const supabase =
 	supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
+const markdownParser = new MarkdownIt({
+	html: true,
+	linkify: true,
+	typographer: true,
+});
+const rawContentBase =
+	"https://raw.githubusercontent.com/thanhtungbtlg-a11y/TUNG-BLOG/main/src/content/posts";
 
 let posts = $state([...initialPosts]);
 let session = $state<Session | null>(null);
@@ -93,6 +101,7 @@ let mediaSearch = $state("");
 let mediaAlt = $state("");
 let mediaLoaded = $state(false);
 let editor = $state(createEmptyPost());
+let editorMode = $state<"write" | "preview">("write");
 let busy = $state(false);
 let uploading = $state(false);
 let error = $state("");
@@ -450,6 +459,7 @@ function visibleMedia() {
 }
 
 function insertImageMarkdown(filename: string) {
+	editorMode = "write";
 	const start = bodyTextarea?.selectionStart ?? editor.body.length;
 	const end = bodyTextarea?.selectionEnd ?? start;
 	const markdown = `\n\n![Mô tả ảnh](${filename})\n\n`;
@@ -461,6 +471,39 @@ function insertImageMarkdown(filename: string) {
 			start + markdown.length,
 		);
 	});
+}
+
+function previewHtml() {
+	const markdown = editor.body.trim() || "_Chưa có nội dung._";
+	return markdownParser.render(resolvePreviewAssets(markdown));
+}
+
+function resolvePreviewAssets(markdown: string) {
+	return markdown.replace(
+		/!\[([^\]]*)]\(([^)\s]+)(?:\s+"[^"]*")?\)/g,
+		(_match, alt, source) => {
+			const resolved = resolvePreviewAsset(source);
+			return `![${alt}](${resolved})`;
+		},
+	);
+}
+
+function resolvePreviewAsset(source: string) {
+	const cleanSource = source.trim().replace(/^['"]|['"]$/g, "");
+	if (
+		/^(?:https?:|data:|blob:|\/)/i.test(cleanSource) ||
+		cleanSource.startsWith("#")
+	) {
+		return cleanSource;
+	}
+
+	const slug = selectedSlug || editor.slug.trim() || slugify(editor.title);
+	const file = cleanSource.replace(/^\.\//, "");
+	if (!slug || file.startsWith("../")) return cleanSource;
+	return `${rawContentBase}/${encodeURIComponent(slug)}/${file
+		.split("/")
+		.map(encodeURIComponent)
+		.join("/")}`;
 }
 
 async function loadComments() {
@@ -786,6 +829,22 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 					<div class="editor-toolbar">
 						<strong>Nội dung</strong>
+						<div class="editor-mode-switch" aria-label="Chế độ soạn bài">
+							<button
+								class:active={editorMode === "write"}
+								type="button"
+								onclick={() => (editorMode = "write")}
+							>
+								<Icon icon="material-symbols:edit-outline-rounded" /> Markdown
+							</button>
+							<button
+								class:active={editorMode === "preview"}
+								type="button"
+								onclick={() => (editorMode = "preview")}
+							>
+								<Icon icon="material-symbols:visibility-outline-rounded" /> Preview
+							</button>
+						</div>
 						<button type="button" onclick={openMediaTab} title="Mở kho ảnh">
 							<Icon icon="material-symbols:photo-library-outline-rounded" /> Kho ảnh
 						</button>
@@ -794,7 +853,13 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 						</button>
 						<input class="file-input" bind:this={fileInput} type="file" accept="image/*" onchange={uploadImage} />
 					</div>
-					<textarea class="body-editor" bind:this={bodyTextarea} bind:value={editor.body} aria-label="Nội dung Markdown"></textarea>
+					{#if editorMode === "write"}
+						<textarea class="body-editor" bind:this={bodyTextarea} bind:value={editor.body} aria-label="Nội dung Markdown"></textarea>
+					{:else}
+						<article class="body-preview markdown-content" aria-label="Preview bài viết">
+							{@html previewHtml()}
+						</article>
+					{/if}
 
 					<div class="editor-actions">
 						{#if selectedSlug}<a href={`/posts/${selectedSlug}/`} target="_blank" rel="noopener"><Icon icon="material-symbols:open-in-new-rounded" /> Xem bài</a>{/if}
@@ -1217,6 +1282,28 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 		margin-right: auto;
 	}
 
+	.editor-mode-switch {
+		display: inline-flex;
+		gap: 0.2rem;
+		padding: 0.2rem;
+		border: 1px solid var(--card-border);
+		border-radius: 7px;
+		background: var(--btn-regular-bg);
+	}
+
+	.editor-mode-switch button {
+		min-height: 1.75rem;
+		padding: 0 0.55rem;
+		border-color: transparent;
+		background: transparent;
+		font-size: 0.78rem;
+	}
+
+	.editor-mode-switch button.active {
+		background: var(--primary);
+		color: white;
+	}
+
 	.file-input {
 		display: none;
 	}
@@ -1228,6 +1315,25 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 		font-family: "JetBrains Mono Variable", monospace;
 		font-size: 0.85rem;
 		line-height: 1.6;
+	}
+
+	.body-preview {
+		min-height: 22rem;
+		max-height: 48rem;
+		overflow: auto;
+		padding: 1rem;
+		border: 1px solid var(--card-border);
+		border-radius: 6px;
+		background: color-mix(in oklch, var(--card-bg), transparent 8%);
+		color: var(--content-color);
+	}
+
+	.body-preview :global(img) {
+		display: block;
+		max-width: 100%;
+		height: auto;
+		margin: 1rem auto;
+		border-radius: 8px;
 	}
 
 	.editor-actions {

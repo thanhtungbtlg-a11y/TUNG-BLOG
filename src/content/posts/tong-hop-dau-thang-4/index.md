@@ -2,7 +2,7 @@
 title: "Tổng hợp đầu tháng 4."
 published: 2023-04-09
 description: "Phần 1 - 02/04/2023: Như thông lệ, cứ đến tháng 4 là cộng đồng anime lại cùng nhau nhắc đến bộ anime tuy đã ra từ 2014 nhưng những cảm xúc mang lại vẫn còn để lại dư â..."
-image: "./img-20230408-194032-2.jpg"
+image: "./img-20230408-194032-2.webp"
 tags: []
 category: "WordPress"
 lang: vi
@@ -23,7 +23,7 @@ https://www.youtube.com/watch?v=LDDAwKs6YBw&ab\_channel=JustMe
 
 Phần 2 - 08/04/2023:
 
-![](./img-20230408-194032-2.jpg)
+![](./img-20230408-194032-2.webp)
 
 Nổi hứng thèm uống Soju nên quyết định vác xe đi mua 2 chai về tự uống một mình🤣. Trong blog trước đây của mình, tên là , mình có đề cập đến việc uống thử Soju lần đầu tiên khi đi chơi Vũng Tàu cùng cty thực tập cũ. Lúc đó thấy khó nó khó uống nên uống ít lắm, bỗng nhiên mấy tháng sau cảm thấy thèm uống lại, chẳng hiểu vì sao nữa🙂. Trong phòng thấy bí bách, xuống trệt của tòa gió mát ơi là mát😂. Vừa uống vừa xem Youtube chill chill.
 

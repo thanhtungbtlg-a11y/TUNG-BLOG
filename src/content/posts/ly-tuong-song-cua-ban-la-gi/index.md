@@ -3,7 +3,7 @@ title: "Lý tưởng sống của bạn là gì..."
 published: 2023-02-28
 updated: 2025-07-27
 description: "Ảnh trên mình chụp vào chủ nhật tuần rồi. Gần đây hoàng hôn đẹp lắm nên hầu như chiều nào mình cũng ra ngắm chứ không chỉ cuối tuần như trước nữa (với lại kỳ này hết đ..."
-image: "./img-1133.jpg"
+image: "./img-1133.webp"
 tags: []
 category: "WordPress"
 lang: vi
@@ -12,7 +12,7 @@ draft: false
 
 <!-- Imported from WordPress: https://thanhtung0209.home.blog/2023/02/28/ly-tuong-song-cua-ban-la-gi/ -->
 
-![](./img-1133.jpg)
+![](./img-1133.webp)
 
 Ảnh trên mình chụp vào chủ nhật tuần rồi. Gần đây hoàng hôn đẹp lắm nên hầu như chiều nào mình cũng ra ngắm chứ không chỉ cuối tuần như trước nữa (với lại kỳ này hết đi làm rồi rảnh quá nên vậy á🤣). Mình chụp bằng máy ảnh mượn của thầy á, hỏi mượn để làm luận văn mà toàn đem đi chụp cảnh🙂, với lại giờ chốt đề tài khác rồi nên không cần dùng tới nữa🤣.
 

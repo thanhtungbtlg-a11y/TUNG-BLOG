@@ -2,7 +2,7 @@
 title: "Tri kỷ"
 published: 2023-04-09
 description: "Vừa rồi mình có đi xem phim Tri kỷ. Mình cũng tranh thủ cơ hội này để thử một phong cách mới với 1 cái áo khoác mới, 1 cái áo thun mới và 1 đôi giày mới (ăn mặc đẹp vậ..."
-image: "./image.png"
+image: "./image.webp"
 tags: []
 category: "WordPress"
 lang: vi
@@ -19,7 +19,7 @@ Một người tri kỷ còn là người cảm nhận được bạn mà không
 
 Có một đoạn trong phim. Khi Ha Eun (Jeon So Nee thủ vai) nhìn Mi So (Kim Da Mi thủ vai) từ phía sau và Ha Eun đã nói rằng quen nhau lâu như vậy rồi nhưng đây là lần đầu được nhìn rõ bóng lưng của Mi So như vậy. Không phải vì thiếu sự quan tâm mà là do họ luôn đi bên cạnh nhau, không ai bị để mặc hoặc bị bỏ rơi một mình. Đoạn phim này làm mình rất ấn tượng.
 
-![](./image.png)
+![](./image.webp)
 
 Có người nói rằng: Một ngày nào đó trên thế giới rộng lớn này chúng ta sẽ gặp được một người thuộc về riêng mình, một người bạn, một nửa tâm hồn, người mà chúng ta có thể kể cho họ nghe về những giấc mơ của mình. Người ấy sẽ là người nhìn vào mắt bạn và nói rằng bạn là người tuyệt vời nhất mà họ từng gặp.
 

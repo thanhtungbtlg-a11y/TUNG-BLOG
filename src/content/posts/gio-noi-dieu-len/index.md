@@ -2,7 +2,7 @@
 title: "Gió nổi diều lên..."
 published: 2023-03-25
 description: "Chiều nay anh chị mình lên làng thả diều, anh rể cũng từng là sinh viên trong làng, hồi đó anh cũng hay ra thả diều nên nay về ôn lại kỷ niệm á mà🤣. Thế là anh chị rủ..."
-image: "./img-20230325-172419-3.jpg"
+image: "./img-20230325-172419-3.webp"
 tags: []
 category: "WordPress"
 lang: vi
@@ -11,7 +11,7 @@ draft: false
 
 <!-- Imported from WordPress: https://thanhtung0209.home.blog/2023/03/25/gio-noi-dieu-len/ -->
 
-![](./img-20230325-172419-3.jpg)
+![](./img-20230325-172419-3.webp)
 
 Chiều nay anh chị mình lên làng thả diều, anh rể cũng từng là sinh viên trong làng, hồi đó anh cũng hay ra thả diều nên nay về ôn lại kỷ niệm á mà🤣. Thế là anh chị rủ mình qua thả diều cùng luôn tiện ra lấy lại khăn tắm (hôm bữa qua nhà chị chơi, đem khăn theo lại quên mang về🤣) và có cả cơm chị nấu nữa😋.
 
@@ -21,4 +21,4 @@ Thả tới trời tối thì mình đi tìm đường tới tiệm kia để mu
 
 À mà lâu rồi mới viết blog 2 ngày liên tiếp á. Chắc là vì điều đặc biệt mà trước giờ mình chưa làm được!
 
-![](./img-20230325-180457-3.jpg)
+![](./img-20230325-180457-3.webp)

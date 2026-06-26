@@ -2,7 +2,7 @@
 title: "Balance."
 published: 2023-09-03
 description: "Đợt nghỉ lễ này. Như mọi năm, mình lại về thăm nhà. Bức ảnh được mình chụp vào chiều ngày 02/09, với trọng tâm là trạm thu phát sóng nằm ngay chính giữa khung hình, nh..."
-image: "./img-1881.jpg"
+image: "./img-1881.webp"
 tags: []
 category: "WordPress"
 lang: vi
@@ -11,7 +11,7 @@ draft: false
 
 <!-- Imported from WordPress: https://thanhtung0209.home.blog/2023/09/03/balance/ -->
 
-![](./img-1881.jpg)
+![](./img-1881.webp)
 
 Đợt nghỉ lễ này. Như mọi năm, mình lại về thăm nhà.
 Bức ảnh được mình chụp vào chiều ngày 02/09, với trọng tâm là trạm thu phát sóng nằm ngay chính giữa khung hình, những sợi dây cáp nằm đối xứng 2 bên tạo ra cảm giác cân đối cho bức ảnh. Bên dưới là những cây keo, dừa, chuối...

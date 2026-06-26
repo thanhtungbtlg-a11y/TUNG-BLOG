@@ -3,7 +3,7 @@ title: "Blog đầu tiên"
 published: 2022-11-30
 updated: 2024-03-30
 description: "Chào bạn, bây giờ là 10h26p tối ngày 30/11. Đây là blog đầu tiên của mình, mới tập tành thôi nên chưa quen lắm🙂. Mình rất dở môn Ngữ văn nên trong lúc đọc nếu bạn thấ..."
-image: "./image.png"
+image: "./image.webp"
 tags: []
 category: "WordPress"
 lang: vi
@@ -22,7 +22,7 @@ Nhìn theme của blog này có vẻ phèn và xưa xưa đúng không. Thật r
 
 Cảm hứng để tạo cái blog này của mình chắc có thể tự nhiều lý do lắm, mà chủ yếu là do một mình...
 
-![](./image.png)
+![](./image.webp)
 
 Nói sao nhỉ, nay đuối quá đuối. Hôm nay dậy từ 5h30 để chạy từ Dĩ An vào q.10 học, không kịp ăn sáng nữa🙂. Môn thí nghiệm in 3D ấy mà, vào lab chạy máy rồi ngồi đợi mấy tiếng máy in thôi, nhờ vậy mà mình cũng chợp mắt được xíu. Tới trưa thì mình phát hiện mẫu in của mình bị lỗi nên sau đó phải chuẩn bị mẫu khác và in lại, thế là không ăn trưa nốt🙂. Chiều mình tiếp tục học thí nghiệm tới khoảng 4h30. Tối giờ làm đồ án nữa đó, chuyện đồ án mình sẽ kể sau, cũng stress lắm🙂.
 

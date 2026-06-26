@@ -2,7 +2,7 @@
 title: "Đậu phụ, ước mơ, ba và mẹ."
 published: 2023-03-15
 description: "Ước mơ, là những mục tiêu, hoài bão, mong muốn và khát khao về một thứ gì đó mà con người ta luôn muốn đạt được tùy thuộc vào mỗi giai đoạn khác nhau của cuộc sống. Nó..."
-image: "./image-2.png"
+image: "./image-2.webp"
 tags: []
 category: "WordPress"
 lang: vi
@@ -11,7 +11,7 @@ draft: false
 
 <!-- Imported from WordPress: https://thanhtung0209.home.blog/2023/03/15/dau-phu-uoc-mo-ba-va-me/ -->
 
-![](./image-2.png)
+![](./image-2.webp)
 
 Ước mơ, là những mục tiêu, hoài bão, mong muốn và khát khao về một thứ gì đó mà con người ta luôn muốn đạt được tùy thuộc vào mỗi giai đoạn khác nhau của cuộc sống. Nó như là kim chỉ nam, giúp chúng ta có thêm động lực để không ngừng cố gắng. Cũng như mình, các bạn chắc ai cũng có một ước mơ xinh đẹp cho riêng bản thân nhỉ? Và bỗng một ngày mình cũng biết được ước mơ của ba mẹ là gì...
 

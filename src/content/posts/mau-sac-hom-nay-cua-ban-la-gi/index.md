@@ -2,7 +2,7 @@
 title: "Màu sắc hôm nay của bạn là gì?"
 published: 2023-01-09
 description: "Ảnh đầu blog là một trang trong quyển sách \"Thiên tài bên trái, kẻ điên bên phải\". Quyển sách hồi hè có đọc tầm chục trang, sau đó vào năm học thì mình ngưng. Mấy hôm..."
-image: "./image-editor-output-image53867239-1673204256355.jpg"
+image: "./image-editor-output-image53867239-1673204256355.webp"
 tags: []
 category: "WordPress"
 lang: vi
@@ -17,7 +17,7 @@ Sách nói về những cuộc đối thoại giữa nhân vật "Tôi", cũng c
 
 Do đó nếu xét về mặt kiến thức thì giá trị mà nó mạng lại rất ít (chính xác là hầu như không có). Nếu xét tới mặt giải trí, xem như lại cung cấp một khía cạnh được khai thác từ một đề tài còn lạ với nhiều người: bệnh nhân tâm thần hoặc là những người mà chúng ta cho như là vậy.
 
-![](./image-editor-output-image53867239-1673204256355.jpg)
+![](./image-editor-output-image53867239-1673204256355.webp)
 
 Câu chuyện mình muốn đề cập đến trong sách tên là "Mưa rơi lặng thầm", mình đã đọc nó từ hè rồi nhưng gần đây nhớ lại nên muốn viết blog nói về cảm nhận của mình. Tóm tắt, nói về một cô gái tự cho rằng bản thân có khả năng nhìn thấy cái gọi là màu sắc của mỗi ngày. Màu sắc ở đây không phải là thời tiết mà là những màu đen, vàng, xanh lá, xanh biển... khi cô gái nhìn ra ngoài vào buổi sáng, nó tràn ngập và như tấm màn mỏng phủ lên toàn bộ tầm nhìn. Mỗi màu sẽ có ý nghĩa riêng, cho biết tình hình của ngày hôm đó... Và như một tương lai được định trước, dù bạn có làm gì cũng không thay đổi được sự kiện sắp xảy đến, đúng như màu sắc sáng hôm đó đã chỉ ra.
 

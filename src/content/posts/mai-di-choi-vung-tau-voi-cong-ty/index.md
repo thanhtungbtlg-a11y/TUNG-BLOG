@@ -2,7 +2,7 @@
 title: "Mai đi chơi Vũng Tàu với công ty❤"
 published: 2022-12-29
 description: "Hình ảnh đầu blog do Google nhắc ôn lại kỷ niệm. Ảnh chụp năm 2018, Thầy trong ảnh là người Thầy dạy toán mình yêu quý nhất trong quãng đời học sinh của mình và cho đế..."
-image: "./img-20181229-125745.jpg"
+image: "./img-20181229-125745.webp"
 tags: []
 category: "WordPress"
 lang: vi
@@ -13,9 +13,9 @@ draft: false
 
 Hình ảnh đầu blog do Google nhắc ôn lại kỷ niệm. Ảnh chụp năm 2018, Thầy trong ảnh là người Thầy dạy toán mình yêu quý nhất trong quãng đời học sinh của mình và cho đến tận bây giờ điều đó chưa hề thay đổi. Hồi đó mấy bạn cùng lớp học thêm tổ chức lên nhà Thầy. Dưới là những bức ảnh còn lại. Đố bạn đọc mình ở đâu trong ảnh🙂.
 
-![](./img-20181229-125745.jpg)
+![](./img-20181229-125745.webp)
 
-![](./img-20181229-125820.jpg)
+![](./img-20181229-125820.webp)
 
 Bật mí nếu bạn chưa biết mình là người che nắng cho Thầy ở tấm thứ 2 đó🤣. Lúc đó thấy Thầy bị nắng nên mình cố tình che á (cái này nói thật❤). Hồi đó đi cắt tóc kêu cắt thật là ngắn và cao nên trong nó ra như vậy đó🙂. Thời gian trôi qua nhanh thật. Hồi năm ngoái mình có thăm Thầy nhưng Thầy không còn nhớ rõ tên mình nữa, chỉ nhớ mặt nhìn quen thôi🤣. Mình hoàn toàn hiểu vì đối với Thầy mình cũng không phải một học sinh nổi bật gì cả. Còn đối với mình Thầy vẫn mãi là một người rất đặc biệt❤.
 

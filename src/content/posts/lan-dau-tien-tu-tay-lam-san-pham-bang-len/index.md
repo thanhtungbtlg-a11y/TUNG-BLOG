@@ -2,7 +2,7 @@
 title: "Lần đầu tiên tự tay làm sản phẩm bằng len."
 published: 2023-03-08
 description: "Hôm nay đã móc xong hoa. Gọi là móc hoa vì dùng móc chứ không phải que đan, lúc tìm hiểu mới biết có 2 cách là đan len và móc len, đan dành cho đồ có kích thước lớn nh..."
-image: "./img-20230308-100532-1.jpg"
+image: "./img-20230308-100532-1.webp"
 tags: []
 category: "WordPress"
 lang: vi
@@ -11,7 +11,7 @@ draft: false
 
 <!-- Imported from WordPress: https://thanhtung0209.home.blog/2023/03/08/lan-dau-tien-tu-tay-lam-san-pham-bang-len/ -->
 
-![](./img-20230308-100532-1.jpg)
+![](./img-20230308-100532-1.webp)
 
 Hôm nay đã móc xong hoa. Gọi là móc hoa vì dùng móc chứ không phải que đan, lúc tìm hiểu mới biết có 2 cách là đan len và móc len, đan dành cho đồ có kích thước lớn như áo hay mũ, còn nhỏ như bông hoa mình làm đó thì dùng móc.
 

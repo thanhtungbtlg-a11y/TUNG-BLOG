@@ -2,7 +2,7 @@
 title: "Mình còn sống..."
 published: 2023-06-03
 description: "Cũng lâu rồi mới viết blog lại nhỉ. Haizz, chuyện là sau cái blog trầm cảm trước thì mình cắm đầu vào làm luận văn. Và sáng nay mình đã bảo vệ xong rồi. Khoảng 3 tuần..."
-image: "./img-20230601-122144-1.jpg"
+image: "./img-20230601-122144-1.webp"
 tags: []
 category: "WordPress"
 lang: vi
@@ -11,7 +11,7 @@ draft: false
 
 <!-- Imported from WordPress: https://thanhtung0209.home.blog/2023/06/03/minh-con-song/ -->
 
-![](./img-20230601-122144-1.jpg)
+![](./img-20230601-122144-1.webp)
 
 Cũng lâu rồi mới viết blog lại nhỉ. Haizz, chuyện là sau cái blog trầm cảm trước thì mình cắm đầu vào làm luận văn. Và sáng nay mình đã bảo vệ xong rồi.
 

@@ -2,7 +2,7 @@
 title: "Chuyện bây giờ mới kể."
 published: 2023-02-23
 description: "Hôm 14/2 vừa rồi mình có đi xem phim, đương nhiên là xem phim một mình vì có mối nào đâu mà xem 2 người🤣. Phim có tên là Thanh âm tình đầu. Mình sẽ không spoil nội du..."
-image: "./img-20230214-131621-1.jpg"
+image: "./img-20230214-131621-1.webp"
 tags: []
 category: "WordPress"
 lang: vi
@@ -13,7 +13,7 @@ draft: false
 
 Hôm 14/2 vừa rồi mình có đi xem phim, đương nhiên là xem phim một mình vì có mối nào đâu mà xem 2 người🤣. Phim có tên là Thanh âm tình đầu. Mình sẽ không spoil nội dung của phim (thật ra thì dài lắm nếu muốn cũng đâu kể hết được🤣). Xem đến cuối phim mình thấy tội cho nam diễn viên chính, khi tất cả mọi thứ đều quay lưng lại với anh ấy, kể cả con ba ba🙂. Phim này có bản năm 2002, mãi tới 20 năm sau thì mới có bản khác.
 
-![](./img-20230214-131621-1.jpg)
+![](./img-20230214-131621-1.webp)
 
 Trong lúc xem phim thì mình có nghe thấy những đoạn nhạc phim hay. Mình để link ở cuối blog nha.
 

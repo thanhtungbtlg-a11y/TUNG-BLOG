@@ -2,7 +2,7 @@
 title: "Một cơ hội mới."
 published: 2023-03-04
 description: "Chuyện bắt đầu từ cuộc nói chuyện của mình và thầy hướng dẫn luận văn. Thầy hỏi có phải mình đăng ký môn thực tập của trường hay không. Rõ ràng đây là sự nhầm lẫn bởi..."
-image: "./330413895-719131359621826-5066374970708893246-n.jpg"
+image: "./330413895-719131359621826-5066374970708893246-n.webp"
 tags: []
 category: "WordPress"
 lang: vi
@@ -11,7 +11,7 @@ draft: false
 
 <!-- Imported from WordPress: https://thanhtung0209.home.blog/2023/03/04/mot-co-hoi-moi/ -->
 
-![](./330413895-719131359621826-5066374970708893246-n.jpg)
+![](./330413895-719131359621826-5066374970708893246-n.webp)
 
 Chuyện bắt đầu từ cuộc nói chuyện của mình và thầy hướng dẫn luận văn. Thầy hỏi có phải mình đăng ký môn thực tập của trường hay không. Rõ ràng đây là sự nhầm lẫn bởi vì mình đã đi thực tập từ hè năm ngoái rồi. Sau đó thầy có gọi lại cho mình nói rằng do thầy nhầm lẫn một chút. Trong đầu mình chợt nảy ra ý nghĩ muốn đi xem (chắc do tính hay tò mò🤣), sau đó thầy cũng hiểu ý mình và nói sẽ báo thời gian sau cho mình.
 

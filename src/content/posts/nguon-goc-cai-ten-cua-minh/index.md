@@ -2,7 +2,7 @@
 title: "Nguồn gốc cái tên của mình."
 published: 2023-06-27
 description: "Nguyễn Thanh Tùng. Hồi tiểu học, mình luôn thấy có chút gì đó tự hào về cái tên mà ba đã đặt cho mình. Với một suy nghĩ hết sức trẻ con rằng tên mình có 3 chữ, không d..."
-image: "./356217073-223515153953921-4327874666082653839-n.jpg"
+image: "./356217073-223515153953921-4327874666082653839-n.webp"
 tags: []
 category: "WordPress"
 lang: vi
@@ -11,7 +11,7 @@ draft: false
 
 <!-- Imported from WordPress: https://thanhtung0209.home.blog/2023/06/27/nguon-goc-cai-ten-cua-minh/ -->
 
-![](./356217073-223515153953921-4327874666082653839-n.jpg)
+![](./356217073-223515153953921-4327874666082653839-n.webp)
 
 Nguyễn Thanh Tùng.
 

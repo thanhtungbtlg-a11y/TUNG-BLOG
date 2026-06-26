@@ -3,7 +3,7 @@ title: "Updating..."
 published: 2025-07-27
 updated: 2025-10-03
 description: "2 ảnh đầu là mình tự setup góc chụp, chế độ hẹn giờ đếm ngược 10 giây. Nhìn cũng oke đấy hehe. Máy ảnh cùi nên ảnh còn sạn chưa được nét lắm. Mình cũng cập nhật phần t..."
-image: "./img-3648-9.jpg"
+image: "./img-3648-9.webp"
 tags: []
 category: "WordPress"
 lang: vi
@@ -12,13 +12,13 @@ draft: false
 
 <!-- Imported from WordPress: https://thanhtung0209.home.blog/2025/07/27/updating/ -->
 
-![](./img-3648-9.jpg)
+![](./img-3648-9.webp)
 
-![](./img-3655-2-1.jpg)
+![](./img-3655-2-1.webp)
 
-![](./z6842817518363-119538f6a4792159f2a22ab9c7960efe-2.jpg)
+![](./z6842817518363-119538f6a4792159f2a22ab9c7960efe-2.webp)
 
-![](./z6842817518363-119538f6a4792159f2a22ab9c7960efe.jpg)
+![](./z6842817518363-119538f6a4792159f2a22ab9c7960efe.webp)
 
 2 ảnh đầu là mình tự setup góc chụp, chế độ hẹn giờ đếm ngược 10 giây. Nhìn cũng oke đấy hehe. Máy ảnh cùi nên ảnh còn sạn chưa được nét lắm. Mình cũng cập nhật phần thẻ "Hình ảnh", nếu bấm vào hãy đợi một chút để ảnh load hết nhé.
 
