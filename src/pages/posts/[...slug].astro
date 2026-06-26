@@ -36,6 +36,15 @@ const shareUrl = new URL(
 	getPostUrlBySlug(entry.slug),
 	Astro.site ?? Astro.url.origin,
 ).toString();
+const ogImageUrl = new URL("/api/og", Astro.site ?? Astro.url.origin);
+ogImageUrl.searchParams.set("title", entry.data.title);
+if (entry.data.description) {
+	ogImageUrl.searchParams.set("subtitle", entry.data.description);
+}
+if (entry.data.category) {
+	ogImageUrl.searchParams.set("category", entry.data.category);
+}
+ogImageUrl.searchParams.set("date", formatDateToYYYYMMDD(entry.data.published));
 
 const jsonLd = {
 	"@context": "https://schema.org",
@@ -52,10 +61,10 @@ const jsonLd = {
 	inLanguage: entry.data.lang
 		? entry.data.lang.replace("_", "-")
 		: siteConfig.lang.replace("_", "-"),
-	// TODO include cover image here
+	image: ogImageUrl.toString(),
 };
 ---
-<MainGridLayout banner={entry.data.image} title={entry.data.title} description={entry.data.description} lang={entry.data.lang} setOGTypeArticle={true} headings={headings}>
+<MainGridLayout banner={entry.data.image} title={entry.data.title} description={entry.data.description} lang={entry.data.lang} setOGTypeArticle={true} headings={headings} ogImage={ogImageUrl.toString()}>
     <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
     <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4">
         <div id="post-container" class:list={["card-base z-10 px-6 md:px-9 pt-6 pb-4 relative w-full ",

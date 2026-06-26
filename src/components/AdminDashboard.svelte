@@ -36,6 +36,9 @@ type BlogComment = {
 	body: string;
 	status: "pending" | "approved";
 	created_at: string;
+	parent_id?: string | null;
+	author_name?: string | null;
+	is_author?: boolean | null;
 };
 
 type MediaItem = {
@@ -83,6 +86,8 @@ let postSearch = $state("");
 let commentStatus = $state<"all" | "pending" | "approved">("pending");
 let commentSlug = $state("all");
 let comments = $state<BlogComment[]>([]);
+let replyingCommentId = $state<string | null>(null);
+let adminReplyBody = $state("");
 let media = $state<MediaItem[]>([]);
 let mediaSearch = $state("");
 let mediaAlt = $state("");
@@ -450,9 +455,22 @@ async function loadComments() {
 	if (!supabase || !isAdmin) return;
 	const { data, error: loadError } = await supabase
 		.from("blog_comments")
-		.select("id,slug,body,status,created_at")
+		.select("id,slug,body,status,created_at,parent_id,author_name,is_author")
 		.order("created_at", { ascending: false });
 	if (loadError) {
+		const { data: legacyData, error: legacyError } = await supabase
+			.from("blog_comments")
+			.select("id,slug,body,status,created_at")
+			.order("created_at", { ascending: false });
+		if (!legacyError) {
+			comments = ((legacyData ?? []) as BlogComment[]).map((comment) => ({
+				...comment,
+				parent_id: null,
+				author_name: "Ẩn danh",
+				is_author: false,
+			}));
+			return;
+		}
 		error = "Không tải được bình luận.";
 		return;
 	}
@@ -488,6 +506,49 @@ async function deleteComment(comment: BlogComment) {
 	busy = false;
 	if (deleteError) error = "Chưa xóa được bình luận.";
 	else comments = comments.filter((item) => item.id !== comment.id);
+}
+
+async function replyToComment(comment: BlogComment) {
+	if (!supabase || !session?.user || busy) return;
+	const trimmed = adminReplyBody.trim();
+	if (!trimmed) {
+		error = "Nhập nội dung trả lời trước đã.";
+		return;
+	}
+
+	busy = true;
+	clearMessages();
+	const parentId = comment.parent_id ?? comment.id;
+	const { data, error: insertError } = await supabase
+		.from("blog_comments")
+		.insert({
+			slug: comment.slug,
+			body: trimmed,
+			status: "approved",
+			parent_id: parentId,
+			author_name: "Nguyễn Thanh Tùng",
+			is_author: true,
+			approved_at: new Date().toISOString(),
+			approved_by: session.user.id,
+		})
+		.select("id,slug,body,status,created_at,parent_id,author_name,is_author")
+		.single();
+	busy = false;
+	if (insertError) {
+		error =
+			"Chưa gửi được trả lời. Hãy chạy lại file supabase/comments.sql trong Supabase SQL Editor.";
+		return;
+	}
+	comments = [data as BlogComment, ...comments];
+	replyingCommentId = null;
+	adminReplyBody = "";
+	notice = "Đã đăng trả lời của bạn.";
+}
+
+function commentAuthorName(comment: BlogComment) {
+	return comment.is_author
+		? "Nguyễn Thanh Tùng"
+		: comment.author_name || "Ẩn danh";
 }
 
 function visiblePosts() {
@@ -789,9 +850,45 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 			<div class="moderation-list">
 				{#each visibleComments() as comment}
 					<article>
-						<div class="comment-row-meta"><strong>{comment.slug}</strong><span>{formatDate(comment.created_at)}</span></div>
+						<div class="comment-row-meta">
+							<strong>{comment.slug}</strong>
+							<span>{commentAuthorName(comment)}</span>
+							{#if comment.parent_id}<span class="comment-badge">Reply</span>{/if}
+							{#if comment.is_author}<span class="comment-badge author">Tác giả</span>{/if}
+							<span>{formatDate(comment.created_at)}</span>
+						</div>
 						<p>{comment.body}</p>
+						{#if replyingCommentId === comment.id}
+							<form
+								class="admin-reply-form"
+								onsubmit={(event) => {
+									event.preventDefault();
+									void replyToComment(comment);
+								}}
+							>
+								<textarea
+									aria-label="Trả lời bình luận"
+									bind:value={adminReplyBody}
+									placeholder="Viết trả lời với tên Nguyễn Thanh Tùng..."
+								></textarea>
+								<div class="admin-reply-actions">
+									<button
+										type="button"
+										onclick={() => {
+											replyingCommentId = null;
+											adminReplyBody = "";
+										}}
+									>
+										Hủy
+									</button>
+									<button type="submit" disabled={busy}>
+										<Icon icon="material-symbols:reply-rounded" /> Gửi trả lời
+									</button>
+								</div>
+							</form>
+						{/if}
 						<div class="moderation-actions">
+							{#if comment.status === "approved" && !comment.is_author}<button type="button" onclick={() => { replyingCommentId = replyingCommentId === comment.id ? null : comment.id; adminReplyBody = ""; }} disabled={busy}><Icon icon="material-symbols:reply-rounded" /> Trả lời</button>{/if}
 							{#if comment.status === "pending"}<button type="button" onclick={() => approveComment(comment)} disabled={busy}><Icon icon="material-symbols:check-rounded" /> Duyệt</button>{/if}
 							<button class="danger" type="button" onclick={() => deleteComment(comment)} disabled={busy} title="Xóa bình luận"><Icon icon="material-symbols:delete-outline-rounded" /></button>
 						</div>
@@ -1233,8 +1330,24 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 	.comment-row-meta {
 		gap: 0.6rem;
+		flex-wrap: wrap;
 		font-size: 0.75rem;
 		color: var(--meta-color);
+	}
+
+	.comment-badge {
+		border: 1px solid var(--card-border);
+		border-radius: 999px;
+		padding: 0.08rem 0.42rem;
+		background: var(--btn-regular-bg);
+		color: var(--content-color);
+		font-size: 0.7rem;
+		font-weight: 850;
+	}
+
+	.comment-badge.author {
+		border-color: color-mix(in oklch, var(--primary), transparent 55%);
+		color: var(--primary);
 	}
 
 	.moderation-list p {
@@ -1242,6 +1355,28 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 		white-space: pre-wrap;
 		line-height: 1.55;
 		color: var(--content-color);
+	}
+
+	.admin-reply-form {
+		display: grid;
+		grid-column: 1 / -1;
+		gap: 0.5rem;
+		padding: 0.65rem;
+		border: 1px dashed var(--card-border);
+		border-radius: 6px;
+		background: color-mix(in oklch, var(--btn-regular-bg), transparent 28%);
+	}
+
+	.admin-reply-form textarea {
+		min-height: 5.5rem;
+		padding: 0.7rem;
+		resize: vertical;
+	}
+
+	.admin-reply-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 0.4rem;
 	}
 
 	.moderation-actions {

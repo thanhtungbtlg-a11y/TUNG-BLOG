@@ -36,6 +36,7 @@ interface Props {
 	lang?: string;
 	setOGTypeArticle?: boolean;
 	hidePlayer?: boolean;
+	ogImage?: string;
 }
 
 let {
@@ -45,6 +46,7 @@ let {
 	lang,
 	setOGTypeArticle,
 	hidePlayer = false,
+	ogImage,
 } = Astro.props;
 
 // apply a class to the body element to decide the height of the banner, only used for initial page load
@@ -70,6 +72,14 @@ if (title) {
 } else {
 	pageTitle = siteConfig.title;
 }
+
+const siteOrigin = Astro.site ?? Astro.url.origin;
+const defaultOgImage = new URL("/api/og", siteOrigin);
+defaultOgImage.searchParams.set("title", pageTitle);
+if (description) defaultOgImage.searchParams.set("subtitle", description);
+const ogImageUrl = ogImage
+	? new URL(ogImage, siteOrigin).toString()
+	: defaultOgImage.toString();
 
 const favicons: Favicon[] =
 	siteConfig.favicon.length > 0 ? siteConfig.favicon : defaultFavicons;
@@ -105,6 +115,9 @@ const bannerOffset =
 		<meta property="og:url" content={Astro.url}>
 		<meta property="og:title" content={pageTitle}>
 		<meta property="og:description" content={description || pageTitle}>
+		<meta property="og:image" content={ogImageUrl}>
+		<meta property="og:image:width" content="1200">
+		<meta property="og:image:height" content="630">
 		{setOGTypeArticle ? (
         <meta property="og:type" content="article" />
         ) : (
@@ -115,6 +128,7 @@ const bannerOffset =
 		<meta property="twitter:url" content={Astro.url}>
 		<meta name="twitter:title" content={pageTitle}>
 		<meta name="twitter:description" content={description || pageTitle}>
+		<meta name="twitter:image" content={ogImageUrl}>
 
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />

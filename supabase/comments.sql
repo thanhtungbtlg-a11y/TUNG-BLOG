@@ -8,6 +8,9 @@ create table if not exists public.blog_comments (
 	slug text not null,
 	body text not null,
 	status text not null default 'pending',
+	parent_id uuid,
+	author_name text not null default 'Ẩn danh',
+	is_author boolean not null default false,
 	created_at timestamptz not null default now(),
 	approved_at timestamptz,
 	approved_by uuid references auth.users(id) on delete set null,
@@ -20,8 +23,33 @@ create table if not exists public.blog_comments (
 	)
 );
 
+alter table public.blog_comments
+	add column if not exists parent_id uuid,
+	add column if not exists author_name text not null default 'Ẩn danh',
+	add column if not exists is_author boolean not null default false;
+
+do $$
+begin
+	if not exists (
+		select 1
+		from pg_constraint
+		where conname = 'blog_comments_parent_id_fkey'
+			and conrelid = 'public.blog_comments'::regclass
+	) then
+		alter table public.blog_comments
+			add constraint blog_comments_parent_id_fkey
+			foreign key (parent_id)
+			references public.blog_comments(id)
+			on delete cascade;
+	end if;
+end;
+$$;
+
 create index if not exists blog_comments_slug_status_created_idx
 	on public.blog_comments (slug, status, created_at desc);
+
+create index if not exists blog_comments_parent_created_idx
+	on public.blog_comments (parent_id, created_at asc);
 
 create table if not exists public.comment_admins (
 	user_id uuid primary key references auth.users(id) on delete cascade,
@@ -81,11 +109,14 @@ create index if not exists comment_submission_log_duplicate_idx
 alter table public.comment_submission_log enable row level security;
 revoke all on table public.comment_submission_log from anon, authenticated;
 
+drop function if exists public.submit_blog_comment(text, text, text, text);
+
 create or replace function public.submit_blog_comment(
 	p_slug text,
 	p_body text,
 	p_ip_hash text,
-	p_body_hash text
+	p_body_hash text,
+	p_parent_id uuid default null
 )
 returns uuid
 language plpgsql
@@ -103,6 +134,16 @@ begin
 	end if;
 	if char_length(v_body) not between 1 and 600 then
 		raise exception 'INVALID_BODY';
+	end if;
+	if p_parent_id is not null and not exists (
+		select 1
+		from public.blog_comments
+		where id = p_parent_id
+			and slug = v_slug
+			and status = 'approved'
+			and parent_id is null
+	) then
+		raise exception 'INVALID_PARENT';
 	end if;
 
 	perform pg_advisory_xact_lock(hashtext(p_ip_hash));
@@ -124,8 +165,8 @@ begin
 		raise exception 'DUPLICATE';
 	end if;
 
-	insert into public.blog_comments (slug, body, status)
-	values (v_slug, v_body, 'pending')
+	insert into public.blog_comments (slug, body, status, parent_id, author_name, is_author)
+	values (v_slug, v_body, 'pending', p_parent_id, 'Ẩn danh', false)
 	returning id into v_id;
 
 	insert into public.comment_submission_log (ip_hash, body_hash, slug)
@@ -138,10 +179,17 @@ begin
 end;
 $$;
 
-revoke all on function public.submit_blog_comment(text, text, text, text)
+revoke all on function public.submit_blog_comment(text, text, text, text, uuid)
 	from public, anon, authenticated;
-grant execute on function public.submit_blog_comment(text, text, text, text)
+grant execute on function public.submit_blog_comment(text, text, text, text, uuid)
 	to service_role;
+
+drop policy if exists "Admins can insert author replies" on public.blog_comments;
+create policy "Admins can insert author replies"
+	on public.blog_comments
+	for insert
+	to authenticated
+	with check (public.is_comment_admin());
 
 drop policy if exists "Admins can update comments" on public.blog_comments;
 create policy "Admins can update comments"

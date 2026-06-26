@@ -24,6 +24,7 @@ interface Props {
 	headings?: MarkdownHeading[];
 	wide?: boolean;
 	hidePlayer?: boolean;
+	ogImage?: string;
 }
 
 const {
@@ -35,6 +36,7 @@ const {
 	headings = [],
 	wide = false,
 	hidePlayer = false,
+	ogImage,
 } = Astro.props;
 const hasBannerCredit =
 	siteConfig.banner.enable && siteConfig.banner.credit.enable;
@@ -45,7 +47,7 @@ const mainPanelTop = siteConfig.banner.enable
 	: "5.5rem";
 ---
 
-<Layout title={title} banner={banner} description={description} lang={lang} setOGTypeArticle={setOGTypeArticle} hidePlayer={hidePlayer}>
+<Layout title={title} banner={banner} description={description} lang={lang} setOGTypeArticle={setOGTypeArticle} hidePlayer={hidePlayer} ogImage={ogImage}>
 
 <!-- Navbar -->
 <slot slot="head" name="head"></slot>

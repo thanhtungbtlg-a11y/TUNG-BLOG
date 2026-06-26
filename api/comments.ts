@@ -18,7 +18,7 @@ const maxLength = 600;
 export default async function handler(
 	request: ApiRequest,
 	response: ApiResponse,
-) {
+): Promise<void> {
 	if (request.method !== "POST") {
 		response.status(405).json({ error: "Phương thức không được hỗ trợ." });
 		return;
@@ -29,6 +29,7 @@ export default async function handler(
 		const slug = String(body.slug ?? "").trim();
 		const content = String(body.body ?? "").trim();
 		const honeypot = String(body.website ?? "").trim();
+		const parentId = String(body.parent_id ?? body.parentId ?? "").trim();
 
 		if (honeypot) {
 			response.status(202).json({ accepted: true });
@@ -36,6 +37,10 @@ export default async function handler(
 		}
 		if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length > 180) {
 			response.status(400).json({ error: "Bài viết không hợp lệ." });
+			return;
+		}
+		if (parentId && !isUuid(parentId)) {
+			response.status(400).json({ error: "Bình luận gốc không hợp lệ." });
 			return;
 		}
 		if (!content || content.length > maxLength) {
@@ -76,18 +81,26 @@ export default async function handler(
 				p_body: content,
 				p_ip_hash: ipHash,
 				p_body_hash: bodyHash,
+				p_parent_id: parentId || null,
 			},
 		);
 		if (error) {
 			if (error.message.includes("RATE_LIMIT")) {
 				response.status(429).json({
-					error: "Bạn đã gửi nhiều bình luận. Hãy thử lại sau 15 phút.",
+					error:
+						"Bạn đã gửi nhiều bình luận. Hãy đọc lại bình luận rồi thử sau 15 phút.",
 				});
 				return;
 			}
 			if (error.message.includes("DUPLICATE")) {
 				response.status(409).json({
 					error: "Bình luận này đã được gửi và đang chờ duyệt.",
+				});
+				return;
+			}
+			if (error.message.includes("INVALID_PARENT")) {
+				response.status(400).json({
+					error: "Bình luận gốc không hợp lệ hoặc chưa được duyệt.",
 				});
 				return;
 			}
@@ -100,6 +113,7 @@ export default async function handler(
 			slug,
 			content,
 			commentId: String(commentId ?? ""),
+			parentId,
 		}).catch((notificationError) => {
 			console.error("Comment notification error", notificationError);
 		});
@@ -114,10 +128,12 @@ async function sendNotification({
 	slug,
 	content,
 	commentId,
+	parentId,
 }: {
 	slug: string;
 	content: string;
 	commentId: string;
+	parentId?: string;
 }) {
 	const apiKey = env("RESEND_API_KEY");
 	if (!apiKey) return;
@@ -126,6 +142,9 @@ async function sendNotification({
 	const adminUrl = `${siteUrl}/admin/`;
 	const postUrl = `${siteUrl}/posts/${encodeURIComponent(slug)}/`;
 	const safeContent = escapeHtml(content).replace(/\n/g, "<br>");
+	const title = parentId
+		? "Bình luận trả lời mới đang chờ duyệt"
+		: "Bình luận mới đang chờ duyệt";
 	const result = await fetch("https://api.resend.com/emails", {
 		method: "POST",
 		headers: {
@@ -137,9 +156,9 @@ async function sendNotification({
 				env("COMMENT_NOTIFICATION_FROM") ||
 				"Thanh Tung Blog <onboarding@resend.dev>",
 			to: [env("COMMENT_NOTIFICATION_TO") || notificationEmail],
-			subject: `Bình luận mới đang chờ duyệt: ${slug}`,
+			subject: `${title}: ${slug}`,
 			text: `${content}\n\nDuyệt: ${adminUrl}\nXem bài: ${postUrl}`,
-			html: `<h2>Bình luận mới đang chờ duyệt</h2><p><strong>Bài viết:</strong> ${escapeHtml(slug)}</p><blockquote>${safeContent}</blockquote><p><a href="${adminUrl}">Mở trang quản trị</a> · <a href="${postUrl}">Xem bài viết</a></p><small>ID: ${escapeHtml(commentId)}</small>`,
+			html: `<h2>${title}</h2><p><strong>Bài viết:</strong> ${escapeHtml(slug)}</p>${parentId ? `<p><strong>Trả lời cho:</strong> ${escapeHtml(parentId)}</p>` : ""}<blockquote>${safeContent}</blockquote><p><a href="${adminUrl}">Mở trang quản trị</a> · <a href="${postUrl}">Xem bài viết</a></p><small>ID: ${escapeHtml(commentId)}</small>`,
 		}),
 	});
 	if (!result.ok) {
@@ -154,6 +173,12 @@ async function sendNotification({
 function looksLikeSpam(value: string) {
 	const links = value.match(/(?:https?:\/\/|www\.)/gi)?.length ?? 0;
 	return links > 2 || /(.)\1{14,}/u.test(value);
+}
+
+function isUuid(value: string) {
+	return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+		value,
+	);
 }
 
 function clientIp(headers: ApiRequest["headers"]) {

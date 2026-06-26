@@ -11,17 +11,23 @@ type BlogComment = {
 	id: string;
 	body: string;
 	created_at: string;
+	parent_id?: string | null;
+	author_name?: string | null;
+	is_author?: boolean | null;
 };
 
 let { slug } = $props<{ slug: string }>();
 
 const maxLength = 600;
 let body = $state("");
+let replyBody = $state("");
+let replyingTo = $state<string | null>(null);
 let comments = $state<BlogComment[]>([]);
 let error = $state("");
 let notice = $state("");
 let loading = $state(true);
 let submitting = $state(false);
+let submittingReplyFor = $state<string | null>(null);
 let website = $state("");
 
 onMount(() => {
@@ -39,23 +45,44 @@ async function loadComments() {
 	try {
 		comments = await supabaseRest<BlogComment[]>(
 			createSupabaseQuery("blog_comments", {
-				select: "id,body,created_at",
+				select: "id,body,created_at,parent_id,author_name,is_author",
 				slug: `eq.${slug}`,
 				status: "eq.approved",
-				order: "created_at.desc",
+				order: "created_at.asc",
 			}),
 		);
 	} catch {
-		error = "Không tải được bình luận.";
+		try {
+			const legacyComments = await supabaseRest<BlogComment[]>(
+				createSupabaseQuery("blog_comments", {
+					select: "id,body,created_at",
+					slug: `eq.${slug}`,
+					status: "eq.approved",
+					order: "created_at.desc",
+				}),
+			);
+			comments = legacyComments.map((comment) => ({
+				...comment,
+				parent_id: null,
+				author_name: "Ẩn danh",
+				is_author: false,
+			}));
+		} catch {
+			error = "Không tải được bình luận.";
+		}
 	} finally {
 		loading = false;
 	}
 }
 
-async function createComment() {
-	const trimmed = body.trim();
+async function createComment(parentId?: string) {
+	const isReply = Boolean(parentId);
+	const source = isReply ? replyBody : body;
+	const trimmed = source.trim();
 	if (!trimmed) {
-		error = "Nhập nội dung bình luận trước đã.";
+		error = isReply
+			? "Nhập nội dung trả lời trước đã."
+			: "Nhập nội dung bình luận trước đã.";
 		return;
 	}
 
@@ -64,7 +91,8 @@ async function createComment() {
 		return;
 	}
 
-	submitting = true;
+	if (isReply) submittingReplyFor = parentId ?? null;
+	else submitting = true;
 	error = "";
 	notice = "";
 
@@ -75,6 +103,7 @@ async function createComment() {
 			body: JSON.stringify({
 				slug,
 				body: trimmed,
+				parent_id: parentId,
 				website,
 			}),
 		});
@@ -82,17 +111,46 @@ async function createComment() {
 		if (!response.ok) {
 			throw new Error(result.error ?? "Chưa gửi được bình luận.");
 		}
-		body = "";
-		website = "";
-		notice = "Bình luận đã gửi và đang chờ duyệt.";
+		if (isReply) {
+			replyBody = "";
+			replyingTo = null;
+			notice = "Trả lời đã gửi và đang chờ duyệt.";
+		} else {
+			body = "";
+			website = "";
+			notice = "Bình luận đã gửi và đang chờ duyệt.";
+		}
 	} catch (submitError) {
 		error =
 			submitError instanceof Error
 				? submitError.message
 				: "Chưa gửi được bình luận. Thử lại sau nhé.";
 	} finally {
-		submitting = false;
+		if (isReply) submittingReplyFor = null;
+		else submitting = false;
 	}
+}
+
+function topLevelComments() {
+	return [...comments.filter((comment) => !comment.parent_id)].sort(
+		(a, b) =>
+			new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+	);
+}
+
+function repliesFor(commentId: string) {
+	return [
+		...comments.filter((comment) => comment.parent_id === commentId),
+	].sort(
+		(a, b) =>
+			new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+	);
+}
+
+function authorName(comment: BlogComment) {
+	return comment.is_author
+		? "Nguyễn Thanh Tùng"
+		: comment.author_name || "Ẩn danh";
 }
 
 function formatDate(value: string) {
@@ -145,7 +203,7 @@ function resetMessages() {
 				<span class:near-limit={body.length > maxLength * 0.9}>
 					{body.length}/{maxLength}
 				</span>
-				<button type="button" disabled={submitting} onclick={createComment}>
+				<button type="button" disabled={submitting} onclick={() => createComment()}>
 					<Icon icon="material-symbols:send-rounded" />
 					{submitting ? "Đang gửi..." : "Gửi bình luận"}
 				</button>
@@ -166,19 +224,87 @@ function resetMessages() {
 					<span>Chưa có bình luận nào.</span>
 				</div>
 			{:else}
-				{#each comments as comment}
-					<article class="comment-item">
-						<div class="comment-avatar" aria-hidden="true">
-							<Icon icon="material-symbols:person-rounded" />
-						</div>
-						<div>
-							<div class="comment-meta">
-								<strong>Ẩn danh</strong>
-								<span>{formatDate(comment.created_at)}</span>
+				{#each topLevelComments() as comment (comment.id)}
+					<div class="comment-thread">
+						<article class="comment-item">
+							<div class="comment-avatar" aria-hidden="true">
+								<Icon icon={comment.is_author ? "material-symbols:verified-rounded" : "material-symbols:person-rounded"} />
 							</div>
-							<p>{comment.body}</p>
-						</div>
-					</article>
+							<div class="comment-content">
+								<div class="comment-meta">
+									<strong>{authorName(comment)}</strong>
+									{#if comment.is_author}<span class="author-badge">Tác giả</span>{/if}
+									<span>{formatDate(comment.created_at)}</span>
+								</div>
+								<p>{comment.body}</p>
+								<button
+									class="comment-reply-button"
+									type="button"
+									onclick={() => {
+										replyingTo = replyingTo === comment.id ? null : comment.id;
+										replyBody = "";
+										resetMessages();
+									}}
+								>
+									<Icon icon="material-symbols:reply-rounded" />
+									Trả lời
+								</button>
+							</div>
+						</article>
+
+						{#if replyingTo === comment.id}
+							<div class="reply-form">
+								<textarea
+									aria-label="Trả lời bình luận"
+									bind:value={replyBody}
+									maxlength={maxLength}
+									placeholder="Viết trả lời ẩn danh..."
+									oninput={resetMessages}
+								></textarea>
+								<div class="comment-actions">
+									<span class:near-limit={replyBody.length > maxLength * 0.9}>
+										{replyBody.length}/{maxLength}
+									</span>
+									<div class="reply-actions">
+										<button
+											class="ghost-button"
+											type="button"
+											onclick={() => {
+												replyingTo = null;
+												replyBody = "";
+											}}
+										>
+											Hủy
+										</button>
+										<button
+											type="button"
+											disabled={submittingReplyFor === comment.id}
+											onclick={() => createComment(comment.id)}
+										>
+											<Icon icon="material-symbols:send-rounded" />
+											{submittingReplyFor === comment.id ? "Đang gửi..." : "Gửi trả lời"}
+										</button>
+									</div>
+								</div>
+							</div>
+						{/if}
+
+						{#each repliesFor(comment.id) as reply (reply.id)}
+							<article class="comment-item reply">
+								<div class="comment-avatar" aria-hidden="true">
+									<Icon icon={reply.is_author ? "material-symbols:verified-rounded" : "material-symbols:person-rounded"} />
+								</div>
+								<div class="comment-content">
+									<div class="comment-meta">
+										<strong>{authorName(reply)}</strong>
+										{#if reply.is_author}<span class="author-badge">Tác giả</span>{/if}
+										<span>{formatDate(reply.created_at)}</span>
+									</div>
+									<p>{reply.body}</p>
+								</div>
+							</article>
+						{/each}
+					</div>
 				{/each}
 			{/if}
 		</div>
@@ -193,7 +319,8 @@ function resetMessages() {
 
 	.comment-heading,
 	.comment-actions,
-	.comment-meta {
+	.comment-meta,
+	.reply-actions {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
@@ -302,7 +429,7 @@ function resetMessages() {
 		font: inherit;
 		font-weight: 800;
 		cursor: pointer;
-		transition: transform 160ms ease, filter 160ms ease;
+		transition: transform 160ms ease, filter 160ms ease, background 160ms ease;
 	}
 
 	button:not(:disabled):hover {
@@ -325,8 +452,13 @@ function resetMessages() {
 
 	.comment-list {
 		display: grid;
-		gap: 0.65rem;
+		gap: 0.8rem;
 		margin-top: 1rem;
+	}
+
+	.comment-thread {
+		display: grid;
+		gap: 0.55rem;
 	}
 
 	.comment-item {
@@ -339,6 +471,15 @@ function resetMessages() {
 		background: color-mix(in oklch, var(--card-bg), transparent 18%);
 	}
 
+	.comment-item.reply,
+	.reply-form {
+		margin-left: 2.75rem;
+	}
+
+	.comment-item.reply {
+		background: color-mix(in oklch, var(--btn-regular-bg), transparent 10%);
+	}
+
 	.comment-avatar {
 		display: grid;
 		place-items: center;
@@ -349,11 +490,24 @@ function resetMessages() {
 		color: var(--primary);
 	}
 
+	.comment-content {
+		min-width: 0;
+	}
+
 	.comment-meta {
 		justify-content: flex-start;
-		gap: 0.65rem;
+		flex-wrap: wrap;
+		gap: 0.45rem 0.65rem;
 		font-size: 0.76rem;
 		color: var(--meta-color);
+	}
+
+	.author-badge {
+		border: 1px solid color-mix(in oklch, var(--primary), transparent 58%);
+		border-radius: 999px;
+		padding: 0.1rem 0.42rem;
+		color: var(--primary);
+		font-weight: 850;
 	}
 
 	.comment-item p {
@@ -361,6 +515,35 @@ function resetMessages() {
 		white-space: pre-wrap;
 		line-height: 1.6;
 		color: var(--content-color);
+	}
+
+	.comment-reply-button,
+	.ghost-button {
+		min-height: 2rem;
+		margin-top: 0.45rem;
+		padding: 0 0.65rem;
+		border-color: var(--card-border);
+		background: var(--btn-regular-bg);
+		color: var(--content-color);
+		font-size: 0.78rem;
+	}
+
+	.reply-form {
+		display: grid;
+		gap: 0.55rem;
+		padding: 0.75rem;
+		border: 1px dashed var(--card-border);
+		border-radius: 0.85rem;
+		background: color-mix(in oklch, var(--card-bg), transparent 28%);
+	}
+
+	.reply-form textarea {
+		min-height: 5rem;
+	}
+
+	.reply-actions {
+		justify-content: flex-end;
+		gap: 0.45rem;
 	}
 
 	.comment-empty {
@@ -380,6 +563,16 @@ function resetMessages() {
 
 		.comment-actions {
 			align-items: flex-end;
+			flex-wrap: wrap;
+		}
+
+		.comment-item.reply,
+		.reply-form {
+			margin-left: 1.25rem;
+		}
+
+		.reply-actions {
+			width: 100%;
 		}
 	}
 </style>
