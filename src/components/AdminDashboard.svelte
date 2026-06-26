@@ -310,8 +310,20 @@ async function uploadImage(event: Event) {
 }
 
 async function openMediaTab() {
+	clearMessages();
 	activeTab = "media";
 	if (!mediaLoaded) await loadMedia();
+}
+
+function openPostsTab() {
+	clearMessages();
+	activeTab = "posts";
+}
+
+async function openCommentsTab() {
+	clearMessages();
+	activeTab = "comments";
+	await loadComments();
 }
 
 async function loadMedia() {
@@ -453,6 +465,7 @@ function insertImageMarkdown(filename: string) {
 
 async function loadComments() {
 	if (!supabase || !isAdmin) return;
+	clearMessages();
 	const { data, error: loadError } = await supabase
 		.from("blog_comments")
 		.select("id,slug,body,status,created_at,parent_id,author_name,is_author")
@@ -719,13 +732,13 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 		</header>
 
 		<nav class="admin-tabs" aria-label="Khu vực quản trị">
-			<button class:active={activeTab === "posts"} type="button" onclick={() => (activeTab = "posts")}>
+			<button class:active={activeTab === "posts"} type="button" onclick={openPostsTab}>
 				<Icon icon="material-symbols:article-outline-rounded" /> Bài viết
 			</button>
 			<button class:active={activeTab === "media"} type="button" onclick={openMediaTab}>
 				<Icon icon="material-symbols:photo-library-outline-rounded" /> Kho ảnh
 			</button>
-			<button class:active={activeTab === "comments"} type="button" onclick={() => (activeTab = "comments")}>
+			<button class:active={activeTab === "comments"} type="button" onclick={openCommentsTab}>
 				<Icon icon="material-symbols:forum-outline-rounded" /> Bình luận
 				{#if comments.some((comment) => comment.status === "pending")}<span class="dot"></span>{/if}
 			</button>
