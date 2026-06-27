@@ -335,3 +335,159 @@ end;
 $$;
 
 grant execute on function public.record_post_reaction(text, text, text) to anon, authenticated;
+
+-- Aggregate reactions for each approved comment. Individual anonymous votes are
+-- kept private so a browser can change its reaction without inflating counts.
+create table if not exists public.comment_reaction_counts (
+	comment_id uuid primary key
+		references public.blog_comments(id)
+		on delete cascade,
+	like_count integer not null default 0 check (like_count >= 0),
+	love_count integer not null default 0 check (love_count >= 0),
+	haha_count integer not null default 0 check (haha_count >= 0),
+	wow_count integer not null default 0 check (wow_count >= 0),
+	sad_count integer not null default 0 check (sad_count >= 0),
+	angry_count integer not null default 0 check (angry_count >= 0),
+	updated_at timestamptz not null default now()
+);
+
+create table if not exists public.comment_reaction_votes (
+	comment_id uuid not null
+		references public.blog_comments(id)
+		on delete cascade,
+	voter_id uuid not null,
+	reaction text not null
+		check (reaction in ('like', 'love', 'haha', 'wow', 'sad', 'angry')),
+	created_at timestamptz not null default now(),
+	updated_at timestamptz not null default now(),
+	primary key (comment_id, voter_id)
+);
+
+alter table public.comment_reaction_counts enable row level security;
+alter table public.comment_reaction_votes enable row level security;
+
+drop policy if exists "Anyone can read comment reaction counts"
+	on public.comment_reaction_counts;
+create policy "Anyone can read comment reaction counts"
+	on public.comment_reaction_counts
+	for select
+	to anon, authenticated
+	using (true);
+
+grant select on table public.comment_reaction_counts to anon, authenticated;
+revoke all on table public.comment_reaction_votes from anon, authenticated;
+
+create or replace function public.record_comment_reaction(
+	p_comment_id uuid,
+	p_voter_id uuid,
+	p_next_reaction text default ''
+)
+returns public.comment_reaction_counts
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+	v_previous text := '';
+	v_next text := coalesce(p_next_reaction, '');
+	v_counts public.comment_reaction_counts;
+begin
+	if p_comment_id is null or p_voter_id is null then
+		raise exception 'Invalid comment reaction identity';
+	end if;
+
+	if v_next not in ('', 'like', 'love', 'haha', 'wow', 'sad', 'angry') then
+		raise exception 'Invalid next reaction';
+	end if;
+
+	if not exists (
+		select 1
+		from public.blog_comments
+		where id = p_comment_id and status = 'approved'
+	) then
+		raise exception 'Comment is not available';
+	end if;
+
+	perform pg_advisory_xact_lock(
+		hashtextextended(p_comment_id::text || ':' || p_voter_id::text, 0)
+	);
+
+	select reaction
+	into v_previous
+	from public.comment_reaction_votes
+	where comment_id = p_comment_id and voter_id = p_voter_id;
+	v_previous := coalesce(v_previous, '');
+
+	insert into public.comment_reaction_counts (comment_id)
+	values (p_comment_id)
+	on conflict (comment_id) do nothing;
+
+	if v_previous <> v_next then
+		if v_next = '' then
+			delete from public.comment_reaction_votes
+			where comment_id = p_comment_id and voter_id = p_voter_id;
+		else
+			insert into public.comment_reaction_votes (
+				comment_id,
+				voter_id,
+				reaction
+			)
+			values (p_comment_id, p_voter_id, v_next)
+			on conflict (comment_id, voter_id) do update
+			set reaction = excluded.reaction, updated_at = now();
+		end if;
+
+		update public.comment_reaction_counts
+		set
+			like_count = greatest(
+				like_count
+					+ case when v_next = 'like' then 1 else 0 end
+					- case when v_previous = 'like' then 1 else 0 end,
+				0
+			),
+			love_count = greatest(
+				love_count
+					+ case when v_next = 'love' then 1 else 0 end
+					- case when v_previous = 'love' then 1 else 0 end,
+				0
+			),
+			haha_count = greatest(
+				haha_count
+					+ case when v_next = 'haha' then 1 else 0 end
+					- case when v_previous = 'haha' then 1 else 0 end,
+				0
+			),
+			wow_count = greatest(
+				wow_count
+					+ case when v_next = 'wow' then 1 else 0 end
+					- case when v_previous = 'wow' then 1 else 0 end,
+				0
+			),
+			sad_count = greatest(
+				sad_count
+					+ case when v_next = 'sad' then 1 else 0 end
+					- case when v_previous = 'sad' then 1 else 0 end,
+				0
+			),
+			angry_count = greatest(
+				angry_count
+					+ case when v_next = 'angry' then 1 else 0 end
+					- case when v_previous = 'angry' then 1 else 0 end,
+				0
+			),
+			updated_at = now()
+		where comment_id = p_comment_id;
+	end if;
+
+	select *
+	into v_counts
+	from public.comment_reaction_counts
+	where comment_id = p_comment_id;
+
+	return v_counts;
+end;
+$$;
+
+revoke all on function public.record_comment_reaction(uuid, uuid, text) from public;
+grant execute on function public.record_comment_reaction(uuid, uuid, text)
+	to anon, authenticated;

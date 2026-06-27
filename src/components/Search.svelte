@@ -3,6 +3,7 @@ import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import Icon from "@iconify/svelte";
 import { url } from "@utils/url-utils.ts";
+import Fuse, { type FuseResultMatch } from "fuse.js";
 import { onMount } from "svelte";
 
 type SearchIndexPost = {
@@ -130,7 +131,8 @@ const normalize = (value: string) =>
 	value
 		.toLowerCase()
 		.normalize("NFD")
-		.replace(/[\u0300-\u036f]/g, "");
+		.replace(/[\u0300-\u036f]/g, "")
+		.replace(/đ/g, "d");
 
 function parseSearchQuery(value: string): ParsedQuery {
 	const filters: ParsedQuery = {
@@ -204,6 +206,87 @@ function createSnippet(content: string | undefined, term: string) {
 	const prefix = start > 0 ? "..." : "";
 	const suffix = end < content.length ? "..." : "";
 	return `${prefix}${content.slice(start, end).trim()}${suffix}`;
+}
+
+function createFuzzySnippet(
+	content: string | undefined,
+	matches: readonly FuseResultMatch[] | undefined,
+) {
+	if (!content || !matches?.length) return "";
+	const contentMatch = matches.find((match) => match.key === "content");
+	const firstRange = contentMatch?.indices[0];
+	if (!firstRange) return "";
+
+	const start = Math.max(0, firstRange[0] - 58);
+	const end = Math.min(content.length, firstRange[1] + 93);
+	return `${start > 0 ? "..." : ""}${content.slice(start, end).trim()}${end < content.length ? "..." : ""}`;
+}
+
+function searchItems(items: CommandItem[], filters: ParsedQuery) {
+	const eligibleItems = items.filter((item) =>
+		matchesPostFilters(item, filters),
+	);
+	if (!filters.normalizedText) {
+		return eligibleItems
+			.filter((item) => filters.hasFilters && item.type === "post")
+			.map((item) => decorateResult(item, 8));
+	}
+
+	const queryLength = filters.normalizedText.length;
+	const fuse = new Fuse(
+		eligibleItems.map((item) => ({
+			item,
+			title: normalize(item.title),
+			description: normalize(item.description),
+			keywords: normalize(item.keywords ?? ""),
+			content: normalize(item.content ?? ""),
+		})),
+		{
+			includeMatches: true,
+			includeScore: true,
+			ignoreLocation: true,
+			minMatchCharLength: queryLength <= 3 ? queryLength : 3,
+			threshold: queryLength <= 3 ? 0.2 : 0.38,
+			keys: [
+				{ name: "title", weight: 0.42 },
+				{ name: "description", weight: 0.2 },
+				{ name: "keywords", weight: 0.18 },
+				{ name: "content", weight: 0.2 },
+			],
+		},
+	);
+
+	return fuse.search(filters.normalizedText, { limit: 24 }).map((result) => {
+		const item = result.item.item;
+		const title = normalize(item.title);
+		const haystack = normalize(
+			`${item.title} ${item.description} ${item.keywords ?? ""}`,
+		);
+		let score = Math.round((1 - (result.score ?? 1)) * 30);
+		if (title === filters.normalizedText) score += 40;
+		if (title.startsWith(filters.normalizedText)) score += 24;
+		if (title.includes(filters.normalizedText)) score += 12;
+		if (haystack.includes(filters.normalizedText)) score += 5;
+
+		const snippet =
+			createSnippet(item.content, filters.text) ||
+			createFuzzySnippet(item.content, result.matches);
+		if (snippet) score += 8;
+
+		return decorateResult(item, score, snippet);
+	});
+}
+
+function decorateResult(item: CommandItem, score: number, snippet = "") {
+	return {
+		...item,
+		snippet,
+		badges:
+			item.type === "post"
+				? [postYear(item.published), item.category ?? ""].filter(Boolean)
+				: [],
+		score: score + (item.weight ?? 0),
+	};
 }
 
 function highlightParts(value: string, term: string): HighlightPart[] {
@@ -346,46 +429,7 @@ $: commandItems = [
 
 $: filteredItems = (
 	query || parsedQuery.hasFilters
-		? commandItems
-				.map((item) => {
-					if (!matchesPostFilters(item, parsedQuery)) {
-						return { ...item, score: -1 };
-					}
-					const haystack = normalize(
-						`${item.title} ${item.description} ${item.keywords ?? ""}`,
-					);
-					const title = normalize(item.title);
-					const snippet =
-						item.type === "post"
-							? createSnippet(item.content, parsedQuery.text)
-							: "";
-					let score = 0;
-					if (!query && parsedQuery.hasFilters && item.type === "post")
-						score += 8;
-					if (query) {
-						if (title === query) score += 40;
-						if (title.startsWith(query)) score += 24;
-						if (title.includes(query)) score += 12;
-						if (haystack.includes(query)) score += 5;
-						if (snippet) score += 8;
-					}
-					return {
-						...item,
-						snippet,
-						badges:
-							item.type === "post"
-								? [postYear(item.published), item.category ?? ""].filter(
-										Boolean,
-									)
-								: [],
-						score: score + (item.weight ?? 0),
-					};
-				})
-				.filter(
-					(item) =>
-						item.score > (item.weight ?? 0) || (!query && item.score > 0),
-				)
-				.sort((a, b) => b.score - a.score)
+		? searchItems(commandItems, parsedQuery).sort((a, b) => b.score - a.score)
 		: commandItems
 				.filter((item) => item.type === "page" || item.type === "post")
 				.slice(0, 9)

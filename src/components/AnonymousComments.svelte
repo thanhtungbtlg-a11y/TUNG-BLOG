@@ -6,6 +6,9 @@ import {
 	supabaseConfigured,
 	supabaseRest,
 } from "../utils/supabase-rest";
+import CommentReactions, {
+	type CommentReactionCounts,
+} from "./CommentReactions.svelte";
 
 type BlogComment = {
 	id: string;
@@ -16,6 +19,10 @@ type BlogComment = {
 	is_author?: boolean | null;
 };
 
+type CommentReactionCountsRow = CommentReactionCounts & {
+	comment_id: string;
+};
+
 let { slug } = $props<{ slug: string }>();
 
 const maxLength = 600;
@@ -23,6 +30,7 @@ let body = $state("");
 let replyBody = $state("");
 let replyingTo = $state<string | null>(null);
 let comments = $state<BlogComment[]>([]);
+let reactionCounts = $state<Record<string, CommentReactionCounts>>({});
 let error = $state("");
 let notice = $state("");
 let loading = $state(true);
@@ -71,7 +79,27 @@ async function loadComments() {
 			error = "Không tải được bình luận.";
 		}
 	} finally {
+		await loadReactionCounts();
 		loading = false;
+	}
+}
+
+async function loadReactionCounts() {
+	if (!comments.length) return;
+
+	try {
+		const rows = await supabaseRest<CommentReactionCountsRow[]>(
+			createSupabaseQuery("comment_reaction_counts", {
+				select:
+					"comment_id,like_count,love_count,haha_count,wow_count,sad_count,angry_count",
+				comment_id: `in.(${comments.map((comment) => comment.id).join(",")})`,
+			}),
+		);
+		reactionCounts = Object.fromEntries(
+			rows.map(({ comment_id, ...counts }) => [comment_id, counts]),
+		);
+	} catch {
+		reactionCounts = {};
 	}
 }
 
@@ -237,18 +265,24 @@ function resetMessages() {
 									<span>{formatDate(comment.created_at)}</span>
 								</div>
 								<p>{comment.body}</p>
-								<button
-									class="comment-reply-button"
-									type="button"
-									onclick={() => {
-										replyingTo = replyingTo === comment.id ? null : comment.id;
-										replyBody = "";
-										resetMessages();
-									}}
-								>
-									<Icon icon="material-symbols:reply-rounded" />
-									Trả lời
-								</button>
+								<div class="comment-toolbar">
+									<CommentReactions
+										commentId={comment.id}
+										initialCounts={reactionCounts[comment.id]}
+									/>
+									<button
+										class="comment-reply-button"
+										type="button"
+										onclick={() => {
+											replyingTo = replyingTo === comment.id ? null : comment.id;
+											replyBody = "";
+											resetMessages();
+										}}
+									>
+										<Icon icon="material-symbols:reply-rounded" />
+										Trả lời
+									</button>
+								</div>
 							</div>
 						</article>
 
@@ -301,6 +335,10 @@ function resetMessages() {
 										<span>{formatDate(reply.created_at)}</span>
 									</div>
 									<p>{reply.body}</p>
+									<CommentReactions
+										commentId={reply.id}
+										initialCounts={reactionCounts[reply.id]}
+									/>
 								</div>
 							</article>
 						{/each}
@@ -526,6 +564,17 @@ function resetMessages() {
 		background: var(--btn-regular-bg);
 		color: var(--content-color);
 		font-size: 0.78rem;
+	}
+
+	.comment-toolbar {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 0.45rem;
+	}
+
+	.comment-toolbar .comment-reply-button {
+		margin-top: 0.35rem;
 	}
 
 	.reply-form {
