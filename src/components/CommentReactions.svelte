@@ -129,6 +129,13 @@ function selectedEmoji() {
 	return reactions.find((reaction) => reaction.id === active)?.emoji;
 }
 
+function togglePicker(event: MouseEvent) {
+	const openedByKeyboard = event.detail === 0;
+	const deviceCanHover = window.matchMedia("(hover: hover)").matches;
+	if (deviceCanHover && !openedByKeyboard) return;
+	pickerOpen = !pickerOpen;
+}
+
 function isReactionId(value: unknown): value is ReactionId {
 	return reactionIds.includes(value as ReactionId);
 }
@@ -154,7 +161,7 @@ function isReactionId(value: unknown): value is ReactionId {
 		aria-expanded={pickerOpen}
 		title="Thả cảm xúc"
 		disabled={saving}
-		onclick={() => (pickerOpen = !pickerOpen)}
+		onclick={togglePicker}
 	>
 		{#if selectedEmoji()}
 			<span aria-hidden="true">{selectedEmoji()}</span>
@@ -267,7 +274,6 @@ function isReactionId(value: unknown): value is ReactionId {
 	}
 
 	.comment-reactions:hover .reaction-picker,
-	.comment-reactions:focus-within .reaction-picker,
 	.comment-reactions.picker-open .reaction-picker {
 		opacity: 1;
 		pointer-events: auto;
