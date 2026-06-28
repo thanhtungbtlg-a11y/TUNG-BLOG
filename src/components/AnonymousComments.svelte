@@ -37,6 +37,11 @@ let loading = $state(true);
 let submitting = $state(false);
 let submittingReplyFor = $state<string | null>(null);
 let website = $state("");
+let identityDialogOpen = $state(false);
+let identityName = $state("");
+let identityEmail = $state("");
+let identityError = $state("");
+let pendingParentId = $state<string | null>(null);
 
 onMount(() => {
 	if (!supabaseConfigured) {
@@ -103,7 +108,16 @@ async function loadReactionCounts() {
 	}
 }
 
-async function createComment(parentId?: string) {
+function requestComment(parentId?: string) {
+	if (!validateComment(parentId)) return;
+	pendingParentId = parentId ?? null;
+	identityName = "";
+	identityEmail = "";
+	identityError = "";
+	identityDialogOpen = true;
+}
+
+function validateComment(parentId?: string) {
 	const isReply = Boolean(parentId);
 	const source = isReply ? replyBody : body;
 	const trimmed = source.trim();
@@ -111,13 +125,40 @@ async function createComment(parentId?: string) {
 		error = isReply
 			? "Nhập nội dung trả lời trước đã."
 			: "Nhập nội dung bình luận trước đã.";
-		return;
+		return false;
 	}
 
 	if (trimmed.length > maxLength) {
 		error = `Bình luận tối đa ${maxLength} ký tự.`;
+		return false;
+	}
+	return true;
+}
+
+async function submitComment(useIdentity: boolean) {
+	const email = useIdentity ? identityEmail.trim().toLowerCase() : "";
+	if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(email)) {
+		identityError = "Địa chỉ email chưa đúng.";
 		return;
 	}
+
+	const sent = await createComment(
+		pendingParentId ?? undefined,
+		useIdentity ? identityName.trim() : "",
+		email,
+	);
+	if (sent) closeIdentityDialog();
+}
+
+async function createComment(
+	parentId?: string,
+	authorName = "",
+	notificationEmail = "",
+) {
+	if (!validateComment(parentId)) return false;
+	const isReply = Boolean(parentId);
+	const source = isReply ? replyBody : body;
+	const trimmed = source.trim();
 
 	if (isReply) submittingReplyFor = parentId ?? null;
 	else submitting = true;
@@ -132,6 +173,8 @@ async function createComment(parentId?: string) {
 				slug,
 				body: trimmed,
 				parent_id: parentId,
+				author_name: authorName,
+				notification_email: notificationEmail,
 				website,
 			}),
 		});
@@ -148,15 +191,40 @@ async function createComment(parentId?: string) {
 			website = "";
 			notice = "Bình luận đã gửi và đang chờ duyệt.";
 		}
+		return true;
 	} catch (submitError) {
 		error =
 			submitError instanceof Error
 				? submitError.message
 				: "Chưa gửi được bình luận. Thử lại sau nhé.";
+		return false;
 	} finally {
 		if (isReply) submittingReplyFor = null;
 		else submitting = false;
 	}
+}
+
+function closeIdentityDialog() {
+	if (submitting || submittingReplyFor) return;
+	identityDialogOpen = false;
+	identityName = "";
+	identityEmail = "";
+	identityError = "";
+	pendingParentId = null;
+}
+
+function handleDialogKeydown(event: KeyboardEvent) {
+	if (event.key === "Escape" && identityDialogOpen) closeIdentityDialog();
+}
+
+function portalToBody(node: HTMLElement) {
+	document.body.appendChild(node);
+
+	return {
+		destroy() {
+			node.remove();
+		},
+	};
 }
 
 function topLevelComments() {
@@ -196,7 +264,9 @@ function resetMessages() {
 }
 </script>
 
-<section class="comment-panel card-base onload-animation" data-anonymous-comments>
+<svelte:window onkeydown={handleDialogKeydown} />
+
+<section id="comments" class="comment-panel card-base onload-animation" data-anonymous-comments>
 	<header class="comment-heading">
 		<div>
 			<h2>Bình luận ẩn danh</h2>
@@ -231,7 +301,7 @@ function resetMessages() {
 				<span class:near-limit={body.length > maxLength * 0.9}>
 					{body.length}/{maxLength}
 				</span>
-				<button type="button" disabled={submitting} onclick={() => createComment()}>
+				<button type="button" disabled={submitting} onclick={() => requestComment()}>
 					<Icon icon="material-symbols:send-rounded" />
 					{submitting ? "Đang gửi..." : "Gửi bình luận"}
 				</button>
@@ -313,7 +383,7 @@ function resetMessages() {
 										<button
 											type="button"
 											disabled={submittingReplyFor === comment.id}
-											onclick={() => createComment(comment.id)}
+											onclick={() => requestComment(comment.id)}
 										>
 											<Icon icon="material-symbols:send-rounded" />
 											{submittingReplyFor === comment.id ? "Đang gửi..." : "Gửi trả lời"}
@@ -348,6 +418,94 @@ function resetMessages() {
 		</div>
 	{/if}
 </section>
+
+{#if identityDialogOpen}
+	<div class="identity-modal-layer" use:portalToBody>
+		<button
+			class="identity-backdrop"
+			type="button"
+			aria-label="Đóng hộp thoại"
+			onclick={closeIdentityDialog}
+		></button>
+		<div
+			class="identity-dialog"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="identity-dialog-title"
+			aria-describedby="identity-dialog-description"
+		>
+			<header>
+				<span class="identity-icon" aria-hidden="true">
+					<Icon icon="material-symbols:mark-email-unread-outline-rounded" />
+				</span>
+				<div>
+					<h2 id="identity-dialog-title">Bạn muốn để lại thông tin?</h2>
+					<p id="identity-dialog-description">
+						Hoàn toàn không bắt buộc. Bạn vẫn có thể gửi bình luận ẩn danh.
+					</p>
+				</div>
+				<button
+					class="identity-close"
+					type="button"
+					aria-label="Đóng"
+					onclick={closeIdentityDialog}
+				>
+					<Icon icon="material-symbols:close-rounded" />
+				</button>
+			</header>
+
+			<div class="identity-fields">
+				<label>
+					<span>Họ tên <small>Không bắt buộc</small></span>
+					<input
+						type="text"
+						bind:value={identityName}
+						maxlength="60"
+						autocomplete="name"
+						placeholder="Tên sẽ hiển thị cùng bình luận"
+					/>
+				</label>
+				<label>
+					<span>Email <small>Không bắt buộc</small></span>
+					<input
+						type="email"
+						bind:value={identityEmail}
+						maxlength="254"
+						autocomplete="email"
+						placeholder="Nhận mail khi có người phản hồi"
+						oninput={() => (identityError = "")}
+					/>
+				</label>
+			</div>
+
+			<div class="identity-privacy">
+				<Icon icon="material-symbols:lock-outline-rounded" />
+				<span>Email chỉ dùng để báo phản hồi và không hiển thị công khai.</span>
+			</div>
+			{#if identityError}<p class="identity-error" role="alert">{identityError}</p>{/if}
+
+			<div class="identity-actions">
+				<button
+					class="anonymous-button"
+					type="button"
+					disabled={submitting || Boolean(submittingReplyFor)}
+					onclick={() => submitComment(false)}
+				>
+					<Icon icon="material-symbols:person-off-outline-rounded" />
+					Gửi ẩn danh
+				</button>
+				<button
+					type="button"
+					disabled={submitting || Boolean(submittingReplyFor)}
+					onclick={() => submitComment(true)}
+				>
+					<Icon icon="material-symbols:send-rounded" />
+					{pendingParentId ? "Gửi trả lời" : "Gửi bình luận"}
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
 
 <style>
 	.comment-panel {
@@ -605,6 +763,171 @@ function resetMessages() {
 		font-size: 0.86rem;
 	}
 
+	.identity-modal-layer {
+		position: fixed;
+		inset: 0;
+		z-index: 12000;
+		display: grid;
+		place-items: center;
+		padding: 1rem;
+	}
+
+	.identity-backdrop {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		min-height: 0;
+		padding: 0;
+		border: 0;
+		border-radius: 0;
+		background: rgb(3 10 16 / 0.58);
+		backdrop-filter: blur(8px);
+	}
+
+	.identity-dialog {
+		position: relative;
+		width: min(31rem, 100%);
+		max-height: calc(100vh - 2rem);
+		overflow-y: auto;
+		padding: 1rem;
+		border: 1px solid var(--card-border);
+		border-radius: 8px;
+		background: var(--float-panel-bg);
+		box-shadow: var(--card-shadow-hover);
+		animation: identity-dialog-in 180ms ease-out;
+	}
+
+	.identity-dialog header {
+		display: grid;
+		grid-template-columns: 2.5rem minmax(0, 1fr) 2.5rem;
+		align-items: start;
+		gap: 0.75rem;
+	}
+
+	.identity-dialog h2 {
+		font-size: 1.05rem;
+	}
+
+	.identity-dialog header p {
+		margin: 0.2rem 0 0;
+		color: var(--meta-color);
+		font-size: 0.8rem;
+		line-height: 1.5;
+	}
+
+	.identity-icon,
+	.identity-close {
+		display: grid;
+		place-items: center;
+		width: 2.5rem;
+		height: 2.5rem;
+		border-radius: 8px;
+		background: color-mix(in oklch, var(--primary), transparent 84%);
+		color: var(--primary);
+		font-size: 1.3rem;
+	}
+
+	.identity-close {
+		min-height: 0;
+		padding: 0;
+		border: 1px solid var(--card-border);
+		background: var(--btn-regular-bg);
+		color: var(--meta-color);
+	}
+
+	.identity-fields {
+		display: grid;
+		gap: 0.8rem;
+		margin-top: 1rem;
+	}
+
+	.identity-fields label,
+	.identity-fields label > span {
+		display: grid;
+		gap: 0.4rem;
+	}
+
+	.identity-fields label > span {
+		grid-template-columns: auto 1fr;
+		align-items: baseline;
+		color: var(--content-color);
+		font-size: 0.82rem;
+		font-weight: 800;
+	}
+
+	.identity-fields small {
+		color: var(--meta-color);
+		font-size: 0.7rem;
+		font-weight: 600;
+	}
+
+	.identity-fields input {
+		width: 100%;
+		height: 2.75rem;
+		padding: 0 0.8rem;
+		border: 1px solid var(--card-border);
+		border-radius: 8px;
+		background: var(--btn-regular-bg);
+		color: var(--content-color);
+		font: inherit;
+		outline: none;
+		transition: border-color 160ms ease, box-shadow 160ms ease;
+	}
+
+	.identity-fields input:focus {
+		border-color: color-mix(in oklch, var(--primary), transparent 42%);
+		box-shadow: 0 0 0 4px color-mix(in oklch, var(--primary), transparent 88%);
+	}
+
+	.identity-privacy {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		margin-top: 0.85rem;
+		padding: 0.55rem 0.65rem;
+		border-left: 3px solid var(--primary);
+		background: color-mix(in oklch, var(--primary), transparent 92%);
+		color: var(--meta-color);
+		font-size: 0.75rem;
+	}
+
+	.identity-privacy :global(svg) {
+		flex: 0 0 auto;
+		color: var(--primary);
+	}
+
+	.identity-error {
+		margin: 0.55rem 0 0;
+		color: #d04444;
+		font-size: 0.78rem;
+		font-weight: 700;
+	}
+
+	.identity-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 0.5rem;
+		margin-top: 1rem;
+	}
+
+	.identity-actions .anonymous-button {
+		border-color: var(--card-border);
+		background: var(--btn-regular-bg);
+		color: var(--content-color);
+	}
+
+	@keyframes identity-dialog-in {
+		from {
+			opacity: 0;
+			transform: translateY(0.6rem) scale(0.98);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0) scale(1);
+		}
+	}
+
 	@media (max-width: 640px) {
 		.comment-panel {
 			padding: 0.9rem;
@@ -621,6 +944,15 @@ function resetMessages() {
 		}
 
 		.reply-actions {
+			width: 100%;
+		}
+
+		.identity-actions {
+			display: grid;
+			grid-template-columns: 1fr;
+		}
+
+		.identity-actions button {
 			width: 100%;
 		}
 	}

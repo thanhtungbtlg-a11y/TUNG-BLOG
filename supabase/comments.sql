@@ -51,6 +51,22 @@ create index if not exists blog_comments_slug_status_created_idx
 create index if not exists blog_comments_parent_created_idx
 	on public.blog_comments (parent_id, created_at asc);
 
+-- Optional notification emails are deliberately separated from public comment
+-- rows. Only service-role API functions can read this table.
+create table if not exists public.comment_subscriptions (
+	comment_id uuid primary key
+		references public.blog_comments(id)
+		on delete cascade,
+	email text not null,
+	created_at timestamptz not null default now(),
+	constraint comment_subscriptions_email_length_check check (
+		char_length(email) between 3 and 254
+	)
+);
+
+alter table public.comment_subscriptions enable row level security;
+revoke all on table public.comment_subscriptions from anon, authenticated;
+
 create table if not exists public.comment_admins (
 	user_id uuid primary key references auth.users(id) on delete cascade,
 	email text,
@@ -110,13 +126,17 @@ alter table public.comment_submission_log enable row level security;
 revoke all on table public.comment_submission_log from anon, authenticated;
 
 drop function if exists public.submit_blog_comment(text, text, text, text);
+drop function if exists public.submit_blog_comment(text, text, text, text, uuid);
+drop function if exists public.submit_blog_comment(text, text, text, text, uuid, text, text);
 
 create or replace function public.submit_blog_comment(
 	p_slug text,
 	p_body text,
 	p_ip_hash text,
 	p_body_hash text,
-	p_parent_id uuid default null
+	p_parent_id uuid default null,
+	p_author_name text default '',
+	p_notification_email text default ''
 )
 returns uuid
 language plpgsql
@@ -126,6 +146,8 @@ as $$
 declare
 	v_slug text := btrim(p_slug);
 	v_body text := btrim(p_body);
+	v_author_name text := regexp_replace(btrim(coalesce(p_author_name, '')), '\s+', ' ', 'g');
+	v_notification_email text := lower(btrim(coalesce(p_notification_email, '')));
 	v_id uuid;
 begin
 	if char_length(v_slug) not between 1 and 180
@@ -134,6 +156,19 @@ begin
 	end if;
 	if char_length(v_body) not between 1 and 600 then
 		raise exception 'INVALID_BODY';
+	end if;
+	if v_author_name = '' then
+		v_author_name := 'Ẩn danh';
+	end if;
+	if char_length(v_author_name) > 60
+		or v_author_name ~ '[[:cntrl:]]' then
+		raise exception 'INVALID_NAME';
+	end if;
+	if v_notification_email <> '' and (
+		char_length(v_notification_email) > 254
+		or v_notification_email !~* '^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]{2,}$'
+	) then
+		raise exception 'INVALID_EMAIL';
 	end if;
 	if p_parent_id is not null and not exists (
 		select 1
@@ -166,8 +201,13 @@ begin
 	end if;
 
 	insert into public.blog_comments (slug, body, status, parent_id, author_name, is_author)
-	values (v_slug, v_body, 'pending', p_parent_id, 'Ẩn danh', false)
+	values (v_slug, v_body, 'pending', p_parent_id, v_author_name, false)
 	returning id into v_id;
+
+	if v_notification_email <> '' then
+		insert into public.comment_subscriptions (comment_id, email)
+		values (v_id, v_notification_email);
+	end if;
 
 	insert into public.comment_submission_log (ip_hash, body_hash, slug)
 	values (p_ip_hash, p_body_hash, v_slug);
@@ -179,9 +219,9 @@ begin
 end;
 $$;
 
-revoke all on function public.submit_blog_comment(text, text, text, text, uuid)
+revoke all on function public.submit_blog_comment(text, text, text, text, uuid, text, text)
 	from public, anon, authenticated;
-grant execute on function public.submit_blog_comment(text, text, text, text, uuid)
+grant execute on function public.submit_blog_comment(text, text, text, text, uuid, text, text)
 	to service_role;
 
 drop policy if exists "Admins can insert author replies" on public.blog_comments;

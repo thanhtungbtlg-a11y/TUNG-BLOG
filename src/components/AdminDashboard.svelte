@@ -534,21 +534,29 @@ async function loadComments() {
 }
 
 async function approveComment(comment: BlogComment) {
-	if (!supabase || !session?.user || busy) return;
+	if (!session?.user || busy) return;
 	busy = true;
-	const { error: updateError } = await supabase
-		.from("blog_comments")
-		.update({
-			status: "approved",
-			approved_at: new Date().toISOString(),
-			approved_by: session.user.id,
-		})
-		.eq("id", comment.id);
-	busy = false;
-	if (updateError) error = "Chưa duyệt được bình luận.";
-	else {
-		comment.status = "approved";
+	clearMessages();
+	try {
+		const result = await adminFetch<{ data: BlogComment }>(
+			"/api/admin/comments",
+			{
+				method: "POST",
+				body: JSON.stringify({
+					action: "approve",
+					comment_id: comment.id,
+				}),
+			},
+		);
+		Object.assign(comment, result.data);
 		notice = "Đã duyệt bình luận.";
+	} catch (approveError) {
+		error =
+			approveError instanceof Error
+				? approveError.message
+				: "Chưa duyệt được bình luận.";
+	} finally {
+		busy = false;
 	}
 }
 
@@ -565,7 +573,7 @@ async function deleteComment(comment: BlogComment) {
 }
 
 async function replyToComment(comment: BlogComment) {
-	if (!supabase || !session?.user || busy) return;
+	if (!session?.user || busy) return;
 	const trimmed = adminReplyBody.trim();
 	if (!trimmed) {
 		error = "Nhập nội dung trả lời trước đã.";
@@ -574,31 +582,30 @@ async function replyToComment(comment: BlogComment) {
 
 	busy = true;
 	clearMessages();
-	const parentId = comment.parent_id ?? comment.id;
-	const { data, error: insertError } = await supabase
-		.from("blog_comments")
-		.insert({
-			slug: comment.slug,
-			body: trimmed,
-			status: "approved",
-			parent_id: parentId,
-			author_name: "Nguyễn Thanh Tùng",
-			is_author: true,
-			approved_at: new Date().toISOString(),
-			approved_by: session.user.id,
-		})
-		.select("id,slug,body,status,created_at,parent_id,author_name,is_author")
-		.single();
-	busy = false;
-	if (insertError) {
+	try {
+		const result = await adminFetch<{ data: BlogComment }>(
+			"/api/admin/comments",
+			{
+				method: "POST",
+				body: JSON.stringify({
+					action: "reply",
+					comment_id: comment.id,
+					body: trimmed,
+				}),
+			},
+		);
+		comments = [result.data, ...comments];
+		replyingCommentId = null;
+		adminReplyBody = "";
+		notice = "Đã đăng trả lời của bạn.";
+	} catch (replyError) {
 		error =
-			"Chưa gửi được trả lời. Hãy chạy lại file supabase/comments.sql trong Supabase SQL Editor.";
-		return;
+			replyError instanceof Error
+				? replyError.message
+				: "Chưa gửi được trả lời.";
+	} finally {
+		busy = false;
 	}
-	comments = [data as BlogComment, ...comments];
-	replyingCommentId = null;
-	adminReplyBody = "";
-	notice = "Đã đăng trả lời của bạn.";
 }
 
 function commentAuthorName(comment: BlogComment) {
