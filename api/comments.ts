@@ -116,7 +116,7 @@ export default async function handler(
 			if (error.message.includes("RATE_LIMIT")) {
 				response.status(429).json({
 					error:
-						"Bạn đã gửi nhiều bình luận. Hãy đọc lại bình luận rồi thử sau 15 phút.",
+						"Bạn đã gửi nhiều bình luận liên tiếp. Vui lòng thử lại sau 10 phút.",
 				});
 				return;
 			}
@@ -128,7 +128,7 @@ export default async function handler(
 			}
 			if (error.message.includes("INVALID_PARENT")) {
 				response.status(400).json({
-					error: "Bình luận gốc không hợp lệ hoặc chưa được duyệt.",
+					error: "Bình luận cần trả lời không hợp lệ hoặc chưa được duyệt.",
 				});
 				return;
 			}

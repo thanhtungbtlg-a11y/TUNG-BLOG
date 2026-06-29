@@ -4,7 +4,10 @@ import {
 	normaliseAdminError,
 	requireAdminToken,
 } from "../../src/lib/admin-auth.js";
-import { sendCommentReplyNotification } from "../../src/lib/comment-email.js";
+import {
+	sendCommentEmailTest,
+	sendCommentReplyNotification,
+} from "../../src/lib/comment-email.js";
 
 type ApiRequest = {
 	method?: string;
@@ -47,6 +50,20 @@ export default async function handler(
 		);
 		const body = parseBody(request.body);
 		const action = String(body.action ?? "");
+		if (action === "test_email") {
+			try {
+				await sendCommentEmailTest();
+			} catch (error) {
+				console.error("Comment test email error", error);
+				throw new AdminRequestError(
+					"Email thử chưa gửi được. Kiểm tra RESEND_API_KEY và COMMENT_NOTIFICATION_FROM.",
+					502,
+				);
+			}
+			response.status(200).json({ sent: true });
+			return;
+		}
+
 		const commentId = String(body.comment_id ?? body.commentId ?? "").trim();
 		if (!isUuid(commentId)) {
 			throw new AdminRequestError("Bình luận không hợp lệ.");
@@ -73,14 +90,14 @@ export default async function handler(
 			}
 
 			const approvedComment = data as BlogComment;
-			if (approvedComment.parent_id) {
-				await notifySubscriber(
-					supabase,
-					approvedComment.parent_id,
-					approvedComment,
-				);
-			}
-			response.status(200).json({ data: approvedComment });
+			const notification = approvedComment.parent_id
+				? await notifySubscriber(
+						supabase,
+						approvedComment.parent_id,
+						approvedComment,
+					)
+				: undefined;
+			response.status(200).json({ data: approvedComment, notification });
 			return;
 		}
 
@@ -110,7 +127,7 @@ export default async function handler(
 					slug: targetComment.slug,
 					body: content,
 					status: "approved",
-					parent_id: targetComment.parent_id ?? targetComment.id,
+					parent_id: targetComment.id,
 					author_name: "Nguyễn Thanh Tùng",
 					is_author: true,
 					approved_at: new Date().toISOString(),
@@ -123,8 +140,12 @@ export default async function handler(
 			}
 
 			const reply = data as BlogComment;
-			await notifySubscriber(supabase, targetComment.id, reply);
-			response.status(201).json({ data: reply });
+			const notification = await notifySubscriber(
+				supabase,
+				targetComment.id,
+				reply,
+			);
+			response.status(201).json({ data: reply, notification });
 			return;
 		}
 
@@ -152,19 +173,25 @@ async function notifySubscriber(
 			.eq("id", targetCommentId)
 			.maybeSingle(),
 	]);
-	if (!subscription?.email || !original?.body) return;
+	if (!subscription?.email || !original?.body) {
+		return { sent: false, reason: "not_requested" as const };
+	}
 
-	await sendCommentReplyNotification({
-		to: subscription.email,
-		slug: reply.slug,
-		originalBody: original.body,
-		replyBody: reply.body,
-		replierName: reply.is_author
-			? "Nguyễn Thanh Tùng"
-			: reply.author_name || "Ẩn danh",
-	}).catch((error) => {
+	try {
+		await sendCommentReplyNotification({
+			to: subscription.email,
+			slug: reply.slug,
+			originalBody: original.body,
+			replyBody: reply.body,
+			replierName: reply.is_author
+				? "Nguyễn Thanh Tùng"
+				: reply.author_name || "Ẩn danh",
+		});
+		return { sent: true, reason: "sent" as const };
+	} catch (error) {
 		console.error("Comment reply email error", error);
-	});
+		return { sent: false, reason: "send_failed" as const };
+	}
 }
 
 function createServiceClient() {

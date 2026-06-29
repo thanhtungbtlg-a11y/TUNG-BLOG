@@ -176,7 +176,6 @@ begin
 		where id = p_parent_id
 			and slug = v_slug
 			and status = 'approved'
-			and parent_id is null
 	) then
 		raise exception 'INVALID_PARENT';
 	end if;
@@ -186,8 +185,8 @@ begin
 		select count(*)
 		from public.comment_submission_log
 		where ip_hash = p_ip_hash
-			and created_at >= now() - interval '15 minutes'
-	) >= 3 then
+			and created_at >= now() - interval '10 minutes'
+	) >= 12 then
 		raise exception 'RATE_LIMIT';
 	end if;
 	if exists (

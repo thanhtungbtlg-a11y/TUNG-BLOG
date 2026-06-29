@@ -42,6 +42,11 @@ type BlogComment = {
 	is_author?: boolean | null;
 };
 
+type CommentNotification = {
+	sent: boolean;
+	reason: "sent" | "not_requested" | "send_failed";
+};
+
 type MediaItem = {
 	id: string;
 	name: string;
@@ -538,18 +543,18 @@ async function approveComment(comment: BlogComment) {
 	busy = true;
 	clearMessages();
 	try {
-		const result = await adminFetch<{ data: BlogComment }>(
-			"/api/admin/comments",
-			{
-				method: "POST",
-				body: JSON.stringify({
-					action: "approve",
-					comment_id: comment.id,
-				}),
-			},
-		);
+		const result = await adminFetch<{
+			data: BlogComment;
+			notification?: CommentNotification;
+		}>("/api/admin/comments", {
+			method: "POST",
+			body: JSON.stringify({
+				action: "approve",
+				comment_id: comment.id,
+			}),
+		});
 		Object.assign(comment, result.data);
-		notice = "Đã duyệt bình luận.";
+		notice = moderationNotice("Đã duyệt bình luận.", result.notification);
 	} catch (approveError) {
 		error =
 			approveError instanceof Error
@@ -583,21 +588,21 @@ async function replyToComment(comment: BlogComment) {
 	busy = true;
 	clearMessages();
 	try {
-		const result = await adminFetch<{ data: BlogComment }>(
-			"/api/admin/comments",
-			{
-				method: "POST",
-				body: JSON.stringify({
-					action: "reply",
-					comment_id: comment.id,
-					body: trimmed,
-				}),
-			},
-		);
+		const result = await adminFetch<{
+			data: BlogComment;
+			notification?: CommentNotification;
+		}>("/api/admin/comments", {
+			method: "POST",
+			body: JSON.stringify({
+				action: "reply",
+				comment_id: comment.id,
+				body: trimmed,
+			}),
+		});
 		comments = [result.data, ...comments];
 		replyingCommentId = null;
 		adminReplyBody = "";
-		notice = "Đã đăng trả lời của bạn.";
+		notice = moderationNotice("Đã đăng trả lời của bạn.", result.notification);
 	} catch (replyError) {
 		error =
 			replyError instanceof Error
@@ -606,6 +611,36 @@ async function replyToComment(comment: BlogComment) {
 	} finally {
 		busy = false;
 	}
+}
+
+async function testCommentEmail() {
+	if (!session?.user || busy) return;
+	busy = true;
+	clearMessages();
+	try {
+		await adminFetch<{ sent: true }>("/api/admin/comments", {
+			method: "POST",
+			body: JSON.stringify({ action: "test_email" }),
+		});
+		notice = "Đã gửi email thử. Kiểm tra hộp thư đến và Spam.";
+	} catch (testError) {
+		error =
+			testError instanceof Error
+				? testError.message
+				: "Email thử chưa gửi được.";
+	} finally {
+		busy = false;
+	}
+}
+
+function moderationNotice(
+	successMessage: string,
+	notification?: CommentNotification,
+) {
+	if (notification?.reason === "send_failed") {
+		return `${successMessage} Email phản hồi chưa gửi được; hãy dùng nút kiểm tra email.`;
+	}
+	return successMessage;
 }
 
 function commentAuthorName(comment: BlogComment) {
@@ -931,6 +966,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 					{#each commentSlugs() as slug}<option value={slug}>{slug}</option>{/each}
 				</select>
 				<button class="icon-button" type="button" title="Tải lại" aria-label="Tải lại bình luận" onclick={loadComments}><Icon icon="material-symbols:refresh-rounded" /></button>
+				<button type="button" disabled={busy} onclick={testCommentEmail}><Icon icon="material-symbols:mark-email-read-outline-rounded" /> Gửi email thử</button>
 			</div>
 			<div class="moderation-list">
 				{#each visibleComments() as comment}

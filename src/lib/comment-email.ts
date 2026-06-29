@@ -55,6 +55,16 @@ export async function sendCommentReplyNotification({
 	});
 }
 
+export async function sendCommentEmailTest() {
+	const siteUrl = getSiteUrl();
+	await sendEmail({
+		to: env("COMMENT_NOTIFICATION_TO") || ownerEmail,
+		subject: "Kiểm tra thông báo bình luận - Thanh Tung Blog",
+		text: `Email thông báo bình luận đang hoạt động.\n\nWebsite: ${siteUrl}`,
+		html: `<h2>Email thông báo đang hoạt động</h2><p>Resend đã gửi email kiểm tra thành công từ blog.</p><p><a href="${siteUrl}">Mở website</a></p>`,
+	});
+}
+
 async function sendEmail({
 	to,
 	subject,
@@ -67,29 +77,35 @@ async function sendEmail({
 	html: string;
 }) {
 	const apiKey = env("RESEND_API_KEY");
-	if (!apiKey) return;
+	if (!apiKey) throw new Error("RESEND_API_KEY is not configured");
 
-	const result = await fetch("https://api.resend.com/emails", {
-		method: "POST",
-		headers: {
-			Authorization: `Bearer ${apiKey}`,
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify({
-			from:
-				env("COMMENT_NOTIFICATION_FROM") ||
-				"Thanh Tung Blog <onboarding@resend.dev>",
-			to: [to],
-			subject,
-			text,
-			html,
-		}),
-	});
+	for (let attempt = 0; attempt < 2; attempt += 1) {
+		const result = await fetch("https://api.resend.com/emails", {
+			method: "POST",
+			headers: {
+				Authorization: `Bearer ${apiKey}`,
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				from:
+					env("COMMENT_NOTIFICATION_FROM").trim() ||
+					"Thanh Tung Blog <onboarding@resend.dev>",
+				to: [to],
+				subject,
+				text,
+				html,
+			}),
+		});
 
-	if (!result.ok) {
-		throw new Error(
-			`Resend notification failed (${result.status}): ${await result.text()}`,
-		);
+		if (result.ok) return;
+		const details = await result.text();
+		const retryable = result.status === 429 || result.status >= 500;
+		if (!retryable || attempt === 1) {
+			throw new Error(
+				`Resend notification failed (${result.status}): ${details}`,
+			);
+		}
+		await new Promise((resolve) => setTimeout(resolve, 450));
 	}
 }
 

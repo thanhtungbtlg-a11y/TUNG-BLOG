@@ -19,6 +19,10 @@ type BlogComment = {
 	is_author?: boolean | null;
 };
 
+type ThreadedComment = BlogComment & {
+	depth: number;
+};
+
 type CommentReactionCountsRow = CommentReactionCounts & {
 	comment_id: string;
 };
@@ -227,20 +231,39 @@ function portalToBody(node: HTMLElement) {
 	};
 }
 
-function topLevelComments() {
-	return [...comments.filter((comment) => !comment.parent_id)].sort(
+function threadedComments(): ThreadedComment[] {
+	const ids = new Set(comments.map((comment) => comment.id));
+	const children = new Map<string | null, BlogComment[]>();
+	for (const comment of comments) {
+		const parentId =
+			comment.parent_id && ids.has(comment.parent_id)
+				? comment.parent_id
+				: null;
+		const group = children.get(parentId) ?? [];
+		group.push(comment);
+		children.set(parentId, group);
+	}
+
+	const result: ThreadedComment[] = [];
+	const visited = new Set<string>();
+	const append = (comment: BlogComment, depth: number) => {
+		if (visited.has(comment.id)) return;
+		visited.add(comment.id);
+		result.push({ ...comment, depth });
+		const replies = [...(children.get(comment.id) ?? [])].sort(
+			(a, b) =>
+				new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+		);
+		for (const reply of replies) append(reply, depth + 1);
+	};
+
+	const roots = [...(children.get(null) ?? [])].sort(
 		(a, b) =>
 			new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
 	);
-}
-
-function repliesFor(commentId: string) {
-	return [
-		...comments.filter((comment) => comment.parent_id === commentId),
-	].sort(
-		(a, b) =>
-			new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
-	);
+	for (const root of roots) append(root, 0);
+	for (const comment of comments) append(comment, 0);
+	return result;
 }
 
 function authorName(comment: BlogComment) {
@@ -322,9 +345,13 @@ function resetMessages() {
 					<span>Chưa có bình luận nào.</span>
 				</div>
 			{:else}
-				{#each topLevelComments() as comment (comment.id)}
-					<div class="comment-thread">
-						<article class="comment-item">
+				{#each threadedComments() as comment (comment.id)}
+					<div
+						class="comment-entry"
+						class:thread-reply={comment.depth > 0}
+						style={`--thread-indent: ${Math.min(comment.depth, 5) * 1.35}rem`}
+					>
+						<article class="comment-item" class:reply={comment.depth > 0}>
 							<div class="comment-avatar" aria-hidden="true">
 								<Icon icon={comment.is_author ? "material-symbols:verified-rounded" : "material-symbols:person-rounded"} />
 							</div>
@@ -362,7 +389,7 @@ function resetMessages() {
 									aria-label="Trả lời bình luận"
 									bind:value={replyBody}
 									maxlength={maxLength}
-									placeholder="Viết trả lời ẩn danh..."
+									placeholder={`Trả lời ${authorName(comment)}...`}
 									oninput={resetMessages}
 								></textarea>
 								<div class="comment-actions">
@@ -392,26 +419,6 @@ function resetMessages() {
 								</div>
 							</div>
 						{/if}
-
-						{#each repliesFor(comment.id) as reply (reply.id)}
-							<article class="comment-item reply">
-								<div class="comment-avatar" aria-hidden="true">
-									<Icon icon={reply.is_author ? "material-symbols:verified-rounded" : "material-symbols:person-rounded"} />
-								</div>
-								<div class="comment-content">
-									<div class="comment-meta">
-										<strong>{authorName(reply)}</strong>
-										{#if reply.is_author}<span class="author-badge">Tác giả</span>{/if}
-										<span>{formatDate(reply.created_at)}</span>
-									</div>
-									<p>{reply.body}</p>
-									<CommentReactions
-										commentId={reply.id}
-										initialCounts={reactionCounts[reply.id]}
-									/>
-								</div>
-							</article>
-						{/each}
 					</div>
 				{/each}
 			{/if}
@@ -652,9 +659,21 @@ function resetMessages() {
 		margin-top: 1rem;
 	}
 
-	.comment-thread {
+	.comment-entry {
+		position: relative;
 		display: grid;
 		gap: 0.55rem;
+		margin-left: var(--thread-indent, 0rem);
+	}
+
+	.comment-entry.thread-reply::before {
+		position: absolute;
+		top: 0.3rem;
+		bottom: 0.3rem;
+		left: -0.7rem;
+		width: 1px;
+		background: color-mix(in oklch, var(--primary), transparent 72%);
+		content: "";
 	}
 
 	.comment-item {
@@ -665,11 +684,6 @@ function resetMessages() {
 		border: 1px solid var(--card-border);
 		border-radius: 0.85rem;
 		background: color-mix(in oklch, var(--card-bg), transparent 18%);
-	}
-
-	.comment-item.reply,
-	.reply-form {
-		margin-left: 2.75rem;
 	}
 
 	.comment-item.reply {
@@ -938,9 +952,8 @@ function resetMessages() {
 			flex-wrap: wrap;
 		}
 
-		.comment-item.reply,
-		.reply-form {
-			margin-left: 1.25rem;
+		.comment-entry {
+			margin-left: min(var(--thread-indent, 0rem), 2.75rem);
 		}
 
 		.reply-actions {
