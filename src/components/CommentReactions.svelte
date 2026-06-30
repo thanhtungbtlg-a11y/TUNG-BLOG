@@ -259,7 +259,7 @@ function isReactionId(value: unknown): value is ReactionId {
 		position: absolute;
 		left: 0;
 		bottom: calc(100% + 0.35rem);
-		z-index: 5;
+		z-index: 20;
 		display: flex;
 		gap: 0.18rem;
 		padding: 0.3rem;
@@ -271,6 +271,16 @@ function isReactionId(value: unknown): value is ReactionId {
 		pointer-events: none;
 		transform: translateY(0.35rem) scale(0.96);
 		transition: opacity 160ms ease, transform 160ms ease;
+	}
+
+	/* Keep hover active while the pointer crosses the gap above the trigger. */
+	.reaction-picker::after {
+		position: absolute;
+		right: 0;
+		bottom: -0.55rem;
+		left: 0;
+		height: 0.55rem;
+		content: "";
 	}
 
 	.comment-reactions:hover .reaction-picker,
