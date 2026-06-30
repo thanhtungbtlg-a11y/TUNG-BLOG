@@ -2,11 +2,14 @@
 	"name": "thanhtung0209-blog",
 	"type": "module",
 	"version": "0.0.1",
+	"engines": {
+		"node": ">=22"
+	},
 	"scripts": {
 		"dev": "node scripts/generate-music-manifest.mjs && astro dev",
 		"start": "astro dev",
 		"check": "astro check",
-		"build": "node scripts/generate-music-manifest.mjs && astro build",
+		"build": "node scripts/generate-music-manifest.mjs && astro build && node scripts/build-brain.mjs",
 		"preview": "astro preview",
 		"astro": "astro",
 		"type-check": "tsc --noEmit --isolatedDeclarations",
@@ -18,6 +21,9 @@
 		"lint": "biome check --write ./src",
 		"preinstall": "npx only-allow pnpm",
 		"music": "node scripts/generate-music-manifest.mjs",
+		"brain:sync": "node scripts/sync-brain-vault.mjs",
+		"brain:build": "node scripts/build-brain.mjs",
+		"brain:dev": "node scripts/sync-brain-vault.mjs && node scripts/build-brain.mjs --serve",
 		"import-wordpress": "node scripts/import-wordpress.mjs"
 	},
 	"dependencies": {

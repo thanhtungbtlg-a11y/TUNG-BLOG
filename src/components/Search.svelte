@@ -111,6 +111,14 @@ const quickActions: CommandItem[] = [
 	},
 	{
 		type: "page",
+		title: "Brain",
+		description: "Ghi chú Obsidian và bản đồ kiến thức",
+		url: url("/brain/"),
+		icon: "material-symbols:neurology-outline-rounded",
+		weight: 9,
+	},
+	{
+		type: "page",
 		title: "Hồ sơ",
 		description: "Kinh nghiệm và định hướng nghề nghiệp",
 		url: url("/portfolio/"),

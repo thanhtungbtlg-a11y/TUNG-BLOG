@@ -1,5 +1,6 @@
 {
 	"$schema": "https://openapi.vercel.sh/vercel.json",
+	"cleanUrls": true,
 	"routes": [
 		{
 			"src": "/((?!auth\\.md$|\\.well-known/|api/|openapi\\.json$|health\\.json$).*)",

@@ -54,6 +54,7 @@ export type NavBarLink = {
 	name: string;
 	url: string;
 	external?: boolean;
+	native?: boolean;
 };
 
 export type NavBarConfig = {
