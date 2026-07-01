@@ -12,7 +12,7 @@ blog Astro.
 
 Blog chỉ gọi `scripts/build-brain.mjs` ở cuối lệnh build. Script này:
 
-1. Cài dependency Quartz khi máy chưa có.
+1. Cài dependency Quartz khi `package-lock.json` thay đổi.
 2. Khôi phục plugin v5 theo `brain/quartz.lock.json`.
 3. Xuất kết quả tĩnh vào `dist/brain` để Vercel phục vụ dưới `/brain`.
 
