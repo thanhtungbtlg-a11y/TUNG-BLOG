@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -34,9 +34,11 @@ if (!existsSync(nodeModulesDir) || installedFingerprint !== dependencyFingerprin
 	writeFileSync(dependencyMarker, dependencyFingerprint);
 }
 
-// Quartz v5 keeps visual features in pinned plugins. A fresh Vercel build
-// restores them from brain/quartz.lock.json before generating the Brain site.
-if (!existsSync(join(brainDir, ".quartz", "plugins"))) {
+// Vercel can restore an incomplete plugin cache where the directory exists but
+// its generated entry point is missing. Rebuild that cache from the lockfile.
+const pluginDir = join(brainDir, ".quartz", "plugins");
+if (!existsSync(join(pluginDir, "index.ts"))) {
+	rmSync(pluginDir, { recursive: true, force: true });
 	run(process.execPath, ["quartz/bootstrap-cli.mjs", "plugin", "install"]);
 }
 
