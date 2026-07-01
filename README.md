@@ -1,97 +1,43 @@
-# TUNG-BLOG
+# THANH TÙNG
 
-Blog cá nhân của Thanh Tùng, viết bằng Astro và deploy trên Vercel.
+Blog cá nhân của Nguyễn Thanh Tùng, viết bằng Astro và triển khai trên Vercel.
 
-Website: [www.thanhtung0209.com](https://www.thanhtung0209.com)
+- Website: [www.thanhtung0209.com](https://www.thanhtung0209.com)
+- Second Brain: [www.thanhtung0209.com/brain/](https://www.thanhtung0209.com/brain/)
+- Quản trị: [www.thanhtung0209.com/admin/](https://www.thanhtung0209.com/admin/)
 
-## Nội Dung
+## Bắt đầu nhanh
 
-- Bài viết cá nhân được import từ WordPress.
-- Tìm kiếm nhanh bằng Ctrl + K, nạp index khi cần để giảm bundle ban đầu.
-- Dark mode, theme presets, reading progress và active TOC.
-- Music player nhỏ gọn.
-- Bình luận ẩn danh qua Supabase, cần duyệt trước khi hiển thị.
-- Phản ứng bài viết dạng emoji và lưu số liệu qua Supabase.
-- Trang quản trị bài viết, bình luận và Media Library tại `/admin/`.
+Yêu cầu: Node.js 22+, pnpm 9+ và Git.
 
-## Chạy Local
-
-Yêu cầu:
-
-- Node.js 20+
-- pnpm 9+
-
-```sh
+```powershell
 pnpm install
 pnpm dev
 ```
 
-Build production:
+Trước khi push:
 
-```sh
-pnpm build
-```
-
-Kiểm tra Astro:
-
-```sh
+```powershell
 pnpm check
+pnpm build
+pnpm check:site
 ```
 
-## Viết Bài Mới
+## Tài liệu
 
-```sh
-pnpm new-post
+- [Hướng dẫn tự cập nhật blog và Second Brain](docs/HUONG-DAN-TU-CAP-NHAT.md)
+- [Hướng dẫn trang quản trị](docs/ADMIN-DASHBOARD.md)
+- [Hướng dẫn Quartz Second Brain](docs/QUARTZ-BRAIN.md)
+- Bản Word để đọc/in: `docs/huong-dan-su-dung-tung-blog.docx`
+
+## Lệnh thường dùng
+
+```powershell
+pnpm new-post        # Tạo bài blog mới
+pnpm new-photo       # Thêm ảnh vào Kho ảnh
+pnpm music           # Cập nhật danh sách nhạc
+pnpm brain:sync      # Đồng bộ Obsidian vào Second Brain
+pnpm brain:dev       # Xem thử Second Brain tại localhost:8080/brain/
 ```
 
-Script sẽ hỏi tiêu đề, ngày, category, tag, ảnh bìa, trạng thái ghim và trạng thái mới nhất rồi tạo bài trong `src/content/posts/`.
-
-Có thể truyền nhanh tiêu đề nếu muốn:
-
-```sh
-pnpm new-post "Tiêu đề bài viết"
-```
-
-Chỉ bài có `pinned: true` mới nằm trong nhóm bài ghim. Chỉ bài có `latest: true` mới nằm trong nhóm mới nhất bên dưới bài ghim.
-
-## Import Từ WordPress
-
-File export WordPress không được commit lên GitHub. Đặt file XML ở máy local rồi chạy:
-
-```sh
-pnpm import-wordpress path/to/export.xml
-```
-
-Script sẽ tạo bài viết trong `src/content/posts/`, tải ảnh về local và rewrite ảnh trong Markdown.
-
-## Supabase
-
-Bình luận ẩn danh và phản ứng bài viết dùng Supabase.
-
-1. Tạo project Supabase.
-2. Thêm biến môi trường:
-   - `PUBLIC_SUPABASE_URL`
-   - `PUBLIC_SUPABASE_ANON_KEY`
-   - Hoặc biến từ Vercel integration:
-     `NEXT_PUBLIC_SUPABASE_URL`,
-     `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-   - `SUPABASE_SECRET_KEY` hoặc `SUPABASE_SERVICE_ROLE_KEY` (chỉ dùng ở
-     server, không thêm `PUBLIC_`)
-3. Chạy SQL trong `supabase/comments.sql`.
-4. Tạo admin user trong Supabase Auth.
-5. Thêm admin user vào bảng `comment_admins`.
-
-Comment mới sẽ ở trạng thái `pending`; chỉ comment đã duyệt mới hiện công khai.
-Việc gửi comment đi qua API để giới hạn tần suất, chống nội dung lặp và bot.
-
-Email báo comment mới dùng Resend. Thêm các biến sau trên Vercel:
-
-- `RESEND_API_KEY`
-- `COMMENT_NOTIFICATION_TO=thanhtungbtlg@gmail.com`
-- `COMMENT_NOTIFICATION_FROM` (địa chỉ gửi đã xác minh trên Resend)
-- `COMMENT_RATE_LIMIT_SECRET` (một chuỗi ngẫu nhiên dài)
-- `PUBLIC_SITE_URL=https://www.thanhtung0209.com`
-
-## Deploy
-
-Repo đang deploy bằng Vercel. Mỗi lần push lên `main`, Vercel sẽ tự build và publish bản mới.
+Mỗi lần push lên nhánh `main`, Vercel tự build và xuất bản blog cùng Second Brain.

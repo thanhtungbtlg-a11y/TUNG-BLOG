@@ -111,7 +111,7 @@ const quickActions: CommandItem[] = [
 	},
 	{
 		type: "page",
-		title: "Brain",
+		title: "Second Brain",
 		description: "Ghi chú Obsidian và bản đồ kiến thức",
 		url: url("/brain/"),
 		icon: "material-symbols:neurology-outline-rounded",

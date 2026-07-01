@@ -2,8 +2,8 @@
 
 # Quartz is isolated in brain/. Nothing in this file changes the Astro blog.
 configuration:
-  pageTitle: "Thanh Tùng's Brain"
-  pageTitleSuffix: " · Brain"
+  pageTitle: "Thanh Tùng's Second Brain"
+  pageTitleSuffix: " · Second Brain"
   enableSPA: true
   enablePopovers: true
   analytics:

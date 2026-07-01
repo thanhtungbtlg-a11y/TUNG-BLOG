@@ -3,7 +3,7 @@ title: "6 tháng nhìn lại"
 published: 2026-06-21
 description: "Một vài ghi chép cá nhân sau nửa năm: công việc mới, định hướng tài chính, AI, mạng xã hội và cách mình học cách chọn lọc thông tin hơn."
 image: ""
-tags: ["sự nghiệp", "tài chính cá nhân", "AI", "đời sống số", "phát triển bản thân"]
+tags: ["sự nghiệp", "tài chính cá nhân", "AI", "phát triển bản thân"]
 category: "Nhật ký cá nhân"
 pinned: false
 pinOrder: 0

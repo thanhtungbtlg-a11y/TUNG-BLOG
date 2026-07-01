@@ -1,5 +1,8 @@
 # Trang quản trị blog
 
+Trang quản trị nằm tại `https://www.thanhtung0209.com/admin/`. Hướng dẫn quy trình
+tự cập nhật và push toàn bộ website nằm tại `docs/HUONG-DAN-TU-CAP-NHAT.md`.
+
 ## Cấu hình một lần trên Vercel
 
 Mở **Project Settings > Environment Variables** và thêm:
@@ -50,10 +53,17 @@ Sau khi thêm biến, redeploy website một lần.
   vị trí con trỏ.
 - Nút lưu tạo commit trên GitHub; Vercel tự triển khai website mới.
 
+Sau khi lưu, chờ Vercel build xong rồi kiểm tra bài trên website production. Nếu
+GitHub không nhận thay đổi, kiểm tra lại `GITHUB_TOKEN`, quyền **Contents: Read and
+write**, repository và branch trong Environment Variables.
+
 ## Bình luận
 
 Chuyển sang tab **Bình luận** để lọc theo trạng thái hoặc bài viết, duyệt và
 xóa bình luận. Người đọc không còn thấy phần đăng nhập quản trị trong từng bài.
+
+Nút **Gửi email thử** kiểm tra cấu hình Resend. Email người đọc để lại là tùy chọn,
+không hiển thị công khai và chỉ dùng để báo khi bình luận của họ có phản hồi.
 
 Comment mới được gửi qua Vercel API, giới hạn 3 lượt trong 15 phút cho mỗi địa
 chỉ IP đã băm, chặn nội dung trùng trong 24 giờ và có honeypot chống bot. IP gốc
