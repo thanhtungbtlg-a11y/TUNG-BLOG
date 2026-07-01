@@ -22,11 +22,15 @@ if (!existsSync(join(brainDir, "node_modules"))) {
 	run(npmCommand, ["ci", "--no-audit", "--no-fund"], process.platform === "win32");
 }
 
+// Quartz v5 keeps visual features in pinned plugins. A fresh Vercel build
+// restores them from brain/quartz.lock.json before generating the Brain site.
+if (!existsSync(join(brainDir, ".quartz", "plugins"))) {
+	run(process.execPath, ["quartz/bootstrap-cli.mjs", "plugin", "install"]);
+}
+
 const quartzArgs = [
 	"quartz/bootstrap-cli.mjs",
 	"build",
-	"--directory",
-	"content",
 	"--output",
 	serve ? "public" : "../dist/brain",
 ];
