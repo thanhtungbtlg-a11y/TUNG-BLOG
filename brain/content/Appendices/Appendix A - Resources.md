@@ -1,3 +1,7 @@
+---
+publish: true
+---
+
 # Appendix A: Resources
 
 #appendix #resources #LEED

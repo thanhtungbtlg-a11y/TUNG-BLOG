@@ -8,6 +8,7 @@ created: 2026-06-28
 description: "LEED (Leadership in Energy & Environmental Design) là một giấy chứng nhận cho các công trình xây dựng xanh được cấp bởi USGBC ra đời năm 1995 tại Mỹ"
 tags:
   - "clippings"
+publish: true
 ---
 Trong thời gian qua, Maison Office nhận được rất nhiều phản hồi từ các bạn hỏi về LEED cùng cách thức đánh giá của hệ thống chứng chỉ này.
 

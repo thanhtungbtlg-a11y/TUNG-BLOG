@@ -180,6 +180,17 @@ Xem cấu hình chi tiết tại `docs/ADMIN-DASHBOARD.md`.
 Second Brain dùng Quartz v5, nằm riêng trong `brain/` và được xuất bản tại `/brain/`.
 Không cần sửa code Astro trong `src/` khi chỉ cập nhật ghi chú.
 
+Mỗi ghi chú muốn công khai phải có frontmatter:
+
+```yaml
+---
+publish: true
+---
+```
+
+Ghi chú không có `publish: true` vẫn nằm trong vault nhưng sẽ không xuất hiện trên
+website. Đây là cách an toàn để phân biệt ghi chú công khai và ghi chú riêng.
+
 Quy trình:
 
 ```powershell
@@ -196,7 +207,7 @@ pnpm brain:sync -- "D:\Obsidian\My Vault"
 ```
 
 Những mục không được public: `.obsidian`, `.smart-env`, `.trash`, `private`,
-`templates`, file `.base`, và ghi chú có:
+`templates`, file `.base`, ghi chú không có `publish: true`, và ghi chú có:
 
 ```yaml
 ---
@@ -204,8 +215,19 @@ draft: true
 ---
 ```
 
+File `.canvas` được hỗ trợ: tạo thư mục `public-canvas` trong vault và chỉ đặt các
+Canvas muốn công khai vào đó. Canvas ở nơi khác sẽ không được sao chép. Trên web,
+người đọc có thể kéo và thu phóng sơ đồ. Quartz cũng tự tạo danh sách 5 ghi chú gần
+đây và ảnh chia sẻ riêng cho từng trang khi build.
+
 Quan trọng: Vercel không thể đọc vault trên máy. Luôn chạy `pnpm brain:sync` trước
 khi commit nếu có thay đổi Obsidian.
+
+Bản vault trước khi bật chế độ xuất bản có kiểm soát nằm tại:
+
+```text
+C:\Users\NITRO 5\Downloads\LEED_Obsidian_Vault-backup-before-quartz-v5-plugins-2026-07-02.zip
+```
 
 ## 10. Xem thử blog trên máy
 
@@ -298,6 +320,7 @@ Bản Quartz v4 cũ vẫn được giữ tại branch `codex/quartz-v4-backup` v
 Trước khi push:
 
 - [ ] Đã lưu bài/ghi chú và kiểm tra ảnh đúng vị trí.
+- [ ] Ghi chú muốn public đã có `publish: true`.
 - [ ] Đã chạy `pnpm brain:sync` nếu Obsidian thay đổi.
 - [ ] Đã chạy `pnpm check`, `pnpm build`, `pnpm check:site`.
 - [ ] Đã xem `git status`, không có `.env` hay file bí mật.

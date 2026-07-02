@@ -1,3 +1,7 @@
+---
+publish: true
+---
+
 # Key Terms Glossary — Thuật ngữ LEED Core Concepts
 
 #glossary #LEED #green-building

@@ -1,3 +1,7 @@
+---
+publish: true
+---
+
 # Imagine It — Letter from Rick Fedrizzi
 
 > *"Imagine being a green building professional."*

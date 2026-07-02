@@ -25,6 +25,12 @@
       "commit": "cf2e161425165e1ac713f1feb7250b07fe0250ae",
       "installedAt": "2026-06-30T23:52:51.791Z"
     },
+    "canvas-page": {
+      "source": "github:quartz-community/canvas-page",
+      "resolved": "https://github.com/quartz-community/canvas-page.git",
+      "commit": "84fc96799671a65f76b66e30217dbefdd43a2905",
+      "installedAt": "2026-07-02T16:31:35.035Z"
+    },
     "content-index": {
       "source": "github:quartz-community/content-index",
       "resolved": "https://github.com/quartz-community/content-index.git",
@@ -66,6 +72,12 @@
       "resolved": "https://github.com/quartz-community/description.git",
       "commit": "56dc546614d905ad07dd0da8dd5820e25e5ea97b",
       "installedAt": "2026-06-30T23:52:49.930Z"
+    },
+    "explicit-publish": {
+      "source": "github:quartz-community/explicit-publish",
+      "resolved": "https://github.com/quartz-community/explicit-publish.git",
+      "commit": "4afb630a1cc9034267beb93c928e81d0fa2f4d4b",
+      "installedAt": "2026-07-02T16:31:34.886Z"
     },
     "explorer": {
       "source": "github:quartz-community/explorer",
@@ -144,6 +156,12 @@
       "resolved": "https://github.com/quartz-community/reader-mode.git",
       "commit": "73c8bce66df8835510ffac47e53b1ca0f7efd51e",
       "installedAt": "2026-06-30T23:52:51.772Z"
+    },
+    "recent-notes": {
+      "source": "github:quartz-community/recent-notes",
+      "resolved": "https://github.com/quartz-community/recent-notes.git",
+      "commit": "3c3d104335e2fc5ff62371ead157667adb79b046",
+      "installedAt": "2026-07-02T16:31:34.928Z"
     },
     "remove-draft": {
       "source": "github:quartz-community/remove-draft",

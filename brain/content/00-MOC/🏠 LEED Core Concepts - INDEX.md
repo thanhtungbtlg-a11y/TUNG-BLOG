@@ -1,3 +1,7 @@
+---
+publish: true
+---
+
 # 🏠 LEED Core Concepts Guide — INDEX (MOC)
 
 > **Source:** LEED® Core Concepts Guide: An Introduction to LEED and Green Building, Third Edition  

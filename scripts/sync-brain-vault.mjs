@@ -16,6 +16,7 @@ const ignoredDirectories = new Set([
 	"templates",
 ]);
 const ignoredExtensions = new Set([".base"]);
+const publicCanvasDirectory = "public-canvas";
 
 function isInside(parent, child) {
 	const rel = relative(parent, child);
@@ -31,7 +32,14 @@ async function shouldCopy(source) {
 	const parts = rel.split(sep);
 	if (parts.some((part) => ignoredDirectories.has(part))) return false;
 	if (parts.some((part) => part.startsWith(".") && part !== ".")) return false;
-	return !ignoredExtensions.has(extname(source).toLowerCase());
+	const extension = extname(source).toLowerCase();
+	if (ignoredExtensions.has(extension)) return false;
+	if (extension === ".canvas") {
+		return parts.some(
+			(part) => part.toLowerCase() === publicCanvasDirectory,
+		);
+	}
+	return true;
 }
 
 async function countMarkdown(directory) {
@@ -54,6 +62,7 @@ const noteCount = await countMarkdown(contentDir);
 const index = `---
 title: Thanh Tùng's Second Brain
 description: Khu vườn ghi chú Obsidian về LEED, công trình xanh và tư duy bền vững.
+publish: true
 ---
 
 # Thanh Tùng's Second Brain

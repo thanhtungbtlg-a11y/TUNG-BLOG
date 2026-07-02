@@ -44,7 +44,6 @@ configuration:
         tertiary: "#ef88ad"
         highlight: rgba(75, 195, 197, 0.15)
         textHighlight: "#b3aa0288"
-
 plugins:
   # Markdown and Obsidian syntax.
   - source: github:quartz-community/note-properties
@@ -132,9 +131,15 @@ plugins:
       enableRSS: true
   - source: github:quartz-community/favicon
     enabled: true
-  # Quartz Head imports this plugin's type even when image generation is off.
   - source: github:quartz-community/og-image
-    enabled: false
+    enabled: true
+    options:
+      colorScheme: darkMode
+      width: 1200
+      height: 630
+      excludeRoot: false
+      defaultTitle: Thanh Tùng's Second Brain
+      defaultDescription: Ghi chú công khai về LEED, công trình xanh và tư duy bền vững.
   - source: github:quartz-community/content-page
     enabled: true
   - source: github:quartz-community/folder-page
@@ -219,6 +224,33 @@ plugins:
         Về blog: https://www.thanhtung0209.com/
         Kho bài: https://www.thanhtung0209.com/archive/
         Email: https://mail.google.com/mail/?view=cm&fs=1&to=thanhtungbtlg@gmail.com
+
+  # Quartz v5 additions: controlled publishing, recent notes and Obsidian Canvas.
+  - source: github:quartz-community/explicit-publish
+    enabled: true
+    options: {}
+    order: 50
+  - source: github:quartz-community/recent-notes
+    enabled: true
+    options:
+      title: Ghi chú gần đây
+      limit: 5
+      linkToMore: false
+      showTags: true
+      hideTagPages: true
+      hideFolderPages: true
+    order: 50
+    layout:
+      position: afterBody
+      priority: 50
+  - source: github:quartz-community/canvas-page
+    enabled: true
+    options:
+      enableInteraction: true
+      initialZoom: 1
+      minZoom: 0.1
+      maxZoom: 5
+    order: 50
 
 # Notes already contain their own H1, so content pages hide Quartz's generated
 # article title. Folder and tag pages still keep their generated title.

@@ -1,6 +1,7 @@
 ---
 title: Thanh Tùng's Second Brain
 description: Khu vườn ghi chú Obsidian về LEED, công trình xanh và tư duy bền vững.
+publish: true
 ---
 
 # Thanh Tùng's Second Brain

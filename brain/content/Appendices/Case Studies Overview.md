@@ -1,3 +1,7 @@
+---
+publish: true
+---
+
 # Case Studies Overview
 
 #case-study #LEED #green-building

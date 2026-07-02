@@ -1,3 +1,7 @@
+---
+publish: true
+---
+
 # Conclusion
 
 #section-conclusion #LEED #green-building
