@@ -221,7 +221,7 @@ Kiểm tra ít nhất:
 - trang chủ và Kho bài;
 - bài vừa sửa trên desktop và mobile;
 - ảnh bìa, ảnh trong bài và liên kết;
-- nút email mở ứng dụng soạn thư;
+- nút email mở trang soạn thư Gmail với người nhận đã điền sẵn;
 - tìm kiếm `Ctrl + K`;
 - player, comment và chế độ sáng/tối;
 - liên kết **Second Brain** mở `/brain/`.

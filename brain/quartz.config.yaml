@@ -218,7 +218,7 @@ plugins:
       links:
         Về blog: https://www.thanhtung0209.com/
         Kho bài: https://www.thanhtung0209.com/archive/
-        Email: mailto:thanhtungbtlg@gmail.com
+        Email: https://mail.google.com/mail/?view=cm&fs=1&to=thanhtungbtlg@gmail.com
 
 # Notes already contain their own H1, so content pages hide Quartz's generated
 # article title. Folder and tag pages still keep their generated title.
