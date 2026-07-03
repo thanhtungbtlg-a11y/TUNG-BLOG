@@ -234,9 +234,7 @@ class TableOfContents extends HTMLElement {
             element.addEventListener('animationend', () => {
                 this.init();
             }, { once: true });
-        } else {
-            console.debug('Animation element not found');
-        }
+		}
     };
 
     init() {

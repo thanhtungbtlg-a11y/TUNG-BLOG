@@ -1,8 +1,9 @@
 import TurndownService from "turndown";
+import { normalizeMarkdownPath } from "../src/lib/markdown-path";
+import { getPublicSiteUrl } from "../src/lib/site-url";
 
 type ApiRequest = {
 	method?: string;
-	headers: Record<string, string | string[] | undefined>;
 	query: Record<string, string | string[] | undefined>;
 };
 
@@ -29,8 +30,8 @@ export default async function handler(
 		return;
 	}
 
-	const targetPath = normalizePath(request.query.path);
-	const targetUrl = buildTargetUrl(request, targetPath);
+	const targetPath = normalizeMarkdownPath(request.query.path);
+	const targetUrl = new URL(targetPath, getPublicSiteUrl()).toString();
 
 	try {
 		const htmlResponse = await fetch(targetUrl, {
@@ -61,27 +62,6 @@ export default async function handler(
 				"# Markdown unavailable\n\nThe page could not be converted right now.",
 			);
 	}
-}
-
-function normalizePath(value: string | string[] | undefined) {
-	const raw = Array.isArray(value) ? value.join("/") : (value ?? "");
-	const clean = raw.replace(/^https?:\/\/[^/]+/i, "").replace(/\0/g, "");
-	if (!clean || clean === "/") return "/";
-	return clean.startsWith("/") ? clean : `/${clean}`;
-}
-
-function buildTargetUrl(request: ApiRequest, targetPath: string) {
-	const hostHeader =
-		request.headers["x-forwarded-host"] ?? request.headers.host;
-	const host = Array.isArray(hostHeader) ? hostHeader[0] : hostHeader;
-	const protocolHeader = request.headers["x-forwarded-proto"];
-	const protocol = Array.isArray(protocolHeader)
-		? (protocolHeader[0] ?? "https")
-		: (protocolHeader ?? "https");
-	return new URL(
-		targetPath,
-		`${protocol}://${host || "www.thanhtung0209.com"}`,
-	).toString();
 }
 
 function extractMain(html: string) {

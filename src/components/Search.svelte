@@ -622,7 +622,7 @@ function handleInputKeydown(event: KeyboardEvent) {
 		font-weight: 800;
 	}
 
-	.command-search-icon {
+	:global(.command-search-icon) {
 		margin: auto;
 		color: var(--primary);
 		font-size: 1.35rem;
@@ -745,15 +745,15 @@ function handleInputKeydown(event: KeyboardEvent) {
 		margin-top: 0.15rem;
 	}
 
-	.command-arrow {
+	:global(.command-arrow) {
 		color: var(--primary);
 		opacity: 0;
 		transform: translateX(-0.25rem);
 		transition: opacity 160ms ease, transform 160ms ease;
 	}
 
-	.command-item:hover .command-arrow,
-	.command-item.active .command-arrow {
+	.command-item:hover :global(.command-arrow),
+	.command-item.active :global(.command-arrow) {
 		opacity: 1;
 		transform: translateX(0);
 	}

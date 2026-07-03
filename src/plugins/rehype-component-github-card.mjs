@@ -15,11 +15,11 @@ export function GithubCardComponent(properties, children) {
 			'Invalid directive. ("github" directive must be leaf type "::github{repo="owner/repo"}")',
 		]);
 
-	if (!properties.repo || !properties.repo.includes("/"))
+	if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(properties.repo || ""))
 		return h(
 			"div",
 			{ class: "hidden" },
-			'Invalid repository. ("repo" attributte must be in the format "owner/repo")',
+			'Invalid repository. ("repo" attribute must be in the format "owner/repo")',
 		);
 
 	const repo = properties.repo;
@@ -68,11 +68,9 @@ export function GithubCardComponent(properties, children) {
         avatarEl.style.backgroundColor = 'transparent';
         document.getElementById('${cardUuid}-license').innerText = data.license?.spdx_id || "no-license";
         document.getElementById('${cardUuid}-card').classList.remove("fetch-waiting");
-        console.log("[GITHUB-CARD] Loaded card for ${repo} | ${cardUuid}.")
       }).catch(err => {
         const c = document.getElementById('${cardUuid}-card');
         c?.classList.add("fetch-error");
-        console.warn("[GITHUB-CARD] (Error) Loading card for ${repo} | ${cardUuid}.")
       })
     `,
 	);
@@ -83,6 +81,7 @@ export function GithubCardComponent(properties, children) {
 			class: "card-github fetch-waiting no-styling",
 			href: `https://github.com/${repo}`,
 			target: "_blank",
+			rel: "noopener noreferrer",
 			repo,
 		},
 		[

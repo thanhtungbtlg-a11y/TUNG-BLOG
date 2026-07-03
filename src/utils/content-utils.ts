@@ -73,13 +73,35 @@ export async function getSortedPostsList(): Promise<PostForList[]> {
 	return sortedPostsList;
 }
 
-export async function getChronologicalPostsList(): Promise<PostForList[]> {
+export type ArchivePost = {
+	slug: string;
+	data: {
+		title: string;
+		description?: string;
+		tags?: string[];
+		category?: string | null;
+		published: Date;
+		pinned?: boolean;
+		pinOrder?: number;
+		latest?: boolean;
+	};
+};
+
+export async function getChronologicalPostsList(): Promise<ArchivePost[]> {
 	const sortedFullPosts = await getRawSortedPosts("date");
 
 	return sortedFullPosts.map((post) => ({
 		slug: post.slug,
-		body: post.body,
-		data: post.data,
+		data: {
+			title: post.data.title,
+			description: post.data.description,
+			tags: post.data.tags,
+			category: post.data.category,
+			published: post.data.published,
+			pinned: post.data.pinned,
+			pinOrder: post.data.pinOrder,
+			latest: post.data.latest,
+		},
 	}));
 }
 

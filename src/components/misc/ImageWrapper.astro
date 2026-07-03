@@ -34,8 +34,7 @@ const isLocal = !(
 );
 const isPublic = src.startsWith("/");
 
-// TODO temporary workaround for images dynamic import
-// https://github.com/withastro/astro/issues/3373
+// Astro requires a glob lookup for content-relative image paths.
 let img: ImageMetadata | undefined;
 if (isLocal) {
 	const files = import.meta.glob<ImageMetadata>("../../**", {
@@ -49,19 +48,18 @@ if (isLocal) {
 		console.error(
 			`\n[ERROR] Image file not found: ${normalizedPath.replace("../../", "src/")}`,
 		);
+	} else {
+		img = await file();
 	}
-	img = await file();
 }
 
 const imageClass = "w-full h-full object-cover";
 const imageStyle = `object-position: ${position}`;
-const loading = id === "banner" ? "eager" : "lazy";
-const imageQuality = id === "banner" ? 78 : 72;
 ---
 <div id={id} class:list={[className, 'overflow-hidden relative image-wrapper']}>
     <div class="image-soft-overlay transition absolute inset-0 pointer-events-none"></div>
-    {isLocal && img && <Image src={img} alt={alt || ""} class={imageClass} style={imageStyle} loading={loading} decoding="async" fetchpriority={loading === "eager" ? "high" : "low"} quality={imageQuality} widths={widths} sizes={sizes}/>}
-    {!isLocal && <img src={isPublic ? url(src) : src} alt={alt || ""} class={imageClass} style={imageStyle} loading={loading} decoding="async" fetchpriority={loading === "eager" ? "high" : "low"}/>}
+    {isLocal && img && <Image src={img} alt={alt || ""} class={imageClass} style={imageStyle} loading="lazy" decoding="async" fetchpriority="low" quality={72} widths={widths} sizes={sizes}/>}
+    {!isLocal && <img src={isPublic ? url(src) : src} alt={alt || ""} class={imageClass} style={imageStyle} loading="lazy" decoding="async" fetchpriority="low"/>}
 </div>
 
 <style>

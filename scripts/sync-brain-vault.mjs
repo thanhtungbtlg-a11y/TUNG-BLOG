@@ -35,9 +35,7 @@ async function shouldCopy(source) {
 	const extension = extname(source).toLowerCase();
 	if (ignoredExtensions.has(extension)) return false;
 	if (extension === ".canvas") {
-		return parts.some(
-			(part) => part.toLowerCase() === publicCanvasDirectory,
-		);
+		return parts.some((part) => part.toLowerCase() === publicCanvasDirectory);
 	}
 	return true;
 }

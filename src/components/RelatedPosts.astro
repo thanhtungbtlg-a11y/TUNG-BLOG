@@ -37,7 +37,7 @@ const { posts } = Astro.props;
 									src={post.data.image}
 									basePath={path.join("content/posts/", getDir(post.id))}
 									alt={post.data.title}
-									class="w-full h-full banner-container"
+									class="w-full h-full cover-zoom"
 								/>
 							) : (
 								<div class="w-full h-full related-gradient"></div>

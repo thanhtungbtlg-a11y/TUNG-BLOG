@@ -49,7 +49,6 @@ export default defineConfig({
 		}),
 		icon({
 			include: {
-				"preprocess: vitePreprocess(),": ["*"],
 				"fa6-brands": ["*"],
 				"fa6-regular": ["*"],
 				"fa6-solid": ["*"],
@@ -158,7 +157,14 @@ export default defineConfig({
 		build: {
 			rollupOptions: {
 				onwarn(warning, warn) {
-					// temporarily suppress this warning
+					const isGeneratedSvelteAnnotation =
+						typeof warning.id === "string" &&
+						warning.id.endsWith(".svelte") &&
+						((warning.code === "INVALID_ANNOTATION" &&
+							warning.message.includes("@__PURE__")) ||
+							(warning.code === "SOURCEMAP_ERROR" &&
+								warning.message.includes("Can't resolve original location")));
+					if (isGeneratedSvelteAnnotation) return;
 					if (
 						warning.message.includes("is dynamically imported by") &&
 						warning.message.includes("but also statically imported by")

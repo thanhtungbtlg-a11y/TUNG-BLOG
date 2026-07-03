@@ -17,6 +17,29 @@ body {
     background: transparent;
 }
 
+.skip-link {
+    position: fixed;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 1000;
+    padding: 0.65rem 0.9rem;
+    border-radius: 0.5rem;
+    background: var(--primary);
+    color: white;
+    font-weight: 800;
+    transform: translateY(-150%);
+    transition: transform 160ms ease;
+}
+
+.skip-link:focus {
+    transform: translateY(0);
+}
+
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+}
+
 @layer components {
     .card-base {
         @apply rounded-[var(--radius-large)] overflow-hidden bg-[var(--card-bg)] transition;
@@ -204,26 +227,15 @@ body {
     box-shadow: var(--nav-shadow);
 }
 
-.banner-container img,
-#banner img,
+.cover-zoom img,
 #post-cover img {
     transform: scale(1);
     transition: transform 700ms ease, filter 700ms ease;
 }
 
-.banner-container:hover img,
+.cover-zoom:hover img,
 #post-cover:hover img {
     transform: scale(1.035);
-}
-
-#banner-wrapper::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background:
-        linear-gradient(to bottom, var(--banner-scrim), transparent 38%, var(--page-bg)),
-        linear-gradient(to right, var(--page-bg), transparent 24%, transparent 76%, var(--page-bg));
 }
 
 html.reading-mode #sidebar {
@@ -299,7 +311,7 @@ html.reading-mode .music-player.expanded {
     }
 
     .interactive-card:hover,
-    .banner-container:hover img,
+    .cover-zoom:hover img,
     #post-cover:hover img {
         transform: none;
     }

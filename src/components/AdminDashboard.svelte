@@ -111,9 +111,9 @@ let busy = $state(false);
 let uploading = $state(false);
 let error = $state("");
 let notice = $state("");
-let fileInput: HTMLInputElement;
-let mediaFileInput: HTMLInputElement;
-let bodyTextarea: HTMLTextAreaElement;
+let fileInput = $state<HTMLInputElement>();
+let mediaFileInput = $state<HTMLInputElement>();
+let bodyTextarea = $state<HTMLTextAreaElement>();
 
 onMount(() => {
 	if (!supabase) {
@@ -890,7 +890,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 						<button type="button" onclick={openMediaTab} title="Mở kho ảnh">
 							<Icon icon="material-symbols:photo-library-outline-rounded" /> Kho ảnh
 						</button>
-						<button type="button" disabled={uploading} onclick={() => fileInput.click()} title="Tải và chèn ảnh">
+						<button type="button" disabled={uploading} onclick={() => fileInput?.click()} title="Tải và chèn ảnh">
 							<Icon icon="material-symbols:add-photo-alternate-outline-rounded" /> {uploading ? "Đang tải" : "Ảnh"}
 						</button>
 						<input class="file-input" bind:this={fileInput} type="file" accept="image/*" onchange={uploadImage} />
@@ -920,7 +920,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 						<span>Mô tả ảnh mới</span>
 						<input placeholder="Nội dung ảnh dành cho người đọc và SEO" bind:value={mediaAlt} />
 					</label>
-					<button class="media-upload-button" type="button" disabled={uploading} onclick={() => mediaFileInput.click()}>
+					<button class="media-upload-button" type="button" disabled={uploading} onclick={() => mediaFileInput?.click()}>
 						<Icon icon="material-symbols:upload-rounded" /> {uploading ? "Đang tối ưu" : "Tải ảnh"}
 					</button>
 					<input class="file-input" bind:this={mediaFileInput} type="file" accept="image/*" onchange={uploadMedia} />

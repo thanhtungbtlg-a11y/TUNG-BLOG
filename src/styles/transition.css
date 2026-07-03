@@ -39,10 +39,6 @@ html.is-animating .transition-swup-fade {
 .footer {
     animation-delay: 250ms;
 }
-#banner-credit {
-    animation-delay: 400ms;
-}
-
 /* Post content */
 #post-container :nth-child(1) { animation-delay: calc(var(--content-delay) + 0ms) }
 #post-container :nth-child(2) { animation-delay: calc(var(--content-delay) + 50ms) }

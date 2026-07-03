@@ -22,7 +22,6 @@ interface Props {
 	category: string | null;
 	image: string;
 	description: string;
-	draft: boolean;
 	style: string;
 }
 const {
@@ -53,20 +52,22 @@ const badge = pinned
 
 const { remarkPluginFrontmatter } = await entry.render();
 ---
-<div class:list={["card-base interactive-card flex flex-col-reverse md:flex-col w-full rounded-[var(--radius-large)] overflow-hidden relative", {"md:min-h-[18rem]": featured && hasCover}, className]} style={style}>
+<article class:list={["card-base interactive-card flex flex-col-reverse md:flex-col w-full rounded-[var(--radius-large)] overflow-hidden relative", {"md:min-h-[18rem]": featured && hasCover}, className]} style={`${style}; --coverWidth: ${coverWidth};`}>
     <div class:list={["pl-6 md:pl-9 pr-6 md:pr-2 pt-6 md:pt-7 pb-6 relative", {"w-full md:w-[calc(100%_-_52px_-_12px)]": !hasCover, "w-full md:w-[calc(100%_-_var(--coverWidth)_-_12px)]": hasCover}]}>
         {badge && <div class="inline-flex items-center gap-1.5 mb-3 rounded-full bg-[var(--btn-regular-bg)] px-3 py-1 text-xs font-bold text-[var(--btn-content)]">
             <Icon name={badge.icon} class="text-base" />
             {badge.text}
         </div>}
-        <a href={url}
-           class:list={["transition group w-full block font-bold mb-3 text-90",
-           "hover:text-[var(--primary)] dark:hover:text-[var(--primary)] active:text-[var(--title-active)] dark:active:text-[var(--title-active)] before:w-1 before:h-5 before:rounded-md before:bg-[var(--primary)] before:absolute before:top-[35px] before:left-[18px] before:hidden md:before:block",
-           {"text-3xl md:text-4xl md:leading-tight": featured, "text-3xl": !featured}]}>
-            {title}
-            <Icon class="inline text-[2rem] text-[var(--primary)] md:hidden translate-y-0.5 absolute" name="material-symbols:chevron-right-rounded" ></Icon>
-            <Icon class="text-[var(--primary)] text-[2rem] transition hidden md:inline absolute translate-y-0.5 opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0" name="material-symbols:chevron-right-rounded"></Icon>
-        </a>
+        <h2 class="m-0">
+            <a href={url}
+               class:list={["transition group w-full block font-bold mb-3 text-90",
+               "hover:text-[var(--primary)] dark:hover:text-[var(--primary)] active:text-[var(--title-active)] dark:active:text-[var(--title-active)] before:w-1 before:h-5 before:rounded-md before:bg-[var(--primary)] before:absolute before:top-[35px] before:left-[18px] before:hidden md:before:block",
+			   {"text-3xl md:text-4xl md:leading-tight": featured, "text-3xl": !featured}]}>
+                {title}
+                <Icon class="inline text-[2rem] text-[var(--primary)] md:hidden translate-y-0.5 absolute" name="material-symbols:chevron-right-rounded" ></Icon>
+                <Icon class="text-[var(--primary)] text-[2rem] transition hidden md:inline absolute translate-y-0.5 opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0" name="material-symbols:chevron-right-rounded"></Icon>
+            </a>
+        </h2>
 
         <!-- metadata -->
         <PostMetadata published={published} updated={updated} tags={tags} category={category} hideTagsForMobile={true} hideUpdateDate={true} class="mb-4"></PostMetadata>
@@ -103,7 +104,7 @@ const { remarkPluginFrontmatter } = await entry.render();
         <ImageWrapper src={image} basePath={path.join("content/posts/", getDir(entry.id))} alt={`Ảnh bìa: ${title}`}
                   widths={[320, 480, 640, 960]}
                   sizes={featured ? "(max-width: 767px) calc(100vw - 2rem), 42vw" : "(max-width: 767px) calc(100vw - 2rem), 28vw"}
-                  class="w-full h-full banner-container">
+                  class="w-full h-full cover-zoom">
         </ImageWrapper>
     </a>}
 
@@ -117,8 +118,5 @@ const { remarkPluginFrontmatter } = await entry.render();
             </Icon>
         </a>
     }
-</div>
+</article>
 <div class="transition border-t-[1px] border-dashed mx-6 border-black/10 dark:border-white/[0.15] last:border-t-0 md:hidden"></div>
-
-<style define:vars={{coverWidth}}>
-</style>

@@ -1,0 +1,26 @@
+---
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { Icon } from "astro-icon/components";
+import { url } from "../utils/url-utils";
+---
+
+<MainGridLayout title="Không tìm thấy trang" wide={true}>
+	<section class="card-base mx-auto flex min-h-[24rem] max-w-3xl flex-col items-center justify-center px-6 py-12 text-center">
+		<div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--btn-regular-bg)] text-[var(--primary)]">
+			<Icon name="material-symbols:explore-off-outline-rounded" class="text-4xl" />
+		</div>
+		<p class="mb-2 font-bold uppercase text-[var(--meta-color)]">Lỗi 404</p>
+		<h1 class="mb-3 text-3xl font-bold text-90 md:text-4xl">Trang này không tồn tại</h1>
+		<p class="mb-7 max-w-lg text-75">Đường dẫn có thể đã thay đổi hoặc nội dung đã được chuyển sang nơi khác.</p>
+		<div class="flex flex-wrap justify-center gap-3">
+			<a class="btn-regular min-h-11 gap-2 rounded-lg px-5 font-bold" href={url("/")}>
+				<Icon name="material-symbols:home-outline-rounded" class="text-xl" />
+				Trang chủ
+			</a>
+			<a class="btn-regular min-h-11 gap-2 rounded-lg px-5 font-bold" href={url("/archive/")}>
+				<Icon name="material-symbols:archive-outline-rounded" class="text-xl" />
+				Kho bài
+			</a>
+		</div>
+	</section>
+</MainGridLayout>

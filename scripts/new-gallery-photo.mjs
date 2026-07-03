@@ -24,7 +24,7 @@ try {
 	const sourceInput = await ask("Đường dẫn ảnh", args.file || args._[0] || "");
 	if (!sourceInput) throw new Error("Bạn chưa nhập đường dẫn ảnh.");
 
-	const sourceFile = path.resolve(sourceInput.replace(/^['\"]|['\"]$/g, ""));
+	const sourceFile = path.resolve(sourceInput.replace(/^['"]|['"]$/g, ""));
 	const sourceStats = await fs.stat(sourceFile);
 	if (!sourceStats.isFile())
 		throw new Error("Đường dẫn không phải là một file ảnh.");

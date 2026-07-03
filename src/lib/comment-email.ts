@@ -1,3 +1,5 @@
+import { getPublicSiteUrl } from "./site-url";
+
 const ownerEmail = "thanhtungbtlg@gmail.com";
 
 type AdminCommentNotification = {
@@ -23,7 +25,7 @@ export async function sendAdminCommentNotification({
 	parentId,
 	authorName,
 }: AdminCommentNotification) {
-	const siteUrl = getSiteUrl();
+	const siteUrl = getPublicSiteUrl();
 	const adminUrl = `${siteUrl}/admin/`;
 	const postUrl = `${siteUrl}/posts/${encodeURIComponent(slug)}/`;
 	const safeContent = multilineHtml(content);
@@ -46,7 +48,7 @@ export async function sendCommentReplyNotification({
 	replyBody,
 	replierName,
 }: ReplyNotification) {
-	const postUrl = `${getSiteUrl()}/posts/${encodeURIComponent(slug)}/#comments`;
+	const postUrl = `${getPublicSiteUrl()}/posts/${encodeURIComponent(slug)}/#comments`;
 	await sendEmail({
 		to,
 		subject: "Có phản hồi mới cho bình luận của bạn",
@@ -56,7 +58,7 @@ export async function sendCommentReplyNotification({
 }
 
 export async function sendCommentEmailTest() {
-	const siteUrl = getSiteUrl();
+	const siteUrl = getPublicSiteUrl();
 	await sendEmail({
 		to: env("COMMENT_NOTIFICATION_TO") || ownerEmail,
 		subject: "Kiểm tra thông báo bình luận - Thanh Tung Blog",
@@ -124,13 +126,6 @@ function escapeHtml(value: string) {
 		};
 		return entities[character];
 	});
-}
-
-function getSiteUrl() {
-	const explicit = env("PUBLIC_SITE_URL").replace(/\/$/, "");
-	if (explicit) return explicit;
-	const vercelUrl = env("VERCEL_PROJECT_PRODUCTION_URL");
-	return vercelUrl ? `https://${vercelUrl}` : "https://www.thanhtung0209.com";
 }
 
 function env(name: string) {

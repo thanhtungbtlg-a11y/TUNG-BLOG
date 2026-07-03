@@ -29,8 +29,15 @@ function run(command, args, shell = false) {
 const installedFingerprint = existsSync(dependencyMarker)
 	? readFileSync(dependencyMarker, "utf8").trim()
 	: "";
-if (!existsSync(nodeModulesDir) || installedFingerprint !== dependencyFingerprint) {
-	run(npmCommand, ["ci", "--no-audit", "--no-fund"], process.platform === "win32");
+if (
+	!existsSync(nodeModulesDir) ||
+	installedFingerprint !== dependencyFingerprint
+) {
+	run(
+		npmCommand,
+		["ci", "--no-audit", "--no-fund"],
+		process.platform === "win32",
+	);
 	writeFileSync(dependencyMarker, dependencyFingerprint);
 }
 

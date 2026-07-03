@@ -10,7 +10,7 @@ interface Post {
 		title: string;
 		description?: string;
 		tags?: string[];
-		category?: string;
+		category?: string | null;
 		published: Date | string;
 		pinned?: boolean;
 		pinOrder?: number;

@@ -1,10 +1,20 @@
 import { createHash } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { sendAdminCommentNotification } from "../src/lib/comment-email.js";
+import {
+	type CommentHeaders,
+	getClientIp,
+	hasControlCharacters,
+	isUuid,
+	isValidEmail,
+	looksLikeCommentSpam,
+	normaliseCommentAuthor,
+	parseCommentBody,
+} from "../src/lib/comment-validation.js";
 
 type ApiRequest = {
 	method?: string;
-	headers: Record<string, string | string[] | undefined>;
+	headers: CommentHeaders;
 	body?: unknown;
 };
 
@@ -26,12 +36,14 @@ export default async function handler(
 	}
 
 	try {
-		const body = parseBody(request.body);
+		const body = parseCommentBody(request.body);
 		const slug = String(body.slug ?? "").trim();
 		const content = String(body.body ?? "").trim();
 		const honeypot = String(body.website ?? "").trim();
 		const parentId = String(body.parent_id ?? body.parentId ?? "").trim();
-		const authorName = normaliseName(body.author_name ?? body.authorName);
+		const authorName = normaliseCommentAuthor(
+			body.author_name ?? body.authorName,
+		);
 		const notificationEmail = String(
 			body.notification_email ?? body.notificationEmail ?? "",
 		)
@@ -66,7 +78,7 @@ export default async function handler(
 			response.status(400).json({ error: "Địa chỉ email không hợp lệ." });
 			return;
 		}
-		if (looksLikeSpam(content)) {
+		if (looksLikeCommentSpam(content)) {
 			response.status(400).json({
 				error: "Bình luận có quá nhiều liên kết hoặc ký tự lặp.",
 			});
@@ -85,7 +97,7 @@ export default async function handler(
 		}
 
 		const ipHash = digest(
-			`${clientIp(request.headers)}:${env("COMMENT_RATE_LIMIT_SECRET") || serviceKey}`,
+			`${getClientIp(request.headers)}:${env("COMMENT_RATE_LIMIT_SECRET") || serviceKey}`,
 		);
 		const bodyHash = digest(content.toLocaleLowerCase("vi"));
 		const supabase = createClient(supabaseUrl, serviceKey, {
@@ -153,52 +165,8 @@ export default async function handler(
 	}
 }
 
-function looksLikeSpam(value: string) {
-	const links = value.match(/(?:https?:\/\/|www\.)/gi)?.length ?? 0;
-	return links > 2 || /(.)\1{14,}/u.test(value);
-}
-
-function isUuid(value: string) {
-	return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-		value,
-	);
-}
-
-function isValidEmail(value: string) {
-	return value.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(value);
-}
-
-function normaliseName(value: unknown) {
-	return String(value ?? "")
-		.trim()
-		.replace(/\s+/g, " ");
-}
-
-function hasControlCharacters(value: string) {
-	return [...value].some((character) => {
-		const code = character.charCodeAt(0);
-		return code < 32 || code === 127;
-	});
-}
-
-function clientIp(headers: ApiRequest["headers"]) {
-	const forwarded = headers["x-forwarded-for"];
-	const value = Array.isArray(forwarded) ? forwarded[0] : forwarded;
-	if (value) return value.split(",")[0].trim();
-	const realIp = headers["x-real-ip"];
-	return Array.isArray(realIp)
-		? (realIp[0] ?? "unknown")
-		: (realIp ?? "unknown");
-}
-
 function digest(value: string) {
 	return createHash("sha256").update(value).digest("hex");
-}
-
-function parseBody(value: unknown) {
-	if (typeof value === "string")
-		return JSON.parse(value) as Record<string, unknown>;
-	return (value ?? {}) as Record<string, unknown>;
 }
 
 function env(name: string) {

@@ -1,3 +1,5 @@
+import { getPublicSiteUrl } from "../src/lib/site-url";
+
 type JsonRpcRequest = {
 	jsonrpc?: string;
 	id?: string | number | null;
@@ -7,7 +9,6 @@ type JsonRpcRequest = {
 
 type ApiRequest = {
 	method?: string;
-	headers: Record<string, string | string[] | undefined>;
 	body?: unknown;
 };
 
@@ -60,7 +61,7 @@ export default async function handler(
 		response.status(200).json({
 			serverInfo,
 			capabilities: { tools: [searchTool.name] },
-			endpoint: `${getSiteUrl(request)}/api/mcp`,
+			endpoint: `${getPublicSiteUrl()}/api/mcp`,
 		});
 		return;
 	}
@@ -73,12 +74,12 @@ export default async function handler(
 	const body = parseBody(request.body);
 	const requests = Array.isArray(body) ? body : [body];
 	const results = await Promise.all(
-		requests.map((entry) => handleJsonRpc(entry as JsonRpcRequest, request)),
+		requests.map((entry) => handleJsonRpc(entry as JsonRpcRequest)),
 	);
 	response.status(200).json(Array.isArray(body) ? results : results[0]);
 }
 
-async function handleJsonRpc(request: JsonRpcRequest, apiRequest: ApiRequest) {
+async function handleJsonRpc(request: JsonRpcRequest) {
 	const id = request.id ?? null;
 	try {
 		if (request.method === "initialize") {
@@ -103,7 +104,7 @@ async function handleJsonRpc(request: JsonRpcRequest, apiRequest: ApiRequest) {
 				return rpcError(id, -32602, "Unknown tool.");
 			}
 			const args = (params.arguments ?? {}) as Record<string, unknown>;
-			const results = await searchBlog(apiRequest, args);
+			const results = await searchBlog(args);
 			return result(id, {
 				content: [
 					{
@@ -125,15 +126,16 @@ async function handleJsonRpc(request: JsonRpcRequest, apiRequest: ApiRequest) {
 	}
 }
 
-async function searchBlog(request: ApiRequest, args: Record<string, unknown>) {
+async function searchBlog(args: Record<string, unknown>) {
 	const query = String(args.query ?? "")
 		.trim()
 		.toLowerCase();
 	const limit = Math.min(Math.max(Number(args.limit ?? 5), 1), 10);
 	if (!query) return [];
 
-	const index = await fetch(`${getSiteUrl(request)}/search-index.json`).then(
-		(response) => response.json(),
+	const siteUrl = getPublicSiteUrl();
+	const index = await fetch(`${siteUrl}/search-index.json`).then((response) =>
+		response.json(),
 	);
 	return index.posts
 		.map((post: Record<string, unknown>) => {
@@ -157,7 +159,7 @@ async function searchBlog(request: ApiRequest, args: Record<string, unknown>) {
 		.slice(0, limit)
 		.map(({ post }: { post: Record<string, unknown> }) => ({
 			title: post.title,
-			url: new URL(String(post.url ?? "/"), getSiteUrl(request)).toString(),
+			url: new URL(String(post.url ?? "/"), siteUrl).toString(),
 			description: post.description,
 			category: post.category,
 			tags: post.tags,
@@ -187,18 +189,4 @@ function parseBody(value: unknown) {
 	if (typeof value === "string")
 		return JSON.parse(value) as JsonRpcRequest | JsonRpcRequest[];
 	return (value ?? {}) as JsonRpcRequest | JsonRpcRequest[];
-}
-
-function getSiteUrl(request: ApiRequest) {
-	const explicit = process.env.PUBLIC_SITE_URL?.replace(/\/$/, "");
-	if (explicit) return explicit;
-
-	const hostHeader =
-		request.headers["x-forwarded-host"] ?? request.headers.host;
-	const host = Array.isArray(hostHeader) ? hostHeader[0] : hostHeader;
-	const protocolHeader = request.headers["x-forwarded-proto"];
-	const protocol = Array.isArray(protocolHeader)
-		? (protocolHeader[0] ?? "https")
-		: (protocolHeader ?? "https");
-	return `${protocol}://${host || "www.thanhtung0209.com"}`;
 }
