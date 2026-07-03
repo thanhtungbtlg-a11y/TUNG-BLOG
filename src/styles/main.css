@@ -8,7 +8,6 @@ html {
         linear-gradient(var(--page-grid) 1px, transparent 1px),
         linear-gradient(90deg, var(--page-grid) 1px, transparent 1px);
     background-size: 44px 44px;
-    background-attachment: fixed;
     background-repeat: repeat;
 }
 
