@@ -2,6 +2,7 @@
 import "@fontsource-variable/roboto";
 
 import "../styles/variables.styl";
+import "../styles/palettes.css";
 import "../styles/main.css";
 import "../styles/transition.css";
 import "../styles/markdown.css";
@@ -136,6 +137,13 @@ const siteLang = lang.replace("_", "-");
 			// Load the hue from local storage
 			const hue = localStorage.getItem('hue') || configHue;
 			document.documentElement.style.setProperty('--hue', hue);
+			const storedPalette = localStorage.getItem('palette');
+			const palettes = ['ocean', 'sakura', 'forest', 'mono'];
+			if (palettes.includes(storedPalette)) {
+				document.documentElement.dataset.palette = storedPalette;
+			} else if (!localStorage.getItem('hue')) {
+				document.documentElement.dataset.palette = 'ocean';
+			}
 		</script>
 		<style define:vars={{
 			configHue,

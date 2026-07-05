@@ -2,30 +2,54 @@
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import Icon from "@iconify/svelte";
-import { getDefaultHue, getHue, setHue } from "@utils/setting-utils";
+import {
+	getDefaultHue,
+	getHue,
+	getThemePalette,
+	setHue,
+	setThemePalette,
+	type ThemePalette,
+} from "@utils/setting-utils";
 import { onMount } from "svelte";
 
 let hue = 250;
 let defaultHue = 250;
 let settingsReady = false;
+let selectedPalette: ThemePalette = "ocean";
 const presets = [
-	{ name: "Ocean", hue: 200, colors: ["#38bdf8", "#0f766e"] },
-	{ name: "Sakura", hue: 345, colors: ["#fb7185", "#c084fc"] },
-	{ name: "Forest", hue: 145, colors: ["#22c55e", "#84cc16"] },
-	{ name: "Mono", hue: 255, colors: ["#94a3b8", "#475569"] },
-];
+	{ id: "ocean", name: "Ocean", hue: 200, colors: ["#24b8c4", "#ff7f6e"] },
+	{ id: "sakura", name: "Sakura", hue: 345, colors: ["#e85d8f", "#7868d8"] },
+	{ id: "forest", name: "Forest", hue: 145, colors: ["#3f9d72", "#e4a83a"] },
+	{ id: "mono", name: "Mono", hue: 255, colors: ["#6d7785", "#2c6ea3"] },
+] satisfies Array<{
+	id: Exclude<ThemePalette, "custom">;
+	name: string;
+	hue: number;
+	colors: [string, string];
+}>;
+
+function useCustomPalette() {
+	selectedPalette = "custom";
+	setThemePalette("custom");
+}
 
 function resetHue() {
+	selectedPalette = "custom";
+	setThemePalette("custom");
 	hue = getDefaultHue();
 }
 
-function applyPreset(nextHue: number) {
-	hue = nextHue;
+function applyPreset(preset: (typeof presets)[number]) {
+	selectedPalette = preset.id;
+	setThemePalette(preset.id);
+	hue = preset.hue;
 }
 
 onMount(() => {
 	defaultHue = getDefaultHue();
 	hue = getHue();
+	selectedPalette = getThemePalette();
+	setThemePalette(selectedPalette);
 	settingsReady = true;
 });
 
@@ -57,7 +81,7 @@ $: if (settingsReady && (hue || hue === 0)) {
         </div>
     </div>
     <div class="w-full h-6 px-1 bg-[oklch(0.80_0.10_0)] dark:bg-[oklch(0.70_0.10_0)] rounded select-none">
-        <input aria-label={i18n(I18nKey.themeColor)} type="range" min="0" max="360" bind:value={hue}
+        <input aria-label={i18n(I18nKey.themeColor)} type="range" min="0" max="360" bind:value={hue} on:input={useCustomPalette}
                class="slider" id="colorSlider" step="5" style="width: 100%">
     </div>
     <div class="mt-4">
@@ -66,9 +90,10 @@ $: if (settingsReady && (hue || hue === 0)) {
             {#each presets as preset}
                 <button
                     class="preset-btn"
-                    class:active={Number(hue) === preset.hue}
+                    class:active={selectedPalette === preset.id}
                     aria-label={`Use ${preset.name} theme`}
-                    on:click={() => applyPreset(preset.hue)}
+                    aria-pressed={selectedPalette === preset.id}
+                    on:click={() => applyPreset(preset)}
                 >
                     <span class="swatches">
                         <span style={`background: ${preset.colors[0]}`}></span>

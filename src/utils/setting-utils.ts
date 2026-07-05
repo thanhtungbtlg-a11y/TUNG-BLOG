@@ -7,6 +7,15 @@ import {
 import { expressiveCodeConfig } from "@/config";
 import type { LIGHT_DARK_MODE } from "@/types/config";
 
+export const THEME_PALETTES = ["ocean", "sakura", "forest", "mono"] as const;
+export type ThemePalette = (typeof THEME_PALETTES)[number] | "custom";
+
+function isThemePalette(value: string | null): value is ThemePalette {
+	return (
+		value === "custom" || THEME_PALETTES.some((palette) => palette === value)
+	);
+}
+
 export function getDefaultHue(): number {
 	const fallback = "250";
 	const configCarrier = document.getElementById("config-carrier");
@@ -25,6 +34,23 @@ export function setHue(hue: number): void {
 		return;
 	}
 	r.style.setProperty("--hue", String(hue));
+}
+
+export function getThemePalette(): ThemePalette {
+	const stored = localStorage.getItem("palette");
+	if (isThemePalette(stored)) {
+		return stored;
+	}
+	return localStorage.getItem("hue") ? "custom" : "ocean";
+}
+
+export function setThemePalette(palette: ThemePalette): void {
+	localStorage.setItem("palette", palette);
+	if (palette === "custom") {
+		delete document.documentElement.dataset.palette;
+		return;
+	}
+	document.documentElement.dataset.palette = palette;
 }
 
 export function applyThemeToDocument(theme: LIGHT_DARK_MODE) {

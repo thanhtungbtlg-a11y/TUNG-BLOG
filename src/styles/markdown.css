@@ -115,6 +115,14 @@
 
     }
 
+	> :first-child {
+		margin-top: 0;
+	}
+
+	> :last-child {
+		margin-bottom: 0;
+	}
+
     .katex-display-container {
         max-width: 100%;
         overflow-x: auto;

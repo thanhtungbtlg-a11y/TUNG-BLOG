@@ -1,5 +1,6 @@
 <script lang="ts">
 import Icon from "@iconify/svelte";
+import { onMount } from "svelte";
 import { getPostUrlBySlug } from "../utils/url-utils";
 
 export let sortedPosts: Post[] = [];
@@ -30,6 +31,8 @@ interface YearGroup {
 	months: MonthGroup[];
 }
 
+type ViewMode = "timeline" | "grid" | "list";
+
 const params =
 	typeof window === "undefined"
 		? new URLSearchParams()
@@ -40,6 +43,18 @@ let selectedCategory = params.get("uncategorized")
 	? "__uncategorized"
 	: (params.get("category") ?? "all");
 let selectedYear = params.get("year") ?? "all";
+let viewMode: ViewMode = "timeline";
+
+onMount(() => {
+	const storedView = localStorage.getItem("archive-view");
+	if (
+		storedView === "timeline" ||
+		storedView === "grid" ||
+		storedView === "list"
+	) {
+		viewMode = storedView;
+	}
+});
 
 $: tagOptions = uniqueSorted(
 	sortedPosts.flatMap((post) => post.data.tags ?? []).filter(Boolean),
@@ -163,6 +178,11 @@ function clearFilters() {
 	selectedYear = "all";
 	updateUrl();
 }
+
+function setViewMode(mode: ViewMode) {
+	viewMode = mode;
+	localStorage.setItem("archive-view", mode);
+}
 </script>
 
 <section class="archive-shell">
@@ -200,6 +220,38 @@ function clearFilters() {
 				{#each tagOptions as tag}<option value={tag}>{tag}</option>{/each}
 			</select>
 		</label>
+		<div class="view-switch" role="group" aria-label="Kiểu hiển thị">
+			<button
+				type="button"
+				class:active={viewMode === "timeline"}
+				aria-label="Dòng thời gian"
+				aria-pressed={viewMode === "timeline"}
+				title="Dòng thời gian"
+				onclick={() => setViewMode("timeline")}
+			>
+				<Icon icon="material-symbols:view-timeline-rounded" />
+			</button>
+			<button
+				type="button"
+				class:active={viewMode === "grid"}
+				aria-label="Lưới"
+				aria-pressed={viewMode === "grid"}
+				title="Lưới"
+				onclick={() => setViewMode("grid")}
+			>
+				<Icon icon="material-symbols:grid-view-rounded" />
+			</button>
+			<button
+				type="button"
+				class:active={viewMode === "list"}
+				aria-label="Danh sách"
+				aria-pressed={viewMode === "list"}
+				title="Danh sách"
+				onclick={() => setViewMode("list")}
+			>
+				<Icon icon="material-symbols:view-list-rounded" />
+			</button>
+		</div>
 	</div>
 
 	{#if pinnedPosts.length}
@@ -225,10 +277,11 @@ function clearFilters() {
 
 	<section class="timeline-section">
 		<div class="section-title">
-			<Icon icon="material-symbols:timeline-rounded" />
-			<span>Dòng thời gian</span>
+			<Icon icon={viewMode === "timeline" ? "material-symbols:view-timeline-rounded" : viewMode === "grid" ? "material-symbols:grid-view-rounded" : "material-symbols:view-list-rounded"} />
+			<span>{viewMode === "timeline" ? "Dòng thời gian" : "Bài viết"}</span>
 		</div>
 
+		{#if viewMode === "timeline"}
 		{#if groups.length}
 			{#each groups as group}
 				<section class="year-group">
@@ -262,6 +315,49 @@ function clearFilters() {
 				<Icon icon="material-symbols:inventory-2-outline-rounded" />
 				<span>Không có bài viết phù hợp.</span>
 			</div>
+		{/if}
+		{:else if viewMode === "grid"}
+			{#if timelinePosts.length}
+				<div class="post-grid">
+					{#each timelinePosts as post}
+						<a class="archive-card" href={getPostUrlBySlug(post.slug)}>
+							<div class="archive-card-meta">
+								<time>{formatFullDate(post.data.published)}</time>
+								{#if post.data.latest}<span class="latest-badge">Mới</span>{/if}
+							</div>
+							<strong>{post.data.title}</strong>
+							<p>{post.data.description || post.data.category || "Chưa phân loại"}</p>
+							<small>{post.data.category || "Chưa phân loại"} {formatTags(post.data.tags)}</small>
+						</a>
+					{/each}
+				</div>
+			{:else}
+				<div class="archive-empty">
+					<Icon icon="material-symbols:inventory-2-outline-rounded" />
+					<span>Không có bài viết phù hợp.</span>
+				</div>
+			{/if}
+		{:else}
+			{#if timelinePosts.length}
+				<div class="compact-list">
+					{#each timelinePosts as post}
+						<a class="compact-post" href={getPostUrlBySlug(post.slug)}>
+							<time>{formatDay(post.data.published)}</time>
+							<span class="compact-main">
+								<strong>{post.data.title}</strong>
+								<small>{post.data.category || "Chưa phân loại"} {formatTags(post.data.tags)}</small>
+							</span>
+							{#if post.data.latest}<span class="latest-badge">Mới</span>{/if}
+							<Icon class="compact-arrow" icon="material-symbols:chevron-right-rounded" />
+						</a>
+					{/each}
+				</div>
+			{:else}
+				<div class="archive-empty">
+					<Icon icon="material-symbols:inventory-2-outline-rounded" />
+					<span>Không có bài viết phù hợp.</span>
+				</div>
+			{/if}
 		{/if}
 	</section>
 </section>
@@ -330,12 +426,14 @@ function clearFilters() {
 
 	.archive-filters {
 		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
+		grid-template-columns: repeat(3, minmax(7.5rem, 1fr)) auto;
 		gap: 0.65rem;
 		padding: 0.85rem;
 		border: 1px solid var(--card-border);
 		border-radius: 8px;
 		background: color-mix(in oklch, var(--card-bg), transparent 8%);
+		box-shadow: var(--card-shadow);
+		backdrop-filter: blur(18px) saturate(1.08);
 	}
 
 	.archive-filters label {
@@ -349,6 +447,40 @@ function clearFilters() {
 	.archive-filters select {
 		width: 100%;
 		padding: 0 0.65rem;
+	}
+
+	.view-switch {
+		align-self: end;
+		display: grid;
+		grid-template-columns: repeat(3, 2.45rem);
+		padding: 0.18rem;
+		border: 1px solid var(--card-border);
+		border-radius: 7px;
+		background: var(--btn-regular-bg);
+	}
+
+	.view-switch button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.1rem;
+		height: 2.1rem;
+		border: 0;
+		border-radius: 6px;
+		background: transparent;
+		color: var(--meta-color);
+		cursor: pointer;
+		transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+	}
+
+	.view-switch button:hover {
+		color: var(--content-color);
+	}
+
+	.view-switch button.active {
+		background: var(--card-bg-solid);
+		color: var(--primary);
+		box-shadow: 0 3px 12px color-mix(in oklch, var(--page-bg), black 12%);
 	}
 
 	.pinned-section,
@@ -455,6 +587,129 @@ function clearFilters() {
 		transform: translateX(2px);
 	}
 
+	.post-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.75rem;
+	}
+
+	.archive-card {
+		display: grid;
+		align-content: start;
+		gap: 0.55rem;
+		min-height: 10.5rem;
+		padding: 1rem;
+		border: 1px solid var(--card-border);
+		border-radius: 8px;
+		background: var(--card-bg);
+		box-shadow: var(--card-shadow);
+		transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+	}
+
+	.archive-card:hover {
+		transform: translateY(-3px);
+		border-color: color-mix(in oklch, var(--primary), var(--card-border) 45%);
+		box-shadow: var(--card-shadow-hover);
+	}
+
+	.archive-card-meta {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem;
+		color: var(--meta-color);
+		font-size: 0.76rem;
+		font-weight: 750;
+	}
+
+	.archive-card > strong {
+		color: var(--content-color);
+		font-size: 1.05rem;
+		line-height: 1.4;
+	}
+
+	.archive-card p {
+		display: -webkit-box;
+		overflow: hidden;
+		margin: 0;
+		color: var(--meta-color);
+		font-size: 0.88rem;
+		line-height: 1.55;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+	}
+
+	.archive-card small {
+		margin-top: auto;
+		color: var(--meta-color);
+	}
+
+	.compact-list {
+		display: grid;
+		border: 1px solid var(--card-border);
+		border-radius: 8px;
+		background: var(--card-bg);
+		box-shadow: var(--card-shadow);
+		overflow: hidden;
+	}
+
+	.compact-post {
+		display: grid;
+		grid-template-columns: 4.25rem minmax(0, 1fr) auto auto;
+		align-items: center;
+		gap: 0.75rem;
+		min-height: 4rem;
+		padding: 0.6rem 0.85rem;
+		border-bottom: 1px solid var(--line-divider);
+		transition: background 160ms ease;
+	}
+
+	.compact-post:last-child {
+		border-bottom: 0;
+	}
+
+	.compact-post:hover {
+		background: var(--btn-plain-bg-hover);
+	}
+
+	.compact-post time,
+	.compact-main small {
+		color: var(--meta-color);
+		font-size: 0.78rem;
+	}
+
+	.compact-post time {
+		font-weight: 750;
+	}
+
+	.compact-main {
+		display: grid;
+		min-width: 0;
+		gap: 0.15rem;
+	}
+
+	.compact-main strong,
+	.compact-main small {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.compact-main strong {
+		color: var(--content-color);
+	}
+
+	.compact-arrow {
+		color: var(--meta-color);
+		font-size: 1.3rem;
+		transition: transform 160ms ease, color 160ms ease;
+	}
+
+	.compact-post:hover .compact-arrow {
+		transform: translateX(2px);
+		color: var(--primary);
+	}
+
 	.post-date {
 		width: 3rem;
 		color: var(--meta-color);
@@ -513,12 +768,37 @@ function clearFilters() {
 
 		.archive-filters,
 		.pinned-grid,
+		.post-grid,
 		.month-group {
 			grid-template-columns: 1fr;
 		}
 
+		.view-switch {
+			grid-template-columns: repeat(3, 1fr);
+		}
+
+		.view-switch button {
+			width: 100%;
+		}
+
+		.compact-post {
+			grid-template-columns: 3.5rem minmax(0, 1fr) auto;
+		}
+
+		.compact-post .latest-badge {
+			display: none;
+		}
+
 		.month-label {
 			padding-top: 0;
+		}
+	}
+
+	@media (min-width: 769px) {
+		.archive-filters {
+			position: sticky;
+			top: 5rem;
+			z-index: 20;
 		}
 	}
 </style>
