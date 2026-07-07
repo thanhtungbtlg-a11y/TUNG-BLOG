@@ -1,83 +1,68 @@
 ---
-import fs from "node:fs/promises";
-import path from "node:path";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 import { Icon } from "astro-icon/components";
-import sharp from "sharp";
 import galleryMetadata from "../data/gallery.json";
 
 type GalleryMetadata = {
 	filename: string;
+	thumbnail?: string;
 	title?: string;
 	description?: string;
 	date?: string;
+	album?: string;
 	width?: number;
 	height?: number;
 };
 
-type GalleryItem = Required<Pick<GalleryMetadata, "filename">> & {
+type GalleryItem = {
+	filename: string;
 	src: string;
+	thumbnail: string;
 	title: string;
 	description: string;
 	date: string;
+	year: string;
+	album: string;
 	width: number;
 	height: number;
 };
 
-const galleryDirectory = path.join(process.cwd(), "public", "gallery");
-const supportedExtensions = new Set([
-	".jpg",
-	".jpeg",
-	".png",
-	".webp",
-	".avif",
-	".gif",
-]);
-const metadataByFilename = new Map(
-	(galleryMetadata as GalleryMetadata[]).map((item) => [item.filename, item]),
+const galleryItems: GalleryItem[] = (galleryMetadata as GalleryMetadata[])
+	.map((item) => ({
+		filename: item.filename,
+		src: `/gallery/${item.filename.split("/").map(encodeURIComponent).join("/")}`,
+		thumbnail: `/gallery/${(item.thumbnail || item.filename).split("/").map(encodeURIComponent).join("/")}`,
+		title: item.title?.trim() || "Khoảnh khắc không tên",
+		description: item.description?.trim() || "",
+		date: item.date?.trim() || "",
+		year: item.date?.slice(0, 4) || "Không rõ",
+		album: item.album?.trim() || "Ảnh chọn lọc",
+		width: item.width || 1600,
+		height: item.height || 1200,
+	}))
+	.sort(
+		(a, b) =>
+			b.date.localeCompare(a.date) ||
+			b.filename.localeCompare(a.filename, "vi"),
+	);
+
+const groups = Object.entries(
+	Object.groupBy(galleryItems, (item) => `${item.date}|${item.album}`),
+)
+	.map(([key, items]) => {
+		const [date, album] = key.split("|");
+		return { key, date, album, items: items || [] };
+	})
+	.sort(
+		(a, b) =>
+			b.date.localeCompare(a.date) || a.album.localeCompare(b.album, "vi"),
+	);
+const years = [...new Set(galleryItems.map((item) => item.year))].sort((a, b) =>
+	b.localeCompare(a),
 );
-
-await fs.mkdir(galleryDirectory, { recursive: true });
-const directoryEntries = await fs.readdir(galleryDirectory, {
-	withFileTypes: true,
-});
-const imageFiles = directoryEntries
-	.filter(
-		(entry) =>
-			entry.isFile() &&
-			supportedExtensions.has(path.extname(entry.name).toLowerCase()),
-	)
-	.map((entry) => entry.name);
-
-const galleryItems: GalleryItem[] = await Promise.all(
-	imageFiles.map(async (filename) => {
-		const savedMetadata = metadataByFilename.get(filename);
-		const imageMetadata = await sharp(path.join(galleryDirectory, filename), {
-			animated: true,
-		}).metadata();
-		const fallbackTitle = path
-			.parse(filename)
-			.name.replace(/^\d{4}-\d{2}-\d{2}-/, "")
-			.replace(/[-_]+/g, " ")
-			.trim();
-
-		return {
-			filename,
-			src: `/gallery/${encodeURIComponent(filename)}`,
-			title: savedMetadata?.title?.trim() || fallbackTitle,
-			description: savedMetadata?.description?.trim() || "",
-			date: savedMetadata?.date?.trim() || "",
-			width: savedMetadata?.width || imageMetadata.width || 1600,
-			height: savedMetadata?.height || imageMetadata.height || 1200,
-		};
-	}),
+const albums = [...new Set(galleryItems.map((item) => item.album))].sort(
+	(a, b) => b.localeCompare(a, "vi"),
 );
-
-galleryItems.sort((a, b) => {
-	if (a.date !== b.date) return b.date.localeCompare(a.date);
-	return b.filename.localeCompare(a.filename, "vi");
-});
-
 const dateFormatter = new Intl.DateTimeFormat("vi-VN", {
 	year: "numeric",
 	month: "long",
@@ -85,7 +70,7 @@ const dateFormatter = new Intl.DateTimeFormat("vi-VN", {
 });
 
 function formatDate(value: string) {
-	if (!value) return "";
+	if (!value) return "Không rõ ngày";
 	const date = new Date(`${value}T00:00:00`);
 	return Number.isNaN(date.getTime()) ? value : dateFormatter.format(date);
 }
@@ -94,95 +79,323 @@ function formatDate(value: string) {
 <MainGridLayout
 	title="Kho ảnh"
 	description="Những bức ảnh và khoảnh khắc được lưu lại bởi Nguyễn Thanh Tùng."
+	wide={true}
+	immediateContent={true}
 >
-	<header class="gallery-header mb-5 px-1">
-		<div class="flex items-center gap-3">
+	<header class="gallery-header">
+		<div class="gallery-title-row">
 			<div class="gallery-heading-icon" aria-hidden="true">
-				<Icon name="material-symbols:photo-library-outline-rounded" />
+				<Icon name="fa6-regular:images" />
 			</div>
 			<div>
-				<h1 class="text-3xl font-bold text-90">Kho ảnh</h1>
-				<p class="mt-1 text-sm text-50">
-					{galleryItems.length > 0
-						? `${galleryItems.length} khoảnh khắc được lưu lại`
-						: "Những khoảnh khắc đang chờ được lưu lại"}
-				</p>
+				<p class="gallery-kicker">Nhật ký bằng hình ảnh</p>
+				<h1>Kho ảnh</h1>
+				<p id="gallery-summary">{galleryItems.length} ảnh trong {groups.length} bộ</p>
 			</div>
 		</div>
 	</header>
 
 	{galleryItems.length > 0 ? (
-		<section class="photo-gallery" aria-label="Kho ảnh của Nguyễn Thanh Tùng">
-			{galleryItems.map((item) => (
-				<figure class="gallery-card card-base interactive-card">
-					<a
-						href={item.src}
-						data-pswp-width={item.width}
-						data-pswp-height={item.height}
-						aria-label={`Xem ảnh ${item.title}`}
-						class="gallery-image-link"
-					>
-						<img
-							src={item.src}
-							alt={item.title}
-							width={item.width}
-							height={item.height}
-							loading="lazy"
-							decoding="async"
-						/>
-					</a>
-					{(item.title || item.description || item.date) && (
-						<figcaption class="gallery-caption">
-							<div class="flex items-start justify-between gap-3">
-								<h2 class="font-semibold text-90 leading-snug">{item.title}</h2>
-								{item.date && (
-									<time class="shrink-0 text-xs text-40" datetime={item.date}>
-										{formatDate(item.date)}
-									</time>
-								)}
+		<>
+			<section class="gallery-toolbar" aria-label="Lọc kho ảnh">
+				<label class="gallery-search">
+					<Icon name="fa6-solid:magnifying-glass" aria-hidden="true" />
+					<input id="gallery-search" type="search" placeholder="Tìm theo tên ảnh..." autocomplete="off" />
+				</label>
+				<label>
+					<span>Năm</span>
+					<select id="gallery-year">
+						<option value="">Tất cả</option>
+						{years.map((year) => <option value={year}>{year}</option>)}
+					</select>
+				</label>
+				<label>
+					<span>Bộ ảnh</span>
+					<select id="gallery-album">
+						<option value="">Tất cả</option>
+						{albums.map((album) => <option value={album}>{album}</option>)}
+					</select>
+				</label>
+				<button id="gallery-reset" type="button" class="gallery-reset" disabled>
+					<Icon name="fa6-solid:filter-circle-xmark" aria-hidden="true" />
+					Xóa lọc
+				</button>
+			</section>
+
+			<div id="gallery-groups" class="gallery-groups">
+				{groups.map((group) => (
+					<section class="gallery-group" data-gallery-group>
+						<header class="gallery-group-heading">
+							<div>
+								<h2>{group.album}</h2>
+								<p>{formatDate(group.date)}</p>
 							</div>
-							{item.description && (
-								<p class="mt-2 text-sm leading-relaxed text-60">{item.description}</p>
-							)}
-						</figcaption>
-					)}
-				</figure>
-			))}
-		</section>
+							<span>{group.items.length} ảnh</span>
+						</header>
+						<div class="photo-gallery" aria-label={`Bộ ảnh ${group.album}`}>
+							{group.items.map((item, index) => (
+								<figure
+									class="gallery-card card-base interactive-card"
+									data-gallery-item
+									data-year={item.year}
+									data-album={item.album.toLocaleLowerCase("vi")}
+									data-search={`${item.title} ${item.description} ${item.album}`.toLocaleLowerCase("vi")}
+								>
+									<a
+										href={item.src}
+										data-pswp-width={item.width}
+										data-pswp-height={item.height}
+										aria-label={`Xem ảnh ${item.title}`}
+										class="gallery-image-link"
+									>
+										<img
+											src={item.thumbnail}
+											alt={item.title}
+											width={item.width}
+											height={item.height}
+											loading={group.key === groups[0]?.key && index < 2 ? "eager" : "lazy"}
+											fetchpriority={group.key === groups[0]?.key && index === 0 ? "high" : "low"}
+											decoding="async"
+										/>
+									</a>
+									<figcaption class="gallery-caption">
+										<h3>{item.title}</h3>
+										{item.description && <p>{item.description}</p>}
+									</figcaption>
+								</figure>
+							))}
+						</div>
+					</section>
+				))}
+			</div>
+			<div id="gallery-empty" class="gallery-empty card-base" hidden>
+				<Icon name="fa6-regular:image" aria-hidden="true" />
+				<p>Không tìm thấy ảnh phù hợp.</p>
+			</div>
+		</>
 	) : (
-		<div class="gallery-empty card-base text-50">
-			<Icon name="material-symbols:add-photo-alternate-outline-rounded" aria-hidden="true" />
+		<div class="gallery-empty card-base">
+			<Icon name="fa6-regular:image" aria-hidden="true" />
 			<p>Chưa có ảnh trong kho.</p>
 		</div>
 	)}
 </MainGridLayout>
 
+<script is:inline>
+(() => {
+	const initGalleryFilters = () => {
+		const search = document.querySelector('#gallery-search');
+		const year = document.querySelector('#gallery-year');
+		const album = document.querySelector('#gallery-album');
+		const reset = document.querySelector('#gallery-reset');
+		const summary = document.querySelector('#gallery-summary');
+		const empty = document.querySelector('#gallery-empty');
+		if (!(search instanceof HTMLInputElement) || !(year instanceof HTMLSelectElement) || !(album instanceof HTMLSelectElement) || !(reset instanceof HTMLButtonElement)) return;
+		if (search.dataset.bound === 'true') return;
+		search.dataset.bound = 'true';
+
+		const apply = () => {
+			const query = search.value.trim().toLocaleLowerCase('vi');
+			let visibleItems = 0;
+			let visibleGroups = 0;
+			document.querySelectorAll('[data-gallery-group]').forEach((group) => {
+				let groupItems = 0;
+				group.querySelectorAll('[data-gallery-item]').forEach((item) => {
+					const matches = (!query || item.dataset.search?.includes(query)) && (!year.value || item.dataset.year === year.value) && (!album.value || item.dataset.album === album.value.toLocaleLowerCase('vi'));
+					item.hidden = !matches;
+					if (matches) groupItems += 1;
+				});
+				group.hidden = groupItems === 0;
+				if (groupItems > 0) visibleGroups += 1;
+				visibleItems += groupItems;
+			});
+			reset.disabled = !query && !year.value && !album.value;
+			if (summary) summary.textContent = `${visibleItems} ảnh trong ${visibleGroups} bộ`;
+			if (empty) empty.hidden = visibleItems !== 0;
+		};
+
+		search.addEventListener('input', apply);
+		year.addEventListener('change', apply);
+		album.addEventListener('change', apply);
+		reset.addEventListener('click', () => {
+			search.value = '';
+			year.value = '';
+			album.value = '';
+			apply();
+			search.focus();
+		});
+	};
+
+	initGalleryFilters();
+	document.addEventListener('astro:page-load', initGalleryFilters);
+	document.addEventListener('swup:page:view', initGalleryFilters);
+})();
+</script>
+
 <style>
 	.gallery-header {
+		padding: 0.35rem 0.25rem 1.25rem;
 		border-bottom: 1px solid var(--line-divider);
-		padding-bottom: 1rem;
+	}
+
+	.gallery-title-row,
+	.gallery-group-heading,
+	.gallery-toolbar,
+	.gallery-search {
+		display: flex;
+		align-items: center;
+	}
+
+	.gallery-title-row {
+		gap: 0.9rem;
 	}
 
 	.gallery-heading-icon {
 		display: grid;
-		width: 2.75rem;
-		height: 2.75rem;
+		width: 3rem;
+		height: 3rem;
+		flex: 0 0 auto;
 		place-items: center;
 		border-radius: 8px;
 		background: var(--btn-regular-bg);
 		color: var(--primary);
-		font-size: 1.5rem;
+		font-size: 1.35rem;
+	}
+
+	.gallery-kicker,
+	.gallery-header h1,
+	.gallery-header p,
+	.gallery-group-heading h2,
+	.gallery-group-heading p,
+	.gallery-caption h3,
+	.gallery-caption p {
+		margin: 0;
+	}
+
+	.gallery-kicker {
+		color: var(--primary);
+		font-size: 0.72rem;
+		font-weight: 850;
+		text-transform: uppercase;
+	}
+
+	.gallery-header h1 {
+		color: var(--content-color);
+		font-size: 2rem;
+		line-height: 1.15;
+	}
+
+	.gallery-header #gallery-summary {
+		margin-top: 0.25rem;
+		color: var(--meta-color);
+		font-size: 0.86rem;
+	}
+
+	.gallery-toolbar {
+		position: sticky;
+		top: 5rem;
+		z-index: 20;
+		display: grid;
+		grid-template-columns: minmax(13rem, 1.4fr) minmax(8rem, 0.6fr) minmax(10rem, 0.8fr) auto;
+		gap: 0.65rem;
+		margin: 1rem 0 1.5rem;
+		padding: 0.75rem;
+		border: 1px solid var(--card-border);
+		border-radius: 8px;
+		background: var(--float-panel-bg);
+		box-shadow: var(--card-shadow);
+		backdrop-filter: blur(18px) saturate(1.1);
+	}
+
+	.gallery-toolbar label:not(.gallery-search) {
+		display: grid;
+		gap: 0.25rem;
+		color: var(--meta-color);
+		font-size: 0.7rem;
+		font-weight: 800;
+	}
+
+	.gallery-search {
+		gap: 0.55rem;
+		padding: 0 0.75rem;
+	}
+
+	.gallery-search,
+	.gallery-toolbar select,
+	.gallery-reset {
+		min-height: 2.75rem;
+		border: 1px solid var(--card-border);
+		border-radius: 7px;
+		background: var(--btn-regular-bg);
+		color: var(--content-color);
+	}
+
+	.gallery-search input {
+		min-width: 0;
+		width: 100%;
+		border: 0;
+		background: transparent;
+		color: inherit;
+		outline: none;
+	}
+
+	.gallery-toolbar select {
+		width: 100%;
+		padding: 0 0.65rem;
+		font: inherit;
+		font-weight: 750;
+	}
+
+	.gallery-reset {
+		display: inline-flex;
+		align-items: center;
+		align-self: end;
+		justify-content: center;
+		gap: 0.4rem;
+		padding: 0 0.8rem;
+		font: inherit;
+		font-weight: 800;
+		cursor: pointer;
+	}
+
+	.gallery-reset:disabled {
+		cursor: default;
+		opacity: 0.48;
+	}
+
+	.gallery-groups {
+		display: grid;
+		gap: 2rem;
+	}
+
+	.gallery-group-heading {
+		justify-content: space-between;
+		gap: 1rem;
+		margin-bottom: 0.75rem;
+		padding: 0 0.2rem 0.65rem;
+		border-bottom: 1px solid var(--line-divider);
+	}
+
+	.gallery-group-heading h2 {
+		color: var(--content-color);
+		font-size: 1.15rem;
+	}
+
+	.gallery-group-heading p,
+	.gallery-group-heading > span {
+		color: var(--meta-color);
+		font-size: 0.76rem;
 	}
 
 	.photo-gallery {
 		column-count: 1;
-		column-gap: 1rem;
+		column-gap: 0.85rem;
 	}
 
 	.gallery-card {
 		display: inline-block;
 		width: 100%;
-		margin: 0 0 1rem;
+		margin: 0 0 0.85rem;
 		break-inside: avoid;
 		overflow: hidden;
 	}
@@ -198,7 +411,7 @@ function formatDate(value: string) {
 		display: block;
 		width: 100%;
 		height: auto;
-		transition: transform 180ms ease, filter 180ms ease;
+		transition: transform 220ms ease, filter 220ms ease;
 	}
 
 	.gallery-image-link:hover img {
@@ -207,8 +420,21 @@ function formatDate(value: string) {
 	}
 
 	.gallery-caption {
-		padding: 0.9rem 1rem 1rem;
+		padding: 0.7rem 0.85rem 0.8rem;
 		border-top: 1px solid var(--line-divider);
+	}
+
+	.gallery-caption h3 {
+		color: var(--content-color);
+		font-size: 0.88rem;
+		line-height: 1.35;
+	}
+
+	.gallery-caption p {
+		margin-top: 0.35rem;
+		color: var(--meta-color);
+		font-size: 0.78rem;
+		line-height: 1.55;
 	}
 
 	.gallery-empty {
@@ -217,22 +443,45 @@ function formatDate(value: string) {
 		place-content: center;
 		justify-items: center;
 		gap: 0.75rem;
+		color: var(--meta-color);
+	}
+
+	.gallery-empty[hidden],
+	.gallery-group[hidden],
+	.gallery-card[hidden] {
+		display: none;
 	}
 
 	.gallery-empty :global(svg) {
-		font-size: 2.5rem;
 		color: var(--primary);
+		font-size: 2.25rem;
 	}
 
 	@media (min-width: 640px) {
-		.photo-gallery {
-			column-count: 2;
-		}
+		.photo-gallery { column-count: 2; }
 	}
 
-	@media (min-width: 1280px) {
-		.photo-gallery {
-			column-count: 3;
+	@media (min-width: 1024px) {
+		.photo-gallery { column-count: 3; }
+	}
+
+	@media (min-width: 1440px) {
+		.photo-gallery { column-count: 4; }
+	}
+
+	@media (max-width: 760px) {
+		.gallery-header h1 { font-size: 1.7rem; }
+		.gallery-toolbar {
+			position: static;
+			grid-template-columns: 1fr 1fr;
 		}
+		.gallery-search { grid-column: 1 / -1; }
+		.gallery-reset { width: 100%; }
+	}
+
+	@media (max-width: 420px) {
+		.gallery-toolbar { grid-template-columns: 1fr; }
+		.gallery-search { grid-column: auto; }
+		.gallery-group-heading { align-items: flex-end; }
 	}
 </style>

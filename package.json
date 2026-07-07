@@ -17,6 +17,7 @@
 		"check:site": "node scripts/check-site-health.mjs",
 		"new-post": "node scripts/new-post.js",
 		"new-photo": "node scripts/new-gallery-photo.mjs",
+		"import-gallery": "node scripts/import-gallery-folder.mjs",
 		"optimize-post-images": "node scripts/optimize-post-images.mjs",
 		"format": "biome format --write ./src ./api ./scripts ./tests",
 		"lint": "biome check ./src ./api ./scripts ./tests",
