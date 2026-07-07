@@ -4,6 +4,8 @@ html {
     scroll-behavior: smooth;
     min-height: 100%;
     background-color: var(--page-bg);
+    color: var(--content-color);
+    color-scheme: light;
     background-image:
 		linear-gradient(180deg, var(--page-wash) 0, transparent 34rem),
 		radial-gradient(circle at center, var(--page-noise) 0 0.38px, transparent 0.65px),
@@ -13,9 +15,14 @@ html {
 	background-repeat: no-repeat, repeat, repeat, repeat;
 }
 
+html.dark {
+    color-scheme: dark;
+}
+
 body {
     min-height: 100vh;
     background: transparent;
+    color: inherit;
 }
 
 .skip-link {
