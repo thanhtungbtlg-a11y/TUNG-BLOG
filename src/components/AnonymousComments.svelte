@@ -518,6 +518,7 @@ function resetMessages() {
 	.comment-panel {
 		padding: 1rem;
 		margin-bottom: 1.5rem;
+		scroll-margin-top: 5.5rem;
 	}
 
 	.comment-heading,
@@ -952,8 +953,14 @@ function resetMessages() {
 			flex-wrap: wrap;
 		}
 
+		.comment-actions button,
+		.comment-reply-button,
+		.ghost-button {
+			min-height: 2.75rem;
+		}
+
 		.comment-entry {
-			margin-left: min(var(--thread-indent, 0rem), 2.75rem);
+			margin-left: min(var(--thread-indent, 0rem), 1.75rem);
 		}
 
 		.reply-actions {

@@ -779,6 +779,12 @@ function setViewMode(mode: ViewMode) {
 
 		.view-switch button {
 			width: 100%;
+			height: 2.5rem;
+		}
+
+		.archive-filters select,
+		.reset-button {
+			min-height: 2.75rem;
 		}
 
 		.compact-post {

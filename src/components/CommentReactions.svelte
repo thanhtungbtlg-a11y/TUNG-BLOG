@@ -312,12 +312,20 @@ function isReactionId(value: unknown): value is ReactionId {
 	@media (max-width: 420px) {
 		.reaction-picker {
 			left: -0.3rem;
+			display: grid;
+			grid-template-columns: repeat(3, 2.5rem);
+			border-radius: 1rem;
 		}
 
 		.reaction-picker button {
-			width: 2rem;
-			height: 2rem;
-			font-size: 1.12rem;
+			width: 2.5rem;
+			height: 2.5rem;
+			font-size: 1.2rem;
+		}
+
+		.reaction-trigger {
+			width: 2.5rem;
+			height: 2.5rem;
 		}
 	}
 </style>

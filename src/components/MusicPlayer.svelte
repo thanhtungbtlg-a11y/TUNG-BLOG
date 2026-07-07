@@ -1255,8 +1255,8 @@ function formatTime(seconds: number) {
 		.music-player {
 			right: 10px;
 			left: auto;
-			bottom: 10px;
-			width: min(286px, calc(100vw - 20px));
+			bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+			width: min(268px, calc(100vw - 20px));
 		}
 
 		.music-player.expanded {
@@ -1266,8 +1266,9 @@ function formatTime(seconds: number) {
 		}
 
 		.panel {
-			max-height: 58vh;
+			max-height: min(58vh, 32rem);
 			overflow-y: auto;
+			overscroll-behavior: contain;
 		}
 	}
 

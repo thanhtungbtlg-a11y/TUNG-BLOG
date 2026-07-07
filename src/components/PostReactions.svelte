@@ -346,6 +346,7 @@ function isReactionId(value: unknown): value is ReactionId {
 	@media (max-width: 768px) {
 		.reaction-panel {
 			grid-template-columns: 1fr;
+			gap: 0.75rem;
 		}
 
 		.reaction-actions {
@@ -355,6 +356,7 @@ function isReactionId(value: unknown): value is ReactionId {
 
 		button {
 			justify-content: center;
+			min-height: 2.75rem;
 			min-width: 0;
 		}
 	}
