@@ -1,19 +1,50 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import { getPostUrlBySlug } from "@utils/url-utils";
+import { Icon } from "astro-icon/components";
 import PostCard from "./PostCard.astro";
 
 const { page } = Astro.props;
 
 let delay = 0;
 const interval = 50;
+const isHome = page.currentPage === 1;
+const posts = page.data.map(
+	(entry: CollectionEntry<"posts">, index: number) => {
+		const previous = page.data[index - 1] as
+			| CollectionEntry<"posts">
+			| undefined;
+		let sectionLabel = "";
+
+		if (isHome && index === 0) {
+			sectionLabel = entry.data.pinned
+				? "Nổi bật"
+				: entry.data.latest
+					? "Mới nhất"
+					: "Bài viết mới";
+		} else if (isHome && previous?.data.pinned && !entry.data.pinned) {
+			sectionLabel = entry.data.latest ? "Mới nhất" : "Bài viết mới";
+		} else if (isHome && previous?.data.latest && !entry.data.latest) {
+			sectionLabel = "Gần đây";
+		}
+
+		return { entry, index, sectionLabel };
+	},
+);
 ---
-<h1 class="sr-only">Bài viết của Nguyễn Thanh Tùng</h1>
+
+{!isHome && <h1 class="sr-only">Bài viết của Nguyễn Thanh Tùng</h1>}
 <div class="transition flex flex-col rounded-[var(--radius-large)] bg-[var(--card-bg)] py-1 md:py-0 md:bg-transparent md:gap-4 mb-4">
-    {page.data.map((entry: CollectionEntry<"posts">, index: number) => (
-        <PostCard
+    {posts.map(({entry, index, sectionLabel}) => (
+        <>
+            {sectionLabel && <div class="feed-heading onload-animation">
+                <Icon name={entry.data.pinned ? "material-symbols:push-pin" : "material-symbols:stars-rounded"} />
+                <h2>{sectionLabel}</h2>
+                <span></span>
+            </div>}
+            <PostCard
                 entry={entry}
-                featured={page.currentPage === 1 && index === 0}
+                featured={isHome && index === 0}
                 title={entry.data.title}
                 tags={entry.data.tags}
                 category={entry.data.category}
@@ -26,6 +57,37 @@ const interval = 50;
                 description={entry.data.description}
 				class:list="onload-animation"
                 style={`animation-delay: calc(var(--content-delay) + ${delay++ * interval}ms);`}
-        ></PostCard>
+            ></PostCard>
+        </>
     ))}
 </div>
+
+<style>
+    .feed-heading {
+        display: grid;
+        grid-template-columns: auto auto 1fr;
+        align-items: center;
+        gap: 0.55rem;
+        margin: 0.65rem 0 -0.15rem;
+        padding-inline: 0.25rem;
+        color: var(--primary);
+    }
+
+    .feed-heading :global(svg) {
+        font-size: 1.15rem;
+    }
+
+    .feed-heading h2 {
+        margin: 0;
+        color: var(--content-color);
+        font-size: 0.88rem;
+        font-weight: 850;
+        letter-spacing: 0;
+        text-transform: uppercase;
+    }
+
+    .feed-heading span {
+        height: 1px;
+        background: var(--line-divider);
+    }
+</style>

@@ -29,7 +29,6 @@ const { posts } = Astro.props;
 						data-related-post
 						href={getPostUrlBySlug(post.slug)}
 						class="related-card card-base interactive-card group block overflow-hidden"
-						aria-label={post.data.title}
 					>
 						<div class="relative h-32 overflow-hidden bg-[var(--btn-regular-bg)]">
 							{hasCover ? (

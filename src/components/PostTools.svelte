@@ -19,15 +19,50 @@ let { slug, title, url, published } = $props<{
 
 const BOOKMARKS_KEY = "blog-read-later-posts";
 const READING_MODE_KEY = "blog-reading-mode";
+const READER_FONT_KEY = "blog-reader-font";
+const READER_WIDTH_KEY = "blog-reader-width";
 const MAX_BOOKMARKS = 60;
+
+type ReaderFont = "compact" | "normal" | "large";
+type ReaderWidth = "narrow" | "normal" | "wide";
+
+const fontOptions: Array<{ id: ReaderFont; label: string; scale: number }> = [
+	{ id: "compact", label: "A−", scale: 0.94 },
+	{ id: "normal", label: "A", scale: 1 },
+	{ id: "large", label: "A+", scale: 1.1 },
+];
+const widthOptions: Array<{
+	id: ReaderWidth;
+	label: string;
+	content: string;
+	shell: string;
+}> = [
+	{ id: "narrow", label: "Hẹp", content: "40rem", shell: "44rem" },
+	{ id: "normal", label: "Vừa", content: "46rem", shell: "50rem" },
+	{ id: "wide", label: "Rộng", content: "54rem", shell: "58rem" },
+];
 
 let saved = $state(false);
 let readingMode = $state(false);
+let settingsOpen = $state(false);
+let readerFont = $state<ReaderFont>("normal");
+let readerWidth = $state<ReaderWidth>("normal");
 
 onMount(() => {
 	saved = readBookmarks().some((post) => post.slug === slug);
 	readingMode = localStorage.getItem(READING_MODE_KEY) === "true";
+	readerFont = readOption(
+		localStorage.getItem(READER_FONT_KEY),
+		fontOptions,
+		"normal",
+	);
+	readerWidth = readOption(
+		localStorage.getItem(READER_WIDTH_KEY),
+		widthOptions,
+		"normal",
+	);
 	applyReadingMode();
+	applyReaderSettings();
 });
 
 onDestroy(() => {
@@ -71,6 +106,53 @@ function applyReadingMode() {
 	localStorage.setItem(READING_MODE_KEY, String(readingMode));
 }
 
+function readOption<T extends string>(
+	stored: string | null,
+	options: Array<{ id: T }>,
+	fallback: T,
+): T {
+	return options.some((option) => option.id === stored)
+		? (stored as T)
+		: fallback;
+}
+
+function setReaderFont(value: ReaderFont) {
+	readerFont = value;
+	applyReaderSettings();
+}
+
+function setReaderWidth(value: ReaderWidth) {
+	readerWidth = value;
+	applyReaderSettings();
+}
+
+function resetReaderSettings() {
+	readerFont = "normal";
+	readerWidth = "normal";
+	applyReaderSettings();
+}
+
+function applyReaderSettings() {
+	const font =
+		fontOptions.find((option) => option.id === readerFont) ?? fontOptions[1];
+	const width =
+		widthOptions.find((option) => option.id === readerWidth) ?? widthOptions[1];
+	document.documentElement.style.setProperty(
+		"--reader-font-scale",
+		String(font.scale),
+	);
+	document.documentElement.style.setProperty(
+		"--reader-content-width",
+		width.content,
+	);
+	document.documentElement.style.setProperty(
+		"--reader-shell-width",
+		width.shell,
+	);
+	localStorage.setItem(READER_FONT_KEY, readerFont);
+	localStorage.setItem(READER_WIDTH_KEY, readerWidth);
+}
+
 function readBookmarks(): SavedPost[] {
 	try {
 		const value = JSON.parse(localStorage.getItem(BOOKMARKS_KEY) || "[]");
@@ -92,7 +174,7 @@ function writeBookmarks(posts: SavedPost[]) {
 }
 </script>
 
-<div class="post-tools onload-animation" aria-label="Công cụ đọc bài viết">
+<div class="post-tools" aria-label="Công cụ đọc bài viết">
 	<button
 		type="button"
 		class:active={saved}
@@ -112,9 +194,57 @@ function writeBookmarks(posts: SavedPost[]) {
 		onclick={toggleReadingMode}
 	>
 		<Icon icon={readingMode ? "material-symbols:chrome-reader-mode-rounded" : "material-symbols:chrome-reader-mode-outline-rounded"} />
-		<span>{readingMode ? "Đang đọc" : "Reading mode"}</span>
+		<span>{readingMode ? "Đang đọc" : "Tập trung"}</span>
+	</button>
+
+	<button
+		type="button"
+		class="settings-toggle"
+		class:active={settingsOpen}
+		aria-expanded={settingsOpen}
+		aria-controls="reader-settings"
+		title="Tùy chỉnh hiển thị bài viết"
+		onclick={() => (settingsOpen = !settingsOpen)}
+	>
+		<Icon icon="material-symbols:text-fields-rounded" />
+		<span>Hiển thị</span>
 	</button>
 </div>
+
+{#if settingsOpen}
+	<div id="reader-settings" class="reader-settings onload-animation">
+		<div class="setting-row">
+			<span class="setting-label">Cỡ chữ</span>
+			<div class="segment" role="group" aria-label="Cỡ chữ bài viết">
+				{#each fontOptions as option}
+					<button
+						type="button"
+						class:active={readerFont === option.id}
+						aria-pressed={readerFont === option.id}
+						onclick={() => setReaderFont(option.id)}
+					>{option.label}</button>
+				{/each}
+			</div>
+		</div>
+		<div class="setting-row">
+			<span class="setting-label">Độ rộng</span>
+			<div class="segment" role="group" aria-label="Độ rộng nội dung">
+				{#each widthOptions as option}
+					<button
+						type="button"
+						class:active={readerWidth === option.id}
+						aria-pressed={readerWidth === option.id}
+						onclick={() => setReaderWidth(option.id)}
+					>{option.label}</button>
+				{/each}
+			</div>
+		</div>
+		<button class="reset-reader" type="button" onclick={resetReaderSettings}>
+			<Icon icon="material-symbols:restart-alt-rounded" />
+			<span>Mặc định</span>
+		</button>
+	</div>
+{/if}
 
 <style>
 	.post-tools {
@@ -162,6 +292,61 @@ function writeBookmarks(posts: SavedPost[]) {
 		color: var(--primary);
 	}
 
+	.reader-settings {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+		align-items: center;
+		gap: 0.75rem;
+		margin: -0.55rem 0 1.35rem;
+		padding: 0.75rem;
+		border: 1px solid var(--card-border);
+		border-radius: 8px;
+		background: color-mix(in oklch, var(--card-bg-solid), transparent 10%);
+		box-shadow: var(--card-shadow);
+	}
+
+	.setting-row {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr);
+		align-items: center;
+		gap: 0.6rem;
+	}
+
+	.setting-label {
+		color: var(--meta-color);
+		font-size: 0.76rem;
+		font-weight: 800;
+	}
+
+	.segment {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(2.4rem, 1fr));
+		gap: 0.15rem;
+		padding: 0.18rem;
+		border: 1px solid var(--card-border);
+		border-radius: 7px;
+		background: var(--btn-regular-bg);
+	}
+
+	.segment button,
+	.reset-reader {
+		min-height: 2rem;
+		padding: 0 0.55rem;
+		border: 0;
+		border-radius: 5px;
+		background: transparent;
+		font-size: 0.76rem;
+	}
+
+	.segment button.active {
+		background: var(--card-bg-solid);
+		box-shadow: 0 2px 8px color-mix(in srgb, var(--page-bg), black 10%);
+	}
+
+	.reset-reader {
+		white-space: nowrap;
+	}
+
 	@media (max-width: 768px) {
 		.post-tools {
 			display: grid;
@@ -171,6 +356,18 @@ function writeBookmarks(posts: SavedPost[]) {
 		button {
 			justify-content: center;
 			padding-inline: 0.65rem;
+		}
+
+		.settings-toggle {
+			grid-column: 1 / -1;
+		}
+
+		.reader-settings {
+			grid-template-columns: 1fr;
+		}
+
+		.setting-row {
+			grid-template-columns: 4.5rem minmax(0, 1fr);
 		}
 	}
 </style>

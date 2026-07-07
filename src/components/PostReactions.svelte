@@ -237,13 +237,13 @@ function isReactionId(value: unknown): value is ReactionId {
 			<button
 				data-reaction-button
 				class:active={state.active === reaction.id}
-				aria-label={reaction.label}
 				aria-pressed={state.active === reaction.id}
 				disabled={saving}
 				title={reaction.label}
 				onclick={() => toggleReaction(reaction.id)}
 			>
 				<span class="reaction-emoji" aria-hidden="true">{reaction.emoji}</span>
+				<span class="sr-only">{reaction.label}</span>
 				<strong>{state.counts[reaction.id]}</strong>
 			</button>
 		{/each}

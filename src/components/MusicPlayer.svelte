@@ -8,6 +8,7 @@ type Track = {
 	artist: string;
 	src: string;
 	cover: string;
+	coverThumb?: string;
 };
 
 type PlayerTabState = {
@@ -705,12 +706,12 @@ function formatTime(seconds: number) {
 			class="mini"
 			role="button"
 			tabindex="0"
-			aria-label={expanded ? "Collapse music player" : "Expand music player"}
 			onclick={toggleExpanded}
 			onkeydown={handleMiniKeydown}
 		>
+			<span class="sr-only">{expanded ? "Thu gọn trình phát nhạc" : "Mở trình phát nhạc"}</span>
 			<div class="cover-shell">
-				<img src={currentTrack.cover} alt={currentTrack.title} class="cover-mini" onerror={useFallbackCover} />
+				<img src={currentTrack.coverThumb || currentTrack.cover} alt={currentTrack.title} class="cover-mini" onerror={useFallbackCover} />
 				<div class="pulse"></div>
 			</div>
 
@@ -811,7 +812,7 @@ function formatTime(seconds: number) {
 							title={`${track.title} - ${track.artist}`}
 							onclick={() => changeTrack(index)}
 						>
-							<img src={track.cover} alt={track.title} onerror={useFallbackCover} />
+							<img src={track.coverThumb || track.cover} alt={track.title} onerror={useFallbackCover} />
 							<div>
 								<div class="track-title" title={track.title}>{track.title}</div>
 								<div class="track-artist">{track.artist}</div>

@@ -240,10 +240,10 @@ body {
 }
 
 #post-container .markdown-content {
-	max-width: 46rem !important;
+	max-width: var(--reader-content-width, 46rem) !important;
 	margin-inline: auto;
 	color: var(--content-color);
-	font-size: 1.04rem;
+	font-size: calc(1.04rem * var(--reader-font-scale, 1));
 	line-height: 1.82;
 }
 
@@ -322,7 +322,7 @@ body {
 
 @media (max-width: 640px) {
 	#post-container .markdown-content {
-		font-size: 1.08rem;
+		font-size: calc(1.08rem * var(--reader-font-scale, 1));
 		line-height: 1.88;
 	}
 
@@ -341,9 +341,9 @@ html.reading-mode #toc-wrapper {
 }
 
 html.reading-mode #main-grid {
-    max-width: min(48rem, calc(100vw - 2rem));
+	max-width: min(var(--reader-shell-width, 50rem), calc(100vw - 2rem));
     grid-auto-columns: 0 !important;
-    grid-template-columns: minmax(0, 48rem) !important;
+	grid-template-columns: minmax(0, var(--reader-shell-width, 50rem)) !important;
     justify-content: center;
 }
 
@@ -356,7 +356,7 @@ html.reading-mode #swup-container {
 }
 
 html.reading-mode #content-wrapper {
-    max-width: 48rem;
+	max-width: var(--reader-shell-width, 50rem);
     margin-inline: auto;
 }
 
@@ -365,7 +365,7 @@ html.reading-mode #post-container {
 }
 
 html.reading-mode .markdown-content {
-	font-size: 1.08rem;
+	font-size: calc(1.08rem * var(--reader-font-scale, 1));
 	line-height: 1.94;
 }
 

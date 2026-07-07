@@ -66,6 +66,7 @@ const ogImageUrl = ogImage
 
 const favicons: Favicon[] =
 	siteConfig.favicon.length > 0 ? siteConfig.favicon : defaultFavicons;
+const enableAnalytics = import.meta.env.PROD && process.env.VERCEL === "1";
 
 // const siteLang = siteConfig.lang.replace('_', '-')
 if (!lang) {
@@ -144,6 +145,20 @@ const siteLang = lang.replace("_", "-");
 			} else if (!localStorage.getItem('hue')) {
 				document.documentElement.dataset.palette = 'ocean';
 			}
+
+			const readerFontScales = { compact: '0.94', normal: '1', large: '1.1' };
+			const readerWidths = {
+				narrow: ['40rem', '44rem'],
+				normal: ['46rem', '50rem'],
+				wide: ['54rem', '58rem'],
+			};
+			const storedReaderFont = localStorage.getItem('blog-reader-font');
+			const storedReaderWidth = localStorage.getItem('blog-reader-width');
+			const readerScale = readerFontScales[storedReaderFont] || readerFontScales.normal;
+			const readerWidth = readerWidths[storedReaderWidth] || readerWidths.normal;
+			document.documentElement.style.setProperty('--reader-font-scale', readerScale);
+			document.documentElement.style.setProperty('--reader-content-width', readerWidth[0]);
+			document.documentElement.style.setProperty('--reader-shell-width', readerWidth[1]);
 		</script>
 		<style define:vars={{
 			configHue,
@@ -159,10 +174,10 @@ const siteLang = lang.replace("_", "-");
 	<body class="min-h-screen transition">
 		<a class="skip-link" href="#swup-container">Chuyển đến nội dung chính</a>
 		<ConfigCarrier></ConfigCarrier>
-		<ReadingProgress client:load />
+		{setOGTypeArticle && <ReadingProgress client:idle />}
 		<slot />
 		{!hidePlayer && <MusicPlayer client:idle />}
- 		<Analytics />
+		{enableAnalytics && <Analytics />}
 		<script is:inline>
 			(() => {
 				const registerWebMcpTools = () => {

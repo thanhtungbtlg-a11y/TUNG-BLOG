@@ -74,14 +74,14 @@ const jsonLd = {
 	image: ogImageUrl.toString(),
 };
 ---
-<MainGridLayout title={entry.data.title} description={entry.data.description} lang={entry.data.lang} setOGTypeArticle={true} headings={headings} ogImage={ogImageUrl.toString()}>
+<MainGridLayout title={entry.data.title} description={entry.data.description} lang={entry.data.lang} setOGTypeArticle={true} headings={headings} ogImage={ogImageUrl.toString()} immediateContent={true}>
     <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
     <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4">
         <div id="post-container" class:list={["card-base z-10 px-6 md:px-9 pt-6 pb-4 relative w-full ",
             {}
         ]}>
             <!-- word count and reading time -->
-            <div class="flex flex-row text-black/30 dark:text-white/30 gap-5 mb-3 transition onload-animation">
+            <div class="flex flex-row text-[var(--meta-color)] gap-5 mb-3 transition">
                 <div class="flex flex-row items-center">
                     <div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2">
                         <Icon name="material-symbols:notes-rounded"></Icon>
@@ -99,7 +99,7 @@ const jsonLd = {
             </div>
 
             <!-- title -->
-            <div class="relative onload-animation">
+            <div class="relative">
 				<h1
                     class="transition w-full block font-bold mb-3
                     text-3xl md:text-[2.25rem]/[2.75rem]
@@ -112,7 +112,7 @@ const jsonLd = {
             </div>
 
             <!-- metadata -->
-            <div class="onload-animation">
+            <div>
                 <PostMetadata
                         class="mb-5"
                         published={entry.data.published}
@@ -128,16 +128,16 @@ const jsonLd = {
                 title={entry.data.title}
                 url={shareUrl}
                 published={formatDateToYYYYMMDD(entry.data.published)}
-                client:load
+                client:idle
             />
 
             <!-- always show cover as long as it has one -->
 
             {entry.data.image &&
-                <ImageWrapper id="post-cover" src={entry.data.image} alt={`Ảnh bìa: ${entry.data.title}`} basePath={path.join("content/posts/", getDir(entry.id))} widths={[640, 960, 1280]} sizes="(max-width: 1024px) calc(100vw - 2rem), 768px" class="mb-8 rounded-xl cover-zoom onload-animation"/>
+                <ImageWrapper id="post-cover" src={entry.data.image} alt={`Ảnh bìa: ${entry.data.title}`} basePath={path.join("content/posts/", getDir(entry.id))} widths={[640, 960, 1280]} sizes="(max-width: 1024px) calc(100vw - 2rem), 768px" class="mb-8 rounded-xl cover-zoom"/>
             }
 
-            <div class="onload-animation mb-7 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.18em] text-black/35 dark:text-white/35">
+            <div class="mb-7 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.18em] text-[var(--meta-color)]">
                 <div class="h-px flex-1 border-t border-dashed border-[var(--line-divider)]"></div>
                 <div class="inline-flex items-center gap-2 rounded-full bg-black/5 px-3 py-1.5 dark:bg-white/10">
                     <Icon name="material-symbols:menu-book-outline-rounded" class="text-base text-[var(--primary)]" />
@@ -147,7 +147,7 @@ const jsonLd = {
             </div>
 
 
-            <Markdown class="mb-6 markdown-content onload-animation">
+            <Markdown class="mb-6 markdown-content">
                 <Content />
             </Markdown>
 
