@@ -141,8 +141,9 @@ Không xóa dấu phẩy giữa các trường. Khi chạy lại `pnpm import-ga
 nhập vẫn được giữ lại. Trên web, mô tả xuất hiện dưới tên ảnh ở card Kho ảnh và
 dưới tên ảnh trong cửa sổ phóng to; nội dung mô tả cũng được dùng khi tìm kiếm.
 
-Cũng có thể dùng tab **Kho ảnh** tại `/admin/` để tải ảnh, nhập alt text, đổi tên,
-tìm kiếm và xóa ảnh. Trước khi xóa, kiểm tra ảnh có đang được bài viết sử dụng không.
+Có thể dùng tab **Kho ảnh** tại `/admin/` mà không cần chạy lệnh. Chọn **Kho ảnh
+công khai** để upload ảnh lên `/gallery/`, chọn album, nhập mô tả/ngày chụp, sửa
+thứ tự hoặc xóa ảnh. Chọn **Ảnh bài viết** để quản lý ảnh dùng trong nội dung blog.
 
 ## 6. Cập nhật avatar, logo và giao diện cơ bản
 

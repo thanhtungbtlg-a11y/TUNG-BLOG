@@ -72,9 +72,12 @@ không được lưu trong database.
 ## Media Library
 
 - Mở tab **Kho ảnh** trong `/admin/`.
-- Nhập mô tả trước khi tải ảnh để dùng làm alt text.
-- Ảnh được thu nhỏ và tạo đồng thời bản WebP cùng AVIF trong `public/media/`.
-- Có thể tìm theo tên/mô tả, đổi tên, sửa mô tả, sao chép mã ảnh hoặc chèn vào
-  bài đang mở.
-- Nút xóa sẽ xóa cả hai định dạng. Kiểm tra các bài đang dùng ảnh trước khi xóa.
-- Mỗi thao tác tạo một commit GitHub; Vercel tự triển khai bản mới.
+- Chọn **Kho ảnh công khai** để quản lý trang `/gallery/`: tải ảnh, chọn hoặc tạo
+  album, nhập ngày chụp, tiêu đề, mô tả và thứ tự; có thể sửa hoặc xóa ảnh cũ.
+- Số thứ tự nhỏ hơn đứng trước trong cùng ngày và album. Khi tải ảnh mới, để thứ
+  tự bằng `0` để hệ thống tự đặt ở cuối album.
+- Ảnh Kho ảnh được tạo thành bản đầy đủ và thumbnail WebP trong `public/gallery/`;
+  metadata nằm tại `src/data/gallery.json`.
+- Chọn **Ảnh bài viết** để dùng thư viện `public/media/` cũ: đổi tên, sửa alt text,
+  sao chép mã ảnh hoặc chèn vào bài đang mở.
+- Mỗi thao tác lưu, tải hoặc xóa tạo một commit GitHub; Vercel tự triển khai bản mới.

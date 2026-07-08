@@ -59,6 +59,20 @@ type MediaItem = {
 	createdAt: string;
 };
 
+type GalleryAdminItem = {
+	filename: string;
+	thumbnail?: string;
+	title: string;
+	description: string;
+	date: string;
+	album: string;
+	width: number;
+	height: number;
+	order: number;
+	src: string;
+	thumbnailSrc: string;
+};
+
 type PostApiResult = {
 	data?: Partial<Omit<EditorPost, "slug" | "tags" | "body">> & {
 		tags?: string[];
@@ -105,6 +119,16 @@ let media = $state<MediaItem[]>([]);
 let mediaSearch = $state("");
 let mediaAlt = $state("");
 let mediaLoaded = $state(false);
+let mediaSection = $state<"gallery" | "library">("gallery");
+let galleryItems = $state<GalleryAdminItem[]>([]);
+let galleryAlbums = $state<string[]>([]);
+let gallerySearch = $state("");
+let galleryLoaded = $state(false);
+let galleryTitle = $state("");
+let galleryDescription = $state("");
+let galleryDate = $state(new Date().toISOString().slice(0, 10));
+let galleryAlbum = $state("Ảnh chọn lọc");
+let galleryOrder = $state(0);
 let editor = $state(createEmptyPost());
 let editorMode = $state<"write" | "preview">("write");
 let busy = $state(false);
@@ -113,6 +137,7 @@ let error = $state("");
 let notice = $state("");
 let fileInput = $state<HTMLInputElement>();
 let mediaFileInput = $state<HTMLInputElement>();
+let galleryFileInput = $state<HTMLInputElement>();
 let bodyTextarea = $state<HTMLTextAreaElement>();
 
 onMount(() => {
@@ -183,6 +208,8 @@ async function signOut() {
 	comments = [];
 	media = [];
 	mediaLoaded = false;
+	galleryItems = [];
+	galleryLoaded = false;
 }
 
 function createEmptyPost(): EditorPost {
@@ -326,6 +353,20 @@ async function uploadImage(event: Event) {
 async function openMediaTab() {
 	clearMessages();
 	activeTab = "media";
+	if (!galleryLoaded) await loadGallery();
+}
+
+async function openGallerySection() {
+	clearMessages();
+	activeTab = "media";
+	mediaSection = "gallery";
+	if (!galleryLoaded) await loadGallery();
+}
+
+async function openLibrarySection() {
+	clearMessages();
+	activeTab = "media";
+	mediaSection = "library";
 	if (!mediaLoaded) await loadMedia();
 }
 
@@ -351,6 +392,195 @@ async function loadMedia() {
 	} catch (loadError) {
 		error = errorMessage(loadError);
 	}
+}
+
+async function loadGallery() {
+	if (!isAdmin) return;
+	galleryLoaded = false;
+	clearMessages();
+	try {
+		const result = await adminFetch<{
+			items: GalleryAdminItem[];
+			albums: string[];
+		}>("/api/admin/gallery");
+		galleryItems = result.items ?? [];
+		galleryAlbums = result.albums ?? [];
+		galleryLoaded = true;
+	} catch (loadError) {
+		error = errorMessage(loadError);
+	}
+}
+
+async function uploadGalleryPhoto(event: Event) {
+	const input = event.currentTarget as HTMLInputElement;
+	const file = input.files?.[0];
+	if (!file) return;
+
+	uploading = true;
+	clearMessages();
+	try {
+		const compressed = await compressImage(file);
+		const fallbackTitle = file.name
+			.replace(/\.[^.]+$/, "")
+			.replace(/[-_]+/g, " ")
+			.trim();
+		const result = await adminFetch<{ item: GalleryAdminItem }>(
+			"/api/admin/gallery",
+			{
+				method: "POST",
+				body: JSON.stringify({
+					name: file.name,
+					title: galleryTitle.trim() || fallbackTitle,
+					description: galleryDescription.trim(),
+					date: galleryDate,
+					album: galleryAlbum.trim(),
+					...(galleryOrder > 0 ? { order: galleryOrder } : {}),
+					contentBase64: await blobToBase64(compressed),
+				}),
+			},
+		);
+		galleryItems = [result.item, ...galleryItems];
+		if (!galleryAlbums.includes(result.item.album)) {
+			galleryAlbums = [...galleryAlbums, result.item.album].sort((a, b) =>
+				a.localeCompare(b, "vi"),
+			);
+		}
+		galleryTitle = "";
+		galleryDescription = "";
+		galleryOrder = 0;
+		notice = "Đã thêm ảnh vào Kho ảnh. Vercel đang triển khai bản mới.";
+	} catch (uploadError) {
+		error = errorMessage(uploadError);
+	} finally {
+		uploading = false;
+		input.value = "";
+	}
+}
+
+async function saveGalleryPhoto(item: GalleryAdminItem) {
+	if (busy) return;
+	busy = true;
+	clearMessages();
+	try {
+		const result = await adminFetch<{ item: GalleryAdminItem }>(
+			"/api/admin/gallery",
+			{
+				method: "PATCH",
+				body: JSON.stringify({
+					filename: item.filename,
+					title: item.title,
+					description: item.description,
+					date: item.date,
+					album: item.album,
+					order: item.order,
+				}),
+			},
+		);
+		const index = galleryItems.findIndex(
+			(entry) => entry.filename === item.filename,
+		);
+		if (index >= 0) galleryItems[index] = result.item;
+		if (!galleryAlbums.includes(result.item.album)) {
+			galleryAlbums = [...galleryAlbums, result.item.album].sort((a, b) =>
+				a.localeCompare(b, "vi"),
+			);
+		}
+		notice = "Đã lưu thông tin và thứ tự ảnh.";
+	} catch (saveError) {
+		error = errorMessage(saveError);
+	} finally {
+		busy = false;
+	}
+}
+
+async function deleteGalleryPhoto(item: GalleryAdminItem) {
+	if (
+		busy ||
+		!window.confirm(
+			`Xóa “${item.title}” khỏi Kho ảnh? File ảnh và thumbnail cũng sẽ bị xóa.`,
+		)
+	)
+		return;
+	busy = true;
+	clearMessages();
+	try {
+		await adminFetch("/api/admin/gallery", {
+			method: "DELETE",
+			body: JSON.stringify({ filename: item.filename }),
+		});
+		galleryItems = galleryItems.filter(
+			(entry) => entry.filename !== item.filename,
+		);
+		notice = "Đã xóa ảnh khỏi Kho ảnh.";
+	} catch (deleteError) {
+		error = errorMessage(deleteError);
+	} finally {
+		busy = false;
+	}
+}
+
+async function moveGalleryPhoto(item: GalleryAdminItem, change: number) {
+	if (busy) return;
+	const ordered = galleryItems
+		.filter((entry) => entry.date === item.date && entry.album === item.album)
+		.sort((a, b) => a.order - b.order || a.title.localeCompare(b.title, "vi"));
+	const currentIndex = ordered.findIndex(
+		(entry) => entry.filename === item.filename,
+	);
+	const targetIndex = currentIndex + change;
+	if (currentIndex < 0 || targetIndex < 0 || targetIndex >= ordered.length)
+		return;
+
+	[ordered[currentIndex], ordered[targetIndex]] = [
+		ordered[targetIndex],
+		ordered[currentIndex],
+	];
+	const updates = ordered.map((entry, index) => ({
+		filename: entry.filename,
+		order: index + 1,
+	}));
+
+	busy = true;
+	clearMessages();
+	try {
+		const result = await adminFetch<{ items: GalleryAdminItem[] }>(
+			"/api/admin/gallery",
+			{
+				method: "PATCH",
+				body: JSON.stringify({ items: updates }),
+			},
+		);
+		const updatedByFilename = new Map(
+			result.items.map((entry) => [entry.filename, entry]),
+		);
+		galleryItems = galleryItems.map(
+			(entry) => updatedByFilename.get(entry.filename) ?? entry,
+		);
+		notice = "Đã cập nhật thứ tự ảnh trong album.";
+	} catch (moveError) {
+		error = errorMessage(moveError);
+	} finally {
+		busy = false;
+	}
+}
+
+function visibleGalleryItems() {
+	const query = gallerySearch.trim().toLocaleLowerCase("vi");
+	return galleryItems
+		.filter((item) =>
+			query
+				? `${item.title} ${item.description} ${item.album}`
+						.toLocaleLowerCase("vi")
+						.includes(query)
+				: true,
+		)
+		.sort(
+			(a, b) =>
+				b.date.localeCompare(a.date) ||
+				a.album.localeCompare(b.album, "vi") ||
+				a.order - b.order ||
+				a.title.localeCompare(b.title, "vi"),
+		);
 }
 
 async function uploadMedia(event: Event) {
@@ -887,8 +1117,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 								<Icon icon="material-symbols:visibility-outline-rounded" /> Preview
 							</button>
 						</div>
-						<button type="button" onclick={openMediaTab} title="Mở kho ảnh">
-							<Icon icon="material-symbols:photo-library-outline-rounded" /> Kho ảnh
+						<button type="button" onclick={openLibrarySection} title="Mở ảnh bài viết">
+							<Icon icon="material-symbols:photo-library-outline-rounded" /> Ảnh bài viết
 						</button>
 						<button type="button" disabled={uploading} onclick={() => fileInput?.click()} title="Tải và chèn ảnh">
 							<Icon icon="material-symbols:add-photo-alternate-outline-rounded" /> {uploading ? "Đang tải" : "Ảnh"}
@@ -911,47 +1141,97 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 			</div>
 		{:else if activeTab === "media"}
 			<section class="media-library">
-				<div class="media-tools">
-					<label class="search-field">
-						<Icon icon="material-symbols:search-rounded" />
-						<input aria-label="Tìm ảnh" placeholder="Tìm theo tên hoặc mô tả" bind:value={mediaSearch} />
-					</label>
-					<label class="media-alt-field">
-						<span>Mô tả ảnh mới</span>
-						<input placeholder="Nội dung ảnh dành cho người đọc và SEO" bind:value={mediaAlt} />
-					</label>
-					<button class="media-upload-button" type="button" disabled={uploading} onclick={() => mediaFileInput?.click()}>
-						<Icon icon="material-symbols:upload-rounded" /> {uploading ? "Đang tối ưu" : "Tải ảnh"}
+				<div class="media-section-switch" aria-label="Loại kho ảnh">
+					<button class:active={mediaSection === "gallery"} type="button" onclick={openGallerySection}>
+						<Icon icon="material-symbols:collections-bookmark-outline-rounded" /> Kho ảnh công khai
 					</button>
-					<input class="file-input" bind:this={mediaFileInput} type="file" accept="image/*" onchange={uploadMedia} />
+					<button class:active={mediaSection === "library"} type="button" onclick={openLibrarySection}>
+						<Icon icon="material-symbols:perm-media-outline-rounded" /> Ảnh bài viết
+					</button>
 				</div>
 
-				{#if !mediaLoaded}
-					<div class="empty-state"><Icon icon="material-symbols:progress-activity" /> Đang tải kho ảnh...</div>
-				{:else if visibleMedia().length === 0}
-					<div class="empty-state"><Icon icon="material-symbols:photo-library-outline-rounded" /> Chưa có ảnh phù hợp.</div>
-				{:else}
-					<div class="media-grid">
-						{#each visibleMedia() as item (item.id)}
-							<article class="media-card">
-				<picture>
-					{#if item.avif}<source srcset={item.avif} type="image/avif" />{/if}
-									<img src={item.webp} alt={item.alt || item.name} loading="lazy" width={item.width} height={item.height} />
-								</picture>
-								<div class="media-card-body">
-									<label>Tên tệp<input bind:value={item.name} /></label>
-									<label>Mô tả<input bind:value={item.alt} placeholder="Mô tả nội dung ảnh" /></label>
-									<small>{item.width}×{item.height} · {formatBytes(item.size)}</small>
-									<div class="media-actions">
-										<button type="button" onclick={() => reuseMedia(item)} title="Chèn vào bài đang mở"><Icon icon="material-symbols:add-photo-alternate-outline-rounded" /> Chèn</button>
-										<button class="icon-button" type="button" onclick={() => copyMedia(item)} title="Sao chép mã ảnh" aria-label="Sao chép mã ảnh"><Icon icon="material-symbols:content-copy-outline-rounded" /></button>
-										<button class="icon-button" type="button" onclick={() => saveMedia(item)} disabled={busy} title="Lưu tên và mô tả" aria-label="Lưu tên và mô tả"><Icon icon="material-symbols:save-outline-rounded" /></button>
-										<button class="icon-button danger" type="button" onclick={() => deleteMedia(item)} disabled={busy} title="Xóa ảnh" aria-label="Xóa ảnh"><Icon icon="material-symbols:delete-outline-rounded" /></button>
-									</div>
-								</div>
-							</article>
-						{/each}
+				{#if mediaSection === "gallery"}
+					<div class="gallery-admin-tools">
+						<label class="search-field gallery-admin-search">
+							<Icon icon="material-symbols:search-rounded" />
+							<input aria-label="Tìm trong Kho ảnh" placeholder="Tìm tên, mô tả hoặc album" bind:value={gallerySearch} />
+						</label>
+						<label><span>Tiêu đề ảnh mới</span><input placeholder="Để trống sẽ lấy tên tệp" bind:value={galleryTitle} /></label>
+						<label>
+							<span>Album</span>
+							<input list="gallery-album-options" placeholder="Ví dụ: Đà Lạt 2026" bind:value={galleryAlbum} />
+							<datalist id="gallery-album-options">{#each galleryAlbums as album}<option value={album}></option>{/each}</datalist>
+						</label>
+						<label><span>Ngày chụp</span><input type="date" bind:value={galleryDate} /></label>
+						<label><span>Thứ tự</span><input type="number" min="0" step="1" bind:value={galleryOrder} title="Để 0 để tự xếp cuối album" /></label>
+						<label class="gallery-description-field"><span>Mô tả</span><input placeholder="Hiện dưới ảnh và trong lightbox" bind:value={galleryDescription} /></label>
+						<button class="media-upload-button" type="button" disabled={uploading} onclick={() => galleryFileInput?.click()}>
+							<Icon icon="material-symbols:upload-rounded" /> {uploading ? "Đang tối ưu" : "Chọn ảnh"}
+						</button>
+						<input class="file-input" bind:this={galleryFileInput} type="file" accept="image/*" onchange={uploadGalleryPhoto} />
 					</div>
+
+					{#if !galleryLoaded}
+						<div class="empty-state"><Icon icon="material-symbols:progress-activity" /> Đang tải Kho ảnh...</div>
+					{:else if visibleGalleryItems().length === 0}
+						<div class="empty-state"><Icon icon="material-symbols:collections-bookmark-outline-rounded" /> Chưa có ảnh phù hợp.</div>
+					{:else}
+						<div class="gallery-admin-grid">
+							{#each visibleGalleryItems() as item (item.filename)}
+								<article class="gallery-admin-card">
+									<img src={item.thumbnailSrc} alt={item.title} loading="lazy" width={item.width} height={item.height} />
+									<div class="gallery-admin-card-body">
+										<label>Tiêu đề<input bind:value={item.title} /></label>
+										<label>Album<input list="gallery-album-options" bind:value={item.album} /></label>
+										<label>Ngày chụp<input type="date" bind:value={item.date} /></label>
+										<label>Mô tả<textarea rows="2" bind:value={item.description} placeholder="Mô tả khoảnh khắc này"></textarea></label>
+										<div class="gallery-order-row">
+											<label>Thứ tự<input type="number" min="0" step="1" bind:value={item.order} /></label>
+											<button class="icon-button" type="button" onclick={() => moveGalleryPhoto(item, -1)} disabled={busy} title="Đưa lên trước" aria-label="Đưa ảnh lên trước"><Icon icon="material-symbols:arrow-upward-rounded" /></button>
+											<button class="icon-button" type="button" onclick={() => moveGalleryPhoto(item, 1)} disabled={busy} title="Đưa xuống sau" aria-label="Đưa ảnh xuống sau"><Icon icon="material-symbols:arrow-downward-rounded" /></button>
+										</div>
+										<small>{item.width}×{item.height} · {item.filename}</small>
+										<div class="media-actions">
+											<a href={item.src} target="_blank" rel="noopener"><Icon icon="material-symbols:open-in-new-rounded" /> Xem</a>
+											<button class="icon-button" type="button" onclick={() => saveGalleryPhoto(item)} disabled={busy} title="Lưu thông tin ảnh" aria-label="Lưu thông tin ảnh"><Icon icon="material-symbols:save-outline-rounded" /></button>
+											<button class="icon-button danger" type="button" onclick={() => deleteGalleryPhoto(item)} disabled={busy} title="Xóa khỏi Kho ảnh" aria-label="Xóa khỏi Kho ảnh"><Icon icon="material-symbols:delete-outline-rounded" /></button>
+										</div>
+									</div>
+								</article>
+							{/each}
+						</div>
+					{/if}
+				{:else}
+					<div class="media-tools">
+						<label class="search-field"><Icon icon="material-symbols:search-rounded" /><input aria-label="Tìm ảnh bài viết" placeholder="Tìm theo tên hoặc mô tả" bind:value={mediaSearch} /></label>
+						<label class="media-alt-field"><span>Mô tả ảnh mới</span><input placeholder="Nội dung ảnh dành cho người đọc và SEO" bind:value={mediaAlt} /></label>
+						<button class="media-upload-button" type="button" disabled={uploading} onclick={() => mediaFileInput?.click()}><Icon icon="material-symbols:upload-rounded" /> {uploading ? "Đang tối ưu" : "Tải ảnh"}</button>
+						<input class="file-input" bind:this={mediaFileInput} type="file" accept="image/*" onchange={uploadMedia} />
+					</div>
+					{#if !mediaLoaded}
+						<div class="empty-state"><Icon icon="material-symbols:progress-activity" /> Đang tải ảnh bài viết...</div>
+					{:else if visibleMedia().length === 0}
+						<div class="empty-state"><Icon icon="material-symbols:perm-media-outline-rounded" /> Chưa có ảnh phù hợp.</div>
+					{:else}
+						<div class="media-grid">
+							{#each visibleMedia() as item (item.id)}
+								<article class="media-card">
+									<picture>{#if item.avif}<source srcset={item.avif} type="image/avif" />{/if}<img src={item.webp} alt={item.alt || item.name} loading="lazy" width={item.width} height={item.height} /></picture>
+									<div class="media-card-body">
+										<label>Tên tệp<input bind:value={item.name} /></label>
+										<label>Mô tả<input bind:value={item.alt} placeholder="Mô tả nội dung ảnh" /></label>
+										<small>{item.width}×{item.height} · {formatBytes(item.size)}</small>
+										<div class="media-actions">
+											<button type="button" onclick={() => reuseMedia(item)} title="Chèn vào bài đang mở"><Icon icon="material-symbols:add-photo-alternate-outline-rounded" /> Chèn</button>
+											<button class="icon-button" type="button" onclick={() => copyMedia(item)} title="Sao chép mã ảnh" aria-label="Sao chép mã ảnh"><Icon icon="material-symbols:content-copy-outline-rounded" /></button>
+											<button class="icon-button" type="button" onclick={() => saveMedia(item)} disabled={busy} title="Lưu tên và mô tả" aria-label="Lưu tên và mô tả"><Icon icon="material-symbols:save-outline-rounded" /></button>
+											<button class="icon-button danger" type="button" onclick={() => deleteMedia(item)} disabled={busy} title="Xóa ảnh" aria-label="Xóa ảnh"><Icon icon="material-symbols:delete-outline-rounded" /></button>
+										</div>
+									</div>
+								</article>
+							{/each}
+						</div>
+					{/if}
 				{/if}
 			</section>
 		{:else}
@@ -1097,7 +1377,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 	}
 
 	button,
-	.editor-actions a {
+	.editor-actions a,
+	.media-actions a {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -1115,7 +1396,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 	}
 
 	button:not(:disabled):hover,
-	.editor-actions a:hover {
+	.editor-actions a:hover,
+	.media-actions a:hover {
 		transform: translateY(-1px);
 		background: var(--btn-regular-bg-hover);
 	}
@@ -1388,6 +1670,97 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 		border-top: 1px solid var(--line-divider);
 	}
 
+	.media-section-switch {
+		display: inline-flex;
+		gap: 0.25rem;
+		margin-bottom: 0.9rem;
+		padding: 0.2rem;
+		border: 1px solid var(--card-border);
+		border-radius: 7px;
+		background: var(--btn-regular-bg);
+	}
+
+	.media-section-switch button {
+		min-height: 2rem;
+		border-color: transparent;
+		background: transparent;
+	}
+
+	.media-section-switch button.active {
+		background: var(--primary);
+		color: white;
+	}
+
+	.gallery-admin-tools {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		align-items: end;
+		gap: 0.65rem;
+		margin-bottom: 1rem;
+		padding: 0.75rem;
+		border: 1px solid var(--card-border);
+		border-radius: 7px;
+		background: color-mix(in oklch, var(--card-bg), transparent 12%);
+	}
+
+	.gallery-admin-search,
+	.gallery-description-field {
+		grid-column: span 2;
+	}
+
+	.gallery-admin-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.75rem;
+	}
+
+	.gallery-admin-card {
+		display: grid;
+		grid-template-columns: 10rem minmax(0, 1fr);
+		min-height: 18rem;
+		overflow: hidden;
+		border: 1px solid var(--card-border);
+		border-radius: 7px;
+		background: color-mix(in oklch, var(--card-bg), transparent 8%);
+	}
+
+	.gallery-admin-card > img {
+		width: 100%;
+		height: 100%;
+		min-height: 18rem;
+		object-fit: cover;
+		background: var(--btn-regular-bg);
+	}
+
+	.gallery-admin-card-body {
+		display: grid;
+		align-content: start;
+		gap: 0.55rem;
+		min-width: 0;
+		padding: 0.7rem;
+	}
+
+	.gallery-admin-card-body textarea {
+		min-height: 4.5rem;
+		padding: 0.65rem;
+		resize: vertical;
+	}
+
+	.gallery-admin-card-body small {
+		overflow: hidden;
+		color: var(--meta-color);
+		font-size: 0.68rem;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.gallery-order-row {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto auto;
+		align-items: end;
+		gap: 0.35rem;
+	}
+
 	.media-tools {
 		display: grid;
 		grid-template-columns: minmax(12rem, 0.8fr) minmax(16rem, 1.2fr) auto;
@@ -1577,6 +1950,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 		.media-grid {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
+
+		.gallery-admin-grid {
+			grid-template-columns: 1fr;
+		}
 	}
 
 	@media (max-width: 640px) {
@@ -1599,8 +1976,29 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 		}
 
 		.media-tools,
-		.media-grid {
+		.media-grid,
+		.gallery-admin-tools {
 			grid-template-columns: 1fr;
+		}
+
+		.gallery-admin-search,
+		.gallery-description-field {
+			grid-column: auto;
+		}
+
+		.media-section-switch {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			width: 100%;
+		}
+
+		.gallery-admin-card {
+			grid-template-columns: 1fr;
+		}
+
+		.gallery-admin-card > img {
+			height: 13rem;
+			min-height: 13rem;
 		}
 
 		.comment-tools select {

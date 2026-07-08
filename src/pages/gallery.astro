@@ -12,6 +12,7 @@ type GalleryMetadata = {
 	album?: string;
 	width?: number;
 	height?: number;
+	order?: number;
 };
 
 type GalleryItem = {
@@ -25,6 +26,7 @@ type GalleryItem = {
 	album: string;
 	width: number;
 	height: number;
+	order: number;
 };
 
 const galleryItems: GalleryItem[] = (galleryMetadata as GalleryMetadata[])
@@ -39,10 +41,12 @@ const galleryItems: GalleryItem[] = (galleryMetadata as GalleryMetadata[])
 		album: item.album?.trim() || "Ảnh chọn lọc",
 		width: item.width || 1600,
 		height: item.height || 1200,
+		order: Number.isFinite(item.order) ? Number(item.order) : 0,
 	}))
 	.sort(
 		(a, b) =>
 			b.date.localeCompare(a.date) ||
+			a.order - b.order ||
 			b.filename.localeCompare(a.filename, "vi"),
 	);
 
@@ -144,8 +148,9 @@ function formatDate(value: string) {
 									data-album={item.album.toLocaleLowerCase("vi")}
 									data-search={`${item.title} ${item.description} ${item.album}`.toLocaleLowerCase("vi")}
 								>
-									<a
-										href={item.src}
+									<button
+										type="button"
+										data-pswp-src={item.src}
 										data-pswp-width={item.width}
 										data-pswp-height={item.height}
 										data-pswp-title={item.title}
@@ -162,7 +167,7 @@ function formatDate(value: string) {
 											fetchpriority={group.key === groups[0]?.key && index === 0 ? "high" : "low"}
 											decoding="async"
 										/>
-									</a>
+									</button>
 									<figcaption class="gallery-caption">
 										<h3>{item.title}</h3>
 										{item.description && <p>{item.description}</p>}
@@ -419,9 +424,13 @@ function formatDate(value: string) {
 
 	.gallery-image-link {
 		display: block;
+		width: 100%;
+		padding: 0;
+		border: 0;
 		overflow: hidden;
 		cursor: zoom-in;
 		background: var(--btn-regular-bg);
+		text-align: left;
 	}
 
 	.gallery-image-link img {

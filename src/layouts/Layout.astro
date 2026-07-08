@@ -459,7 +459,7 @@ import PhotoSwipeLightbox from "photoswipe/lightbox"
 
 const lightboxes: PhotoSwipeLightbox[] = []
 const photoSwipeGalleries = [
-	{ gallery: ".gallery-groups", children: ".photo-gallery a" },
+	{ gallery: ".gallery-groups", children: ".photo-gallery .gallery-image-link" },
 	{ gallery: ".custom-md", children: "img" },
 	{ gallery: "#post-cover", children: "img" },
 ]
@@ -503,6 +503,12 @@ function createPhotoSwipe(gallery: string, children: string) {
 			itemData.w = Number(element.dataset.pswpWidth || preview?.naturalWidth || window.innerWidth)
 			itemData.h = Number(element.dataset.pswpHeight || preview?.naturalHeight || window.innerHeight)
 			itemData.msrc = preview?.src
+		} else if (element instanceof HTMLElement && element.dataset.pswpSrc) {
+			const preview = element.querySelector("img")
+			itemData.src = element.dataset.pswpSrc
+			itemData.w = Number(element.dataset.pswpWidth || preview?.naturalWidth || window.innerWidth)
+			itemData.h = Number(element.dataset.pswpHeight || preview?.naturalHeight || window.innerHeight)
+			itemData.msrc = preview?.src
 		}
 
 		return itemData
@@ -539,10 +545,12 @@ function createPhotoSwipe(gallery: string, children: string) {
 
 		const updateCaption = () => {
 			const source = pswp.currSlide?.data.element
-			const title = source instanceof HTMLAnchorElement
-				? source.dataset.pswpTitle || source.querySelector("img")?.alt || ""
-				: source instanceof HTMLImageElement ? source.alt : ""
-			const description = source instanceof HTMLAnchorElement
+			const title = source instanceof HTMLImageElement
+				? source.alt
+				: source instanceof HTMLElement
+					? source.dataset.pswpTitle || source.querySelector("img")?.alt || ""
+					: ""
+			const description = source instanceof HTMLElement
 				? source.dataset.pswpDescription || ""
 				: ""
 
