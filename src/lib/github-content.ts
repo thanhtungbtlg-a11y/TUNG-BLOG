@@ -7,9 +7,9 @@ function env(name: string) {
 	return process.env[name] ?? "";
 }
 
-function getConfig() {
+function getConfig(requireToken = false) {
 	const token = env("GITHUB_TOKEN");
-	if (!token) {
+	if (requireToken && !token) {
 		throw new AdminRequestError(
 			"Thiếu GITHUB_TOKEN trong Environment Variables của Vercel.",
 			503,
@@ -28,24 +28,56 @@ function encodePath(pathname: string) {
 }
 
 async function githubFetch(pathname: string, init: RequestInit = {}) {
-	const { token } = getConfig();
-	const response = await fetch(`https://api.github.com${pathname}`, {
-		...init,
-		headers: {
-			Accept: "application/vnd.github+json",
-			Authorization: `Bearer ${token}`,
-			"X-GitHub-Api-Version": "2022-11-28",
-			...init.headers,
-		},
-	});
+	const method = (init.method ?? "GET").toUpperCase();
+	const isReadRequest = method === "GET";
+	const { token } = getConfig(!isReadRequest);
+	const request = (authorizationToken = "") =>
+		fetch(`https://api.github.com${pathname}`, {
+			...init,
+			headers: {
+				Accept: "application/vnd.github+json",
+				...(authorizationToken
+					? { Authorization: `Bearer ${authorizationToken}` }
+					: {}),
+				"X-GitHub-Api-Version": "2022-11-28",
+				...init.headers,
+			},
+		});
+
+	let response = await request(token);
+	// Repository data is public. A stale PAT should not block read-only admin views.
+	if (isReadRequest && token && [401, 403].includes(response.status)) {
+		response = await request();
+	}
 
 	if (!response.ok) {
 		const details = await response.text();
 		if (response.status === 404) {
-			throw new AdminRequestError("Không tìm thấy tệp bài viết.", 404);
+			throw new AdminRequestError("Không tìm thấy dữ liệu trên GitHub.", 404);
 		}
 		console.error("GitHub API error", response.status, details);
-		throw new AdminRequestError("GitHub chưa nhận được thay đổi.", 502);
+		if (response.status === 401) {
+			throw new AdminRequestError(
+				"GITHUB_TOKEN không hợp lệ hoặc đã hết hạn.",
+				502,
+			);
+		}
+		if (response.status === 403) {
+			throw new AdminRequestError(
+				"GITHUB_TOKEN chưa có quyền Contents: Read and write cho repository.",
+				502,
+			);
+		}
+		if (response.status === 409 || response.status === 422) {
+			throw new AdminRequestError(
+				"GitHub vừa có thay đổi mới. Vui lòng tải lại rồi thử lần nữa.",
+				409,
+			);
+		}
+		throw new AdminRequestError(
+			`GitHub chưa xử lý được yêu cầu (HTTP ${response.status}).`,
+			502,
+		);
 	}
 
 	return response.json();
@@ -62,7 +94,7 @@ export async function commitRepositoryFiles(
 ) {
 	if (changes.length === 0) return;
 
-	const { repository, branch } = getConfig();
+	const { repository, branch } = getConfig(true);
 	const refPath = `heads/${branch}`;
 	const ref = await githubFetch(
 		`/repos/${repository}/git/ref/${encodePath(refPath)}`,
@@ -285,7 +317,7 @@ async function writeRepositoryFile(
 	message: string,
 	sha?: string,
 ) {
-	const { repository, branch } = getConfig();
+	const { repository, branch } = getConfig(true);
 	return githubFetch(`/repos/${repository}/contents/${encodePath(pathname)}`, {
 		method: "PUT",
 		headers: { "Content-Type": "application/json" },

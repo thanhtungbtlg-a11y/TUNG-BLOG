@@ -124,6 +124,7 @@ let galleryItems = $state<GalleryAdminItem[]>([]);
 let galleryAlbums = $state<string[]>([]);
 let gallerySearch = $state("");
 let galleryLoaded = $state(false);
+let galleryLoading = $state(false);
 let galleryTitle = $state("");
 let galleryDescription = $state("");
 let galleryDate = $state(new Date().toISOString().slice(0, 10));
@@ -210,6 +211,7 @@ async function signOut() {
 	mediaLoaded = false;
 	galleryItems = [];
 	galleryLoaded = false;
+	galleryLoading = false;
 }
 
 function createEmptyPost(): EditorPost {
@@ -395,8 +397,8 @@ async function loadMedia() {
 }
 
 async function loadGallery() {
-	if (!isAdmin) return;
-	galleryLoaded = false;
+	if (!isAdmin || galleryLoading) return;
+	galleryLoading = true;
 	clearMessages();
 	try {
 		const result = await adminFetch<{
@@ -408,6 +410,8 @@ async function loadGallery() {
 		galleryLoaded = true;
 	} catch (loadError) {
 		error = errorMessage(loadError);
+	} finally {
+		galleryLoading = false;
 	}
 }
 
@@ -1171,8 +1175,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 						<input class="file-input" bind:this={galleryFileInput} type="file" accept="image/*" onchange={uploadGalleryPhoto} />
 					</div>
 
-					{#if !galleryLoaded}
+					{#if galleryLoading}
 						<div class="empty-state"><Icon icon="material-symbols:progress-activity" /> Đang tải Kho ảnh...</div>
+					{:else if !galleryLoaded}
+						<div class="empty-state gallery-load-error">
+							<Icon icon="material-symbols:cloud-off-outline-rounded" />
+							<span>Chưa tải được dữ liệu Kho ảnh.</span>
+							<button type="button" onclick={loadGallery}><Icon icon="material-symbols:refresh-rounded" /> Thử lại</button>
+						</div>
 					{:else if visibleGalleryItems().length === 0}
 						<div class="empty-state"><Icon icon="material-symbols:collections-bookmark-outline-rounded" /> Chưa có ảnh phù hợp.</div>
 					{:else}
@@ -1311,6 +1321,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 		gap: 0.5rem;
 		min-height: 12rem;
 		color: var(--meta-color);
+	}
+
+	.gallery-load-error {
+		flex-wrap: wrap;
 	}
 
 	.login-panel {
