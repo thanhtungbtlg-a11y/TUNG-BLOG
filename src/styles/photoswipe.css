@@ -12,3 +12,81 @@
 .pswp__button--close {
     @apply mr-4 !important;
 }
+
+.pswp__button--home {
+    @apply mt-4 rounded-xl active:scale-90 !important;
+    width: auto !important;
+    gap: 0.45rem;
+    margin-right: 0.5rem !important;
+    padding: 0 0.85rem !important;
+    color: white !important;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.pswp__button--home svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+.pswp__button--arrow--prev,
+.pswp__button--arrow--next {
+    @apply rounded-xl active:scale-90 !important;
+    margin: -1.5rem 0.75rem 0 !important;
+}
+
+.pswp__gallery-caption {
+    position: absolute;
+    z-index: 10;
+    left: 50%;
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    display: grid;
+    max-width: min(42rem, calc(100vw - 2rem));
+    padding: 0.65rem 1rem;
+    transform: translateX(-50%);
+    border: 1px solid rgb(255 255 255 / 18%);
+    border-radius: 8px;
+    background: rgb(8 18 20 / 78%);
+    box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 30%);
+    color: white;
+    text-align: center;
+    pointer-events: none;
+    backdrop-filter: blur(14px) saturate(1.15);
+}
+
+.pswp__gallery-caption strong {
+    overflow: hidden;
+    font-size: 0.95rem;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pswp__gallery-caption span {
+    margin-top: 0.15rem;
+    color: rgb(255 255 255 / 72%);
+    font-size: 0.8rem;
+    line-height: 1.35;
+}
+
+@media (max-width: 640px) {
+    .pswp__button--home {
+        width: 3rem !important;
+        padding: 0 !important;
+    }
+
+    .pswp__button--home span {
+        display: none;
+    }
+
+    .pswp__button--arrow--prev,
+    .pswp__button--arrow--next {
+        display: none !important;
+    }
+
+    .pswp__gallery-caption {
+        width: calc(100vw - 1.5rem);
+        bottom: max(0.75rem, env(safe-area-inset-bottom));
+    }
+}

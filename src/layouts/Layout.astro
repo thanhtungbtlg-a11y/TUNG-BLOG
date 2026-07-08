@@ -13,6 +13,7 @@ import ConfigCarrier from "@components/ConfigCarrier.astro";
 import MusicPlayer from "@components/MusicPlayer.svelte";
 import ReadingProgress from "@components/ReadingProgress.svelte";
 import Analytics from "@vercel/analytics/astro";
+import { Icon } from "astro-icon/components";
 import { profileConfig, siteConfig } from "@/config";
 import {
 	AUTO_MODE,
@@ -174,6 +175,9 @@ const siteLang = lang.replace("_", "-");
 	<body class="min-h-screen transition">
 		<a class="skip-link" href="#swup-container">Chuyển đến nội dung chính</a>
 		<ConfigCarrier></ConfigCarrier>
+		<template id="photoswipe-home-icon">
+			<Icon name="fa6-solid:house" aria-hidden="true" />
+		</template>
 		{setOGTypeArticle && <ReadingProgress client:idle />}
 		<slot />
 		{!hidePlayer && <MusicPlayer client:idle />}
@@ -451,50 +455,39 @@ scrollFunction()
 </script>
 
 <script>
-type PhotoSwipeItemData = {
-	src?: string
-	w?: number
-	h?: number
-	msrc?: string
-}
-type LightboxInstance = {
-	addFilter: (
-		name: "domItemData",
-		callback: (
-			itemData: PhotoSwipeItemData,
-			element: Element,
-		) => PhotoSwipeItemData,
-	) => void
-	init: () => void
-	destroy?: () => void
-}
+import PhotoSwipeLightbox from "photoswipe/lightbox"
 
-let lightbox: LightboxInstance | undefined
-let photoSwipeSetupToken = 0
-const photoSwipeSelector = ".custom-md img, #post-cover img, .photo-gallery a"
+const lightboxes: PhotoSwipeLightbox[] = []
+const photoSwipeGalleries = [
+	{ gallery: ".gallery-groups", children: ".photo-gallery a" },
+	{ gallery: ".custom-md", children: "img" },
+	{ gallery: "#post-cover", children: "img" },
+]
 
-async function createPhotoSwipe() {
-	const galleryItems = document.querySelectorAll(photoSwipeSelector)
-	if (galleryItems.length === 0) return
+function createPhotoSwipe(gallery: string, children: string) {
+	if (!document.querySelector(gallery)) return
 
-	const token = ++photoSwipeSetupToken
-	const { default: PhotoSwipeLightbox } = await import("photoswipe/lightbox")
-	if (token !== photoSwipeSetupToken) return
-
-	lightbox = new PhotoSwipeLightbox({
-		gallery: "body",
-		children: photoSwipeSelector,
+	const lightbox = new PhotoSwipeLightbox({
+		gallery,
+		children,
 		pswpModule: () => import("photoswipe"),
 		closeSVG: '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#ffffff"><path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z"/></svg>',
 		zoomSVG: '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#ffffff"><path d="M340-540h-40q-17 0-28.5-11.5T260-580q0-17 11.5-28.5T300-620h40v-40q0-17 11.5-28.5T380-700q17 0 28.5 11.5T420-660v40h40q17 0 28.5 11.5T500-580q0 17-11.5 28.5T460-540h-40v40q0 17-11.5 28.5T380-460q-17 0-28.5-11.5T340-500v-40Zm40 220q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l224 224q11 11 11 28t-11 28q-11 11-28 11t-28-11L532-372q-30 24-69 38t-83 14Zm0-80q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>',
 		padding: { top: 20, bottom: 20, left: 20, right: 20 },
 		wheelToZoom: true,
-		arrowPrev: false,
-		arrowNext: false,
+		arrowPrev: true,
+		arrowNext: true,
+		arrowPrevTitle: "Ảnh trước",
+		arrowNextTitle: "Ảnh tiếp theo",
+		closeTitle: "Đóng",
+		zoomTitle: "Thu phóng",
+		arrowKeys: true,
+		escKey: true,
+		allowPanToNext: true,
 		imageClickAction: 'close',
 		tapAction: 'close',
 		doubleTapAction: 'zoom',
-	}) as LightboxInstance
+	})
 
 	lightbox.addFilter("domItemData", (itemData, element) => {
 		if (element instanceof HTMLImageElement) {
@@ -515,26 +508,92 @@ async function createPhotoSwipe() {
 		return itemData
 	})
 
+	lightbox.on("afterInit", () => {
+		const pswp = lightbox?.pswp
+		if (!pswp?.element) return
+
+		const topBar = pswp.element.querySelector(".pswp__top-bar")
+		if (topBar) {
+			const homeLink = document.createElement("a")
+			homeLink.className = "pswp__button pswp__button--home"
+			homeLink.href = "/"
+			homeLink.title = "Về trang chủ"
+			homeLink.setAttribute("aria-label", "Về trang chủ")
+
+			const iconTemplate = document.querySelector<HTMLTemplateElement>("#photoswipe-home-icon")
+			if (iconTemplate) homeLink.append(iconTemplate.content.cloneNode(true))
+
+			const homeLabel = document.createElement("span")
+			homeLabel.textContent = "Trang chủ"
+			homeLink.append(homeLabel)
+			homeLink.addEventListener("click", () => pswp.close())
+
+			const firstButton = topBar.querySelector(".pswp__button")
+			topBar.insertBefore(homeLink, firstButton)
+		}
+
+		const captionElement = document.createElement("div")
+		captionElement.className = "pswp__gallery-caption"
+		captionElement.setAttribute("aria-live", "polite")
+		pswp.element.append(captionElement)
+
+		const updateCaption = () => {
+			const source = pswp.currSlide?.data.element
+			const title = source instanceof HTMLAnchorElement
+				? source.dataset.pswpTitle || source.querySelector("img")?.alt || ""
+				: source instanceof HTMLImageElement ? source.alt : ""
+			const description = source instanceof HTMLAnchorElement
+				? source.dataset.pswpDescription || ""
+				: ""
+
+			captionElement.replaceChildren()
+			captionElement.hidden = !title && !description
+			if (title) {
+				const titleElement = document.createElement("strong")
+				titleElement.textContent = title
+				captionElement.append(titleElement)
+			}
+			if (description) {
+				const descriptionElement = document.createElement("span")
+				descriptionElement.textContent = description
+				captionElement.append(descriptionElement)
+			}
+		}
+
+		pswp.on("change", updateCaption)
+		updateCaption()
+	})
+
 	lightbox.init()
+	lightboxes.push(lightbox)
+}
+
+function createPhotoSwipeGalleries() {
+	for (const config of photoSwipeGalleries) {
+		createPhotoSwipe(config.gallery, config.children)
+	}
+}
+
+function destroyPhotoSwipeGalleries() {
+	for (const lightbox of lightboxes) lightbox.destroy()
+	lightboxes.length = 0
 }
 
 const setupSwupPhotoSwipe = () => {
 	window.swup.hooks.on("page:view", () => {
-		void createPhotoSwipe()
+		createPhotoSwipeGalleries()
 	})
 
 	window.swup.hooks.on(
 		"content:replace",
 		() => {
-			photoSwipeSetupToken++
-			lightbox?.destroy?.()
-			lightbox = undefined
+			destroyPhotoSwipeGalleries()
 		},
 		{ before: true },
 	)
 }
 
-void createPhotoSwipe()
+createPhotoSwipeGalleries()
 
 if (window.swup?.hooks) {
 	setupSwupPhotoSwipe()

@@ -98,9 +98,12 @@ function formatDate(value: string) {
 	{galleryItems.length > 0 ? (
 		<>
 			<section class="gallery-toolbar" aria-label="Lọc kho ảnh">
-				<label class="gallery-search">
-					<Icon name="fa6-solid:magnifying-glass" aria-hidden="true" />
-					<input id="gallery-search" type="search" placeholder="Tìm theo tên ảnh..." autocomplete="off" />
+				<label class="gallery-search-field">
+					<span>Tìm kiếm</span>
+					<span class="gallery-search">
+						<Icon name="fa6-solid:magnifying-glass" aria-hidden="true" />
+						<input id="gallery-search" type="search" placeholder="Tên ảnh, mô tả hoặc bộ ảnh" autocomplete="off" />
+					</span>
 				</label>
 				<label>
 					<span>Năm</span>
@@ -130,7 +133,7 @@ function formatDate(value: string) {
 								<h2>{group.album}</h2>
 								<p>{formatDate(group.date)}</p>
 							</div>
-							<span>{group.items.length} ảnh</span>
+							<span data-gallery-group-count>{group.items.length} ảnh</span>
 						</header>
 						<div class="photo-gallery" aria-label={`Bộ ảnh ${group.album}`}>
 							{group.items.map((item, index) => (
@@ -145,6 +148,8 @@ function formatDate(value: string) {
 										href={item.src}
 										data-pswp-width={item.width}
 										data-pswp-height={item.height}
+										data-pswp-title={item.title}
+										data-pswp-description={item.description}
 										aria-label={`Xem ảnh ${item.title}`}
 										class="gallery-image-link"
 									>
@@ -179,11 +184,9 @@ function formatDate(value: string) {
 			<p>Chưa có ảnh trong kho.</p>
 		</div>
 	)}
-</MainGridLayout>
 
-<script is:inline>
-(() => {
-	const initGalleryFilters = () => {
+	<script is:inline>
+	(() => {
 		const search = document.querySelector('#gallery-search');
 		const year = document.querySelector('#gallery-year');
 		const album = document.querySelector('#gallery-album');
@@ -194,22 +197,36 @@ function formatDate(value: string) {
 		if (search.dataset.bound === 'true') return;
 		search.dataset.bound = 'true';
 
+		const normalizeRestoredValue = (value) => value === 'null' || value === 'undefined' ? '' : value;
+		search.value = normalizeRestoredValue(search.value);
+		year.value = normalizeRestoredValue(year.value);
+		album.value = normalizeRestoredValue(album.value);
+
 		const apply = () => {
 			const query = search.value.trim().toLocaleLowerCase('vi');
+			const selectedAlbum = album.value.trim().toLocaleLowerCase('vi');
 			let visibleItems = 0;
 			let visibleGroups = 0;
+
 			document.querySelectorAll('[data-gallery-group]').forEach((group) => {
 				let groupItems = 0;
 				group.querySelectorAll('[data-gallery-item]').forEach((item) => {
-					const matches = (!query || item.dataset.search?.includes(query)) && (!year.value || item.dataset.year === year.value) && (!album.value || item.dataset.album === album.value.toLocaleLowerCase('vi'));
+					const matchesSearch = !query || item.dataset.search?.includes(query) === true;
+					const matchesYear = !year.value || item.dataset.year === year.value;
+					const matchesAlbum = !selectedAlbum || item.dataset.album === selectedAlbum;
+					const matches = matchesSearch && matchesYear && matchesAlbum;
 					item.hidden = !matches;
 					if (matches) groupItems += 1;
 				});
+
 				group.hidden = groupItems === 0;
+				const count = group.querySelector('[data-gallery-group-count]');
+				if (count) count.textContent = `${groupItems} ảnh`;
 				if (groupItems > 0) visibleGroups += 1;
 				visibleItems += groupItems;
 			});
-			reset.disabled = !query && !year.value && !album.value;
+
+			reset.disabled = !query && !year.value && !selectedAlbum;
 			if (summary) summary.textContent = `${visibleItems} ảnh trong ${visibleGroups} bộ`;
 			if (empty) empty.hidden = visibleItems !== 0;
 		};
@@ -224,13 +241,11 @@ function formatDate(value: string) {
 			apply();
 			search.focus();
 		});
-	};
 
-	initGalleryFilters();
-	document.addEventListener('astro:page-load', initGalleryFilters);
-	document.addEventListener('swup:page:view', initGalleryFilters);
-})();
-</script>
+		apply();
+	})();
+	</script>
+</MainGridLayout>
 
 <style>
 	.gallery-header {
@@ -297,6 +312,7 @@ function formatDate(value: string) {
 		z-index: 20;
 		display: grid;
 		grid-template-columns: minmax(13rem, 1.4fr) minmax(8rem, 0.6fr) minmax(10rem, 0.8fr) auto;
+		align-items: end;
 		gap: 0.65rem;
 		margin: 1rem 0 1.5rem;
 		padding: 0.75rem;
@@ -307,8 +323,9 @@ function formatDate(value: string) {
 		backdrop-filter: blur(18px) saturate(1.1);
 	}
 
-	.gallery-toolbar label:not(.gallery-search) {
+	.gallery-toolbar > label {
 		display: grid;
+		min-width: 0;
 		gap: 0.25rem;
 		color: var(--meta-color);
 		font-size: 0.7rem;
@@ -469,19 +486,19 @@ function formatDate(value: string) {
 		.photo-gallery { column-count: 4; }
 	}
 
-	@media (max-width: 760px) {
+	@media (max-width: 960px) {
 		.gallery-header h1 { font-size: 1.7rem; }
 		.gallery-toolbar {
 			position: static;
-			grid-template-columns: 1fr 1fr;
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
 		}
-		.gallery-search { grid-column: 1 / -1; }
-		.gallery-reset { width: 100%; }
+		.gallery-search-field { grid-column: 1 / -1; }
 	}
 
-	@media (max-width: 420px) {
+	@media (max-width: 640px) {
 		.gallery-toolbar { grid-template-columns: 1fr; }
-		.gallery-search { grid-column: auto; }
+		.gallery-search-field { grid-column: auto; }
+		.gallery-reset { width: 100%; }
 		.gallery-group-heading { align-items: flex-end; }
 	}
 </style>

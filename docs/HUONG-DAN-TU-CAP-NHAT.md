@@ -122,8 +122,24 @@ Chạy:
 pnpm new-photo
 ```
 
-Nhập đường dẫn ảnh, tiêu đề, ngày, địa điểm và mô tả. Script chép ảnh vào
-`public/gallery/` và cập nhật `src/data/gallery.json`.
+Nhập đường dẫn ảnh, tiêu đề, ngày và mô tả. Script chép ảnh vào `public/gallery/`
+và cập nhật `src/data/gallery.json`.
+
+Với ảnh đã nhập hàng loạt, mở `src/data/gallery.json`, tìm ảnh theo `source` hoặc
+`title`, rồi điền nội dung vào trường `description`:
+
+```json
+{
+  "title": "IMG 3640",
+  "description": "Một buổi chiều bên bờ sông Hàn.",
+  "date": "2025-07-14",
+  "album": "14.07.2025"
+}
+```
+
+Không xóa dấu phẩy giữa các trường. Khi chạy lại `pnpm import-gallery`, mô tả đã
+nhập vẫn được giữ lại. Trên web, mô tả xuất hiện dưới tên ảnh ở card Kho ảnh và
+dưới tên ảnh trong cửa sổ phóng to; nội dung mô tả cũng được dùng khi tìm kiếm.
 
 Cũng có thể dùng tab **Kho ảnh** tại `/admin/` để tải ảnh, nhập alt text, đổi tên,
 tìm kiếm và xóa ảnh. Trước khi xóa, kiểm tra ảnh có đang được bài viết sử dụng không.
