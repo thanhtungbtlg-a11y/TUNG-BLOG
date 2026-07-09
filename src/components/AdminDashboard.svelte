@@ -1507,6 +1507,39 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 		color: #15803d;
 	}
 
+	.admin-shell > .feedback {
+		position: fixed;
+		top: calc(5rem + env(safe-area-inset-top));
+		right: 1rem;
+		z-index: 200;
+		width: min(26rem, calc(100vw - 2rem));
+		margin: 0;
+		border: 1px solid currentColor;
+		box-shadow: 0 12px 32px rgb(0 0 0 / 0.2);
+		backdrop-filter: blur(14px);
+		animation: feedback-enter 180ms ease-out;
+	}
+
+	.admin-shell > .feedback.error {
+		background: color-mix(in oklch, var(--card-bg) 88%, #dc2626 12%);
+	}
+
+	.admin-shell > .feedback.notice {
+		background: color-mix(in oklch, var(--card-bg) 88%, #16a34a 12%);
+	}
+
+	@keyframes feedback-enter {
+		from {
+			opacity: 0;
+			transform: translateY(-0.5rem);
+		}
+
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
 	.post-workspace {
 		display: grid;
 		grid-template-columns: 15rem minmax(0, 1fr);
