@@ -1,0 +1,361 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { Icon } from "astro-icon/components";
+import { profileConfig } from "../config";
+import { getPostUrlBySlug, url } from "../utils/url-utils";
+import ImageWrapper from "./misc/ImageWrapper.astro";
+
+interface Props {
+	totalPosts: number;
+	pinnedCount: number;
+	latestCount: number;
+	spotlight?: CollectionEntry<"posts">;
+}
+
+const { totalPosts, pinnedCount, latestCount, spotlight } = Astro.props;
+const spotlightUrl = spotlight
+	? getPostUrlBySlug(spotlight.slug)
+	: url("/archive/");
+const spotlightDate = spotlight?.data.published
+	? new Intl.DateTimeFormat("vi-VN", {
+			day: "2-digit",
+			month: "2-digit",
+			year: "numeric",
+		}).format(spotlight.data.published)
+	: "";
+
+const quickLinks = [
+	{
+		label: "Đọc bài mới",
+		href: spotlightUrl,
+		icon: "material-symbols:menu-book-rounded",
+		primary: true,
+	},
+	{
+		label: "Kho bài",
+		href: url("/archive/"),
+		icon: "material-symbols:archive-outline-rounded",
+	},
+	{
+		label: "Kho ảnh",
+		href: url("/gallery/"),
+		icon: "material-symbols:photo-library-outline-rounded",
+	},
+	{
+		label: "Second Brain",
+		href: url("/brain/"),
+		icon: "material-symbols:neurology-outline-rounded",
+		native: true,
+	},
+];
+---
+
+<section class="home-hero onload-animation" aria-labelledby="home-hero-title">
+	<div class="hero-atmosphere" aria-hidden="true"></div>
+	<div class="hero-content">
+		<p class="hero-kicker">Personal Journal</p>
+		<h1 id="home-hero-title">{profileConfig.name}</h1>
+		<p class="hero-tagline"><em>{profileConfig.bio}</em></p>
+		<p class="hero-summary">
+			Nơi mình lưu lại những suy nghĩ, ký ức, ảnh chụp và những ghi chú đang lớn dần theo thời gian.
+		</p>
+
+		<nav class="hero-actions" aria-label="Điều hướng nhanh">
+			{quickLinks.map((item) => (
+				<a
+					class:list={["hero-action", { primary: item.primary }]}
+					href={item.href}
+					data-no-swup={item.native ? true : undefined}
+					data-astro-reload={item.native ? true : undefined}
+				>
+					<Icon name={item.icon} />
+					<span>{item.label}</span>
+				</a>
+			))}
+		</nav>
+
+		<div class="hero-stats" aria-label="Tổng quan nội dung">
+			<span><strong>{totalPosts}</strong> bài viết</span>
+			<span><strong>{pinnedCount}</strong> nổi bật</span>
+			<span><strong>{latestCount}</strong> mới nhất</span>
+		</div>
+	</div>
+
+	<aside class="hero-card" aria-label="Bài viết gợi ý">
+		<div class="avatar-ring">
+			<ImageWrapper
+				src={profileConfig.avatar || ""}
+				alt={`Ảnh đại diện của ${profileConfig.name}`}
+				class="hero-avatar"
+			/>
+		</div>
+		<div class="hero-card-body">
+			<span class="card-label">Bắt đầu từ đây</span>
+			<a href={spotlightUrl} class="spotlight-link">
+				{spotlight ? spotlight.data.title : "Mở kho bài"}
+				<Icon name="material-symbols:arrow-forward-rounded" />
+			</a>
+			{spotlight && (
+				<p>
+					{spotlightDate}
+					{spotlight.data.category ? ` · ${spotlight.data.category}` : ""}
+				</p>
+			)}
+		</div>
+	</aside>
+</section>
+
+<style>
+	.home-hero {
+		position: relative;
+		display: grid;
+		grid-template-columns: minmax(0, 1.45fr) minmax(16rem, 0.75fr);
+		gap: 1.25rem;
+		margin-bottom: 1.25rem;
+		padding: clamp(1.35rem, 4vw, 2.5rem);
+		overflow: hidden;
+		border: 1px solid color-mix(in oklch, var(--primary), var(--card-border) 66%);
+		border-radius: var(--radius-large);
+		background:
+			linear-gradient(135deg, color-mix(in oklch, var(--card-bg-solid), transparent 7%), color-mix(in oklch, var(--card-bg), transparent 18%)),
+			radial-gradient(circle at 82% 12%, color-mix(in oklch, var(--primary), transparent 70%), transparent 34rem),
+			linear-gradient(var(--page-grid) 1px, transparent 1px),
+			linear-gradient(90deg, var(--page-grid) 1px, transparent 1px);
+		background-size: auto, auto, 42px 42px, 42px 42px;
+		box-shadow: var(--card-shadow);
+		backdrop-filter: blur(18px) saturate(1.12);
+	}
+
+	.hero-atmosphere {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		background:
+			radial-gradient(circle at 12% 10%, color-mix(in oklch, var(--theme-accent), transparent 72%), transparent 20rem),
+			linear-gradient(180deg, transparent 0%, color-mix(in oklch, var(--page-bg), transparent 24%) 100%);
+		opacity: 0.78;
+	}
+
+	.hero-content,
+	.hero-card {
+		position: relative;
+		z-index: 1;
+	}
+
+	.hero-kicker {
+		margin: 0 0 0.85rem;
+		color: var(--primary);
+		font-size: 0.78rem;
+		font-weight: 850;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+
+	.home-hero h1 {
+		max-width: 11ch;
+		margin: 0;
+		color: var(--content-color);
+		font-size: clamp(3rem, 10vw, 6.75rem);
+		font-weight: 900;
+		line-height: 0.92;
+		letter-spacing: 0;
+	}
+
+	.hero-tagline {
+		margin: 1rem 0 0;
+		color: color-mix(in oklch, var(--content-color), transparent 22%);
+		font-size: clamp(1.02rem, 2vw, 1.28rem);
+		font-weight: 700;
+	}
+
+	.hero-summary {
+		max-width: 38rem;
+		margin: 1rem 0 0;
+		color: color-mix(in oklch, var(--content-color), transparent 30%);
+		font-size: 1rem;
+		line-height: 1.75;
+	}
+
+	.hero-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.65rem;
+		margin-top: 1.35rem;
+	}
+
+	.hero-action {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.45rem;
+		min-height: 2.65rem;
+		padding: 0.72rem 0.95rem;
+		border: 1px solid var(--card-border);
+		border-radius: 0.75rem;
+		background: color-mix(in oklch, var(--card-bg-solid), transparent 8%);
+		color: var(--content-color);
+		font-size: 0.92rem;
+		font-weight: 850;
+		box-shadow: 0 8px 22px color-mix(in srgb, var(--page-bg), black 10%);
+		transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+	}
+
+	.hero-action:hover {
+		transform: translateY(-2px);
+		border-color: color-mix(in oklch, var(--primary), var(--card-border) 35%);
+		background: color-mix(in oklch, var(--primary), var(--card-bg-solid) 82%);
+	}
+
+	.hero-action.primary {
+		border-color: color-mix(in oklch, var(--primary), transparent 42%);
+		background: var(--primary);
+		color: var(--card-bg-solid);
+	}
+
+	.hero-action :global(svg) {
+		font-size: 1.25rem;
+	}
+
+	.hero-stats {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.55rem;
+		margin-top: 1.2rem;
+		color: color-mix(in oklch, var(--content-color), transparent 32%);
+		font-size: 0.86rem;
+	}
+
+	.hero-stats span {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		padding: 0.45rem 0.65rem;
+		border: 1px solid color-mix(in oklch, var(--card-border), transparent 15%);
+		border-radius: 999px;
+		background: color-mix(in oklch, var(--card-bg), transparent 18%);
+	}
+
+	.hero-stats strong {
+		color: var(--primary);
+		font-weight: 900;
+	}
+
+	.hero-card {
+		align-self: end;
+		display: grid;
+		gap: 1rem;
+		padding: 1rem;
+		border: 1px solid color-mix(in oklch, var(--primary), transparent 62%);
+		border-radius: 1rem;
+		background: color-mix(in oklch, var(--card-bg), transparent 8%);
+		box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
+	}
+
+	.avatar-ring {
+		width: min(12rem, 60vw);
+		margin-inline: auto;
+		overflow: hidden;
+		border: 1px solid color-mix(in oklch, var(--primary), transparent 45%);
+		border-radius: 1rem;
+		background: color-mix(in oklch, var(--card-bg-solid), transparent 10%);
+	}
+
+	.avatar-ring :global(img) {
+		display: block;
+		width: 100%;
+		height: auto;
+	}
+
+	.hero-card-body {
+		display: grid;
+		gap: 0.45rem;
+	}
+
+	.card-label {
+		color: var(--primary);
+		font-size: 0.72rem;
+		font-weight: 850;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+
+	.spotlight-link {
+		display: inline-flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 0.75rem;
+		color: var(--content-color);
+		font-size: 1.2rem;
+		font-weight: 900;
+		line-height: 1.25;
+	}
+
+	.spotlight-link:hover {
+		color: var(--primary);
+	}
+
+	.spotlight-link :global(svg) {
+		flex: 0 0 auto;
+		margin-top: 0.1rem;
+		color: var(--primary);
+		font-size: 1.35rem;
+		transition: transform 180ms ease;
+	}
+
+	.spotlight-link:hover :global(svg) {
+		transform: translateX(3px);
+	}
+
+	.hero-card p {
+		margin: 0;
+		color: color-mix(in oklch, var(--content-color), transparent 38%);
+		font-size: 0.86rem;
+		font-weight: 700;
+	}
+
+	@media (max-width: 900px) {
+		.home-hero {
+			grid-template-columns: 1fr;
+		}
+
+		.hero-card {
+			align-self: stretch;
+			grid-template-columns: auto minmax(0, 1fr);
+			align-items: center;
+		}
+
+		.avatar-ring {
+			width: 5.75rem;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.home-hero {
+			margin-inline: 0;
+			padding: 1.15rem;
+		}
+
+		.home-hero h1 {
+			font-size: clamp(2.75rem, 16vw, 4.25rem);
+		}
+
+		.hero-actions {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+		}
+
+		.hero-action {
+			justify-content: center;
+			min-width: 0;
+			padding-inline: 0.7rem;
+		}
+
+		.hero-card {
+			grid-template-columns: 1fr;
+		}
+
+		.avatar-ring {
+			width: 7rem;
+			margin-inline: 0;
+		}
+	}
+</style>

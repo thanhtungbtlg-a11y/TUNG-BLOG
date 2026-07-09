@@ -2,6 +2,7 @@
 import type { CollectionEntry } from "astro:content";
 import { getPostUrlBySlug } from "@utils/url-utils";
 import { Icon } from "astro-icon/components";
+import HomeHero from "./HomeHero.astro";
 import PostCard from "./PostCard.astro";
 
 const { page } = Astro.props;
@@ -9,6 +10,17 @@ const { page } = Astro.props;
 let delay = 0;
 const interval = 50;
 const isHome = page.currentPage === 1;
+const totalPosts = page.total ?? page.data.length;
+const pinnedCount = page.data.filter(
+	(entry: CollectionEntry<"posts">) => entry.data.pinned,
+).length;
+const latestCount = page.data.filter(
+	(entry: CollectionEntry<"posts">) => entry.data.latest,
+).length;
+const spotlight =
+	page.data.find((entry: CollectionEntry<"posts">) => entry.data.latest) ??
+	page.data.find((entry: CollectionEntry<"posts">) => entry.data.pinned) ??
+	page.data[0];
 const posts = page.data.map(
 	(entry: CollectionEntry<"posts">, index: number) => {
 		const previous = page.data[index - 1] as
@@ -34,6 +46,14 @@ const posts = page.data.map(
 ---
 
 {!isHome && <h1 class="sr-only">Bài viết của Nguyễn Thanh Tùng</h1>}
+{isHome && (
+	<HomeHero
+		totalPosts={totalPosts}
+		pinnedCount={pinnedCount}
+		latestCount={latestCount}
+		spotlight={spotlight}
+	/>
+)}
 <div class="transition flex flex-col rounded-[var(--radius-large)] bg-[var(--card-bg)] py-1 md:py-0 md:bg-transparent md:gap-4 mb-4">
     {posts.map(({entry, index, sectionLabel}) => (
         <>
