@@ -32,11 +32,11 @@ export const siteConfig: SiteConfig = {
 export const navBarConfig: NavBarConfig = {
 	links: [
 		LinkPreset.Home,
+		LinkPreset.About,
 		LinkPreset.Archive,
 		{ name: "Kho ảnh", url: "/gallery/" },
 		{ name: "Second Brain", url: "/brain/", native: true },
 		{ name: "Hồ sơ", url: "/portfolio/" },
-		LinkPreset.About,
 	],
 };
 

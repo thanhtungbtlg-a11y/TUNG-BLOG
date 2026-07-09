@@ -1,7 +1,9 @@
 ---
-
 import { getEntry, render } from "astro:content";
+import ImageWrapper from "@components/misc/ImageWrapper.astro";
 import Markdown from "@components/misc/Markdown.astro";
+import { Icon } from "astro-icon/components";
+import { profileConfig } from "../config";
 import I18nKey from "../i18n/i18nKey";
 import { i18n } from "../i18n/translation";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
@@ -14,12 +16,175 @@ if (!aboutPost) {
 
 const { Content } = await render(aboutPost);
 ---
-<MainGridLayout title={i18n(I18nKey.about)} description={i18n(I18nKey.about)}>
-    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
-        <div class="card-base z-10 px-9 py-6 relative w-full ">
-            <Markdown class="mt-2">
-                <Content />
-            </Markdown>
-        </div>
-    </div>
+
+<MainGridLayout title={i18n(I18nKey.about)} description={i18n(I18nKey.about)} wide>
+	<section class="about-shell card-base onload-animation">
+		<div class="about-profile">
+			<a
+				href="#about-content"
+				class="about-avatar"
+				aria-label="Chuyển đến phần giới thiệu"
+			>
+				<ImageWrapper
+					src={profileConfig.avatar || ""}
+					alt={`Ảnh đại diện của ${profileConfig.name}`}
+					class="h-full w-full"
+				></ImageWrapper>
+			</a>
+			<div class="about-intro">
+				<p class="about-kicker">Giới thiệu</p>
+				<h1>{profileConfig.name}</h1>
+				{profileConfig.bio && <blockquote>{profileConfig.bio}</blockquote>}
+				<div class="about-links" aria-label="Liên kết cá nhân">
+					{
+						profileConfig.links.map((item) => (
+							<a
+								rel="me noopener noreferrer"
+								aria-label={item.name}
+								href={item.url}
+								target={item.url.startsWith("mailto:") ? undefined : "_blank"}
+								data-no-swup={item.url.startsWith("mailto:") ? true : undefined}
+								class="about-link"
+							>
+								<Icon name={item.icon} />
+								<span>{item.name}</span>
+							</a>
+						))
+					}
+				</div>
+			</div>
+		</div>
+
+		<div id="about-content" class="about-content">
+			<Markdown class="mt-0">
+				<Content />
+			</Markdown>
+		</div>
+	</section>
 </MainGridLayout>
+
+<style>
+	.about-shell {
+		padding: clamp(1rem, 3vw, 2rem);
+	}
+
+	.about-profile {
+		display: grid;
+		grid-template-columns: minmax(12rem, 18rem) minmax(0, 1fr);
+		gap: clamp(1.25rem, 3vw, 2rem);
+		align-items: stretch;
+		padding-bottom: clamp(1.25rem, 3vw, 2rem);
+		border-bottom: 1px solid var(--line-divider);
+	}
+
+	.about-avatar {
+		position: relative;
+		display: block;
+		overflow: hidden;
+		min-height: 18rem;
+		border-radius: 1.2rem;
+		border: 1px solid color-mix(in oklch, var(--primary), transparent 62%);
+		background: var(--btn-regular-bg);
+	}
+
+	.about-intro {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		min-width: 0;
+	}
+
+	.about-kicker {
+		margin: 0 0 0.55rem;
+		color: var(--primary);
+		font-size: 0.8rem;
+		font-weight: 900;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+	}
+
+	.about-intro h1 {
+		margin: 0;
+		color: var(--content-color);
+		font-size: clamp(2.4rem, 7vw, 5rem);
+		font-weight: 900;
+		line-height: 0.98;
+		text-wrap: balance;
+	}
+
+	.about-intro blockquote {
+		max-width: 36rem;
+		margin: 1rem 0 0;
+		padding-left: 1rem;
+		border-left: 3px solid var(--primary);
+		color: var(--content-color);
+		font-size: clamp(1rem, 2vw, 1.2rem);
+		font-style: italic;
+		font-weight: 650;
+		line-height: 1.65;
+		opacity: 0.78;
+	}
+
+	.about-links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.65rem;
+		margin-top: 1.4rem;
+	}
+
+	.about-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.55rem;
+		min-height: 2.75rem;
+		padding: 0 0.9rem;
+		border-radius: 0.75rem;
+		background: var(--btn-regular-bg);
+		color: var(--btn-content);
+		font-weight: 800;
+		transition:
+			transform 180ms ease,
+			background-color 180ms ease,
+			color 180ms ease;
+	}
+
+	.about-link:hover {
+		transform: translateY(-2px);
+		background: var(--btn-regular-bg-hover);
+		color: var(--primary);
+	}
+
+	.about-link :global(svg) {
+		font-size: 1.25rem;
+	}
+
+	.about-content {
+		padding-top: clamp(1.2rem, 3vw, 2rem);
+	}
+
+	.about-content :global(.custom-md) {
+		margin-top: 0;
+	}
+
+	@media (max-width: 760px) {
+		.about-profile {
+			grid-template-columns: 1fr;
+		}
+
+		.about-avatar {
+			min-height: 16rem;
+			max-height: 22rem;
+		}
+
+		.about-link {
+			flex: 1 1 calc(50% - 0.65rem);
+			justify-content: center;
+		}
+	}
+
+	@media (max-width: 460px) {
+		.about-link {
+			flex-basis: 100%;
+		}
+	}
+</style>
