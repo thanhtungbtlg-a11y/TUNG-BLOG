@@ -17,7 +17,11 @@ if (!aboutPost) {
 const { Content } = await render(aboutPost);
 ---
 
-<MainGridLayout title={i18n(I18nKey.about)} description={i18n(I18nKey.about)} wide>
+<MainGridLayout
+	title={i18n(I18nKey.about)}
+	description="Về Nguyễn Thanh Tùng và góc lưu giữ những bài viết, ảnh chụp, ghi chú."
+	wide
+>
 	<section class="about-shell card-base onload-animation">
 		<div class="about-profile">
 			<a
@@ -70,7 +74,7 @@ const { Content } = await render(aboutPost);
 
 	.about-profile {
 		display: grid;
-		grid-template-columns: minmax(12rem, 18rem) minmax(0, 1fr);
+		grid-template-columns: minmax(11rem, 15rem) minmax(0, 1fr);
 		gap: clamp(1.25rem, 3vw, 2rem);
 		align-items: stretch;
 		padding-bottom: clamp(1.25rem, 3vw, 2rem);
@@ -81,8 +85,8 @@ const { Content } = await render(aboutPost);
 		position: relative;
 		display: block;
 		overflow: hidden;
-		min-height: 18rem;
-		border-radius: 1.2rem;
+		min-height: 15rem;
+		border-radius: var(--radius-large);
 		border: 1px solid color-mix(in oklch, var(--primary), transparent 62%);
 		background: var(--btn-regular-bg);
 	}
@@ -106,9 +110,9 @@ const { Content } = await render(aboutPost);
 	.about-intro h1 {
 		margin: 0;
 		color: var(--content-color);
-		font-size: clamp(2.4rem, 7vw, 5rem);
+		font-size: clamp(2rem, 4vw, 3.15rem);
 		font-weight: 900;
-		line-height: 0.98;
+		line-height: 1.08;
 		text-wrap: balance;
 	}
 
@@ -172,8 +176,8 @@ const { Content } = await render(aboutPost);
 		}
 
 		.about-avatar {
-			min-height: 16rem;
-			max-height: 22rem;
+			min-height: 14rem;
+			max-height: 19rem;
 		}
 
 		.about-link {

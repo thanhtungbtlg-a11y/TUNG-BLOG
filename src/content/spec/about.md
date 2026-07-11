@@ -1,5 +1,3 @@
-# Về Mình
-
 Chào bạn, mình là Nguyễn Thanh Tùng.
 
 Đây là blog cá nhân nơi mình lưu lại những suy nghĩ, kỷ niệm, những lần tự hỏi về công việc, cuộc sống, gia đình và những ngày rất bình thường nhưng vẫn đáng nhớ.

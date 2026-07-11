@@ -47,9 +47,14 @@ let {
 
 // Define the theme variable in the root layout so Astro can apply it globally.
 const configHue = siteConfig.themeColor.hue;
+const isHomePage = Astro.url.pathname === "/";
+const defaultDescription =
+	"Góc lưu giữ bài viết, ảnh chụp và những ghi chú của Nguyễn Thanh Tùng.";
 
 let pageTitle: string;
-if (title) {
+if (isHomePage) {
+	pageTitle = siteConfig.title;
+} else if (title) {
 	pageTitle = `${title} - ${siteConfig.title}`;
 } else {
 	pageTitle = siteConfig.title;
@@ -57,10 +62,23 @@ if (title) {
 
 const siteOrigin = Astro.site ?? Astro.url.origin;
 const canonicalUrl = new URL(Astro.url.pathname, siteOrigin).toString();
-const metaDescription = description || profileConfig.bio || pageTitle;
+const metaDescription = isHomePage
+	? defaultDescription
+	: description || defaultDescription;
 const defaultOgImage = new URL("/api/og", siteOrigin);
-defaultOgImage.searchParams.set("title", pageTitle);
-if (description) defaultOgImage.searchParams.set("subtitle", description);
+defaultOgImage.searchParams.set(
+	"title",
+	isHomePage ? "Nguyễn Thanh Tùng" : pageTitle,
+);
+defaultOgImage.searchParams.set("subtitle", metaDescription);
+defaultOgImage.searchParams.set(
+	"category",
+	isHomePage
+		? "Trang cá nhân"
+		: setOGTypeArticle
+			? "Bài viết"
+			: siteConfig.title,
+);
 const ogImageUrl = ogImage
 	? new URL(ogImage, siteOrigin).toString()
 	: defaultOgImage.toString();
@@ -74,6 +92,7 @@ if (!lang) {
 	lang = `${siteConfig.lang}`;
 }
 const siteLang = lang.replace("_", "-");
+const ogLocale = siteLang.replace("-", "_");
 ---
 
 <!DOCTYPE html>
@@ -89,6 +108,7 @@ const siteLang = lang.replace("_", "-");
 		<link rel="canonical" href={canonicalUrl}>
 
 		<meta property="og:site_name" content={siteConfig.title}>
+		<meta property="og:locale" content={ogLocale}>
 		<meta property="og:url" content={canonicalUrl}>
 		<meta property="og:title" content={pageTitle}>
 		<meta property="og:description" content={metaDescription}>

@@ -43,6 +43,7 @@ let selectedCategory = params.get("uncategorized")
 	? "__uncategorized"
 	: (params.get("category") ?? "all");
 let selectedYear = params.get("year") ?? "all";
+let query = params.get("q") ?? "";
 let viewMode: ViewMode = "timeline";
 
 onMount(() => {
@@ -67,12 +68,19 @@ $: categoryOptions = uniqueSorted(
 $: yearOptions = uniqueSorted(
 	sortedPosts.map((post) => String(toDate(post.data.published).getFullYear())),
 ).sort((a, b) => Number(b) - Number(a));
+$: normalizedQuery = normalizeSearch(query);
 
 $: filteredPosts = sortedPosts.filter((post) => {
 	const postTags = post.data.tags ?? [];
 	const postCategory = post.data.category?.trim() ?? "";
 	const postYear = String(toDate(post.data.published).getFullYear());
+	const searchableText = normalizeSearch(
+		[post.data.title, post.data.description, postCategory, ...postTags].join(
+			" ",
+		),
+	);
 	return (
+		(!normalizedQuery || searchableText.includes(normalizedQuery)) &&
 		(selectedTag === "all" || postTags.includes(selectedTag)) &&
 		(selectedCategory === "all" ||
 			(selectedCategory === "__uncategorized"
@@ -84,8 +92,18 @@ $: filteredPosts = sortedPosts.filter((post) => {
 $: pinnedPosts = filteredPosts
 	.filter((post) => post.data.pinned)
 	.sort((a, b) => (b.data.pinOrder ?? 0) - (a.data.pinOrder ?? 0));
-$: timelinePosts = filteredPosts.filter((post) => !post.data.pinned);
+$: latestPosts = filteredPosts
+	.filter((post) => !post.data.pinned && post.data.latest)
+	.slice(0, 3);
+$: timelinePosts = filteredPosts.filter(
+	(post) => !post.data.pinned && !latestPosts.includes(post),
+);
 $: groups = groupPosts(timelinePosts);
+$: hasActiveFilters =
+	query.trim().length > 0 ||
+	selectedTag !== "all" ||
+	selectedCategory !== "all" ||
+	selectedYear !== "all";
 
 function toDate(date: Date | string) {
 	return date instanceof Date ? date : new Date(date);
@@ -93,6 +111,14 @@ function toDate(date: Date | string) {
 
 function uniqueSorted(values: string[]) {
 	return [...new Set(values)].sort((a, b) => a.localeCompare(b, "vi"));
+}
+
+function normalizeSearch(value: string) {
+	return value
+		.normalize("NFD")
+		.replace(/\p{Diacritic}/gu, "")
+		.toLocaleLowerCase("vi")
+		.trim();
 }
 
 function formatDay(date: Date | string) {
@@ -160,19 +186,23 @@ function formatTags(tagList?: string[]) {
 function updateUrl() {
 	if (typeof window === "undefined") return;
 	const next = new URLSearchParams();
+	if (query.trim()) next.set("q", query.trim());
 	if (selectedTag !== "all") next.set("tag", selectedTag);
 	if (selectedCategory === "__uncategorized") next.set("uncategorized", "true");
 	else if (selectedCategory !== "all") next.set("category", selectedCategory);
 	if (selectedYear !== "all") next.set("year", selectedYear);
-	const query = next.toString();
+	const queryString = next.toString();
 	window.history.replaceState(
 		null,
 		"",
-		query ? `${window.location.pathname}?${query}` : window.location.pathname,
+		queryString
+			? `${window.location.pathname}?${queryString}`
+			: window.location.pathname,
 	);
 }
 
 function clearFilters() {
+	query = "";
 	selectedTag = "all";
 	selectedCategory = "all";
 	selectedYear = "all";
@@ -189,15 +219,34 @@ function setViewMode(mode: ViewMode) {
 	<header class="archive-header">
 		<div>
 			<p>Kho bài</p>
-			<h1>{filteredPosts.length} bài viết</h1>
+			<h1 aria-live="polite">{filteredPosts.length} bài viết</h1>
+			<span class="archive-total">trong {sortedPosts.length} bài đã lưu</span>
 		</div>
-		<button type="button" class="reset-button" onclick={clearFilters}>
+		<button
+			type="button"
+			class="reset-button"
+			disabled={!hasActiveFilters}
+			onclick={clearFilters}
+		>
 			<Icon icon="material-symbols:filter-alt-off-outline-rounded" />
 			Xóa lọc
 		</button>
 	</header>
 
 	<div class="archive-filters">
+		<label class="archive-search">
+			<span>Tìm nhanh</span>
+			<div>
+				<Icon icon="material-symbols:search-rounded" aria-hidden="true" />
+				<input
+					type="search"
+					placeholder="Tìm tiêu đề, chủ đề hoặc thẻ"
+					aria-label="Tìm trong Kho bài"
+					bind:value={query}
+					oninput={updateUrl}
+				/>
+			</div>
+		</label>
 		<label>
 			<span>Năm</span>
 			<select bind:value={selectedYear} onchange={updateUrl}>
@@ -269,6 +318,24 @@ function setViewMode(mode: ViewMode) {
 						</div>
 						<p>{post.data.description || post.data.category || "Bài viết nổi bật"}</p>
 						<span>{formatTags(post.data.tags)}</span>
+					</a>
+				{/each}
+			</div>
+		</section>
+	{/if}
+
+	{#if latestPosts.length}
+		<section class="latest-section" aria-label="Mới cập nhật">
+			<div class="section-title">
+				<Icon icon="material-symbols:history-rounded" />
+				<span>Mới cập nhật</span>
+			</div>
+			<div class="latest-grid">
+				{#each latestPosts as post}
+					<a class="latest-card" href={getPostUrlBySlug(post.slug)}>
+						<time>{formatFullDate(post.data.published)}</time>
+						<strong>{post.data.title}</strong>
+						<p>{post.data.description || post.data.category || "Bài viết mới"}</p>
 					</a>
 				{/each}
 			</div>
@@ -388,7 +455,8 @@ function setViewMode(mode: ViewMode) {
 	}
 
 	.archive-header p,
-	.archive-header h1 {
+	.archive-header h1,
+	.archive-total {
 		margin: 0;
 	}
 
@@ -405,8 +473,17 @@ function setViewMode(mode: ViewMode) {
 		font-size: 1.65rem;
 	}
 
+	.archive-total {
+		display: block;
+		margin-top: 0.28rem;
+		color: var(--meta-color);
+		font-size: 0.84rem;
+		font-weight: 650;
+	}
+
 	.reset-button,
-	.archive-filters select {
+	.archive-filters select,
+	.archive-search > div {
 		min-height: 2.45rem;
 		border: 1px solid var(--card-border);
 		border-radius: 7px;
@@ -424,9 +501,14 @@ function setViewMode(mode: ViewMode) {
 		cursor: pointer;
 	}
 
+	.reset-button:disabled {
+		cursor: default;
+		opacity: 0.52;
+	}
+
 	.archive-filters {
 		display: grid;
-		grid-template-columns: repeat(3, minmax(7.5rem, 1fr)) auto;
+		grid-template-columns: minmax(14rem, 1.4fr) repeat(3, minmax(7.5rem, 1fr)) auto;
 		gap: 0.65rem;
 		padding: 0.85rem;
 		border: 1px solid var(--card-border);
@@ -442,6 +524,35 @@ function setViewMode(mode: ViewMode) {
 		color: var(--meta-color);
 		font-size: 0.76rem;
 		font-weight: 850;
+	}
+
+	.archive-search > div {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0 0.7rem;
+	}
+
+	.archive-search :global(svg) {
+		flex: 0 0 auto;
+		color: var(--meta-color);
+		font-size: 1.15rem;
+	}
+
+	.archive-search input {
+		width: 100%;
+		min-width: 0;
+		border: 0;
+		outline: 0;
+		background: transparent;
+		color: var(--content-color);
+		font: inherit;
+		font-weight: 650;
+	}
+
+	.archive-search input::placeholder {
+		color: var(--meta-color);
+		opacity: 0.8;
 	}
 
 	.archive-filters select {
@@ -484,6 +595,7 @@ function setViewMode(mode: ViewMode) {
 	}
 
 	.pinned-section,
+	.latest-section,
 	.timeline-section {
 		display: grid;
 		gap: 0.75rem;
@@ -499,6 +611,51 @@ function setViewMode(mode: ViewMode) {
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: 0.75rem;
+	}
+
+	.latest-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 0.75rem;
+	}
+
+	.latest-card {
+		display: grid;
+		align-content: start;
+		gap: 0.45rem;
+		min-height: 8.8rem;
+		padding: 0.95rem;
+		border: 1px solid var(--card-border);
+		border-radius: 8px;
+		background: var(--card-bg);
+		box-shadow: var(--card-shadow);
+		transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
+	}
+
+	.latest-card:hover {
+		transform: translateY(-2px);
+		border-color: color-mix(in oklch, var(--primary), var(--card-border) 45%);
+		background: color-mix(in oklch, var(--card-bg), var(--primary) 4%);
+	}
+
+	.latest-card time,
+	.latest-card p {
+		color: var(--meta-color);
+		font-size: 0.8rem;
+	}
+
+	.latest-card strong {
+		color: var(--content-color);
+		line-height: 1.45;
+	}
+
+	.latest-card p {
+		display: -webkit-box;
+		overflow: hidden;
+		margin: 0;
+		line-height: 1.5;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
 	}
 
 	.pinned-card {
@@ -768,6 +925,7 @@ function setViewMode(mode: ViewMode) {
 
 		.archive-filters,
 		.pinned-grid,
+		.latest-grid,
 		.post-grid,
 		.month-group {
 			grid-template-columns: 1fr;
@@ -797,6 +955,16 @@ function setViewMode(mode: ViewMode) {
 
 		.month-label {
 			padding-top: 0;
+		}
+	}
+
+	@media (min-width: 769px) and (max-width: 1100px) {
+		.archive-filters {
+			grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+		}
+
+		.archive-search {
+			grid-column: span 2;
 		}
 	}
 
