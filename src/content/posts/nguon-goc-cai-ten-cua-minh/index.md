@@ -6,8 +6,6 @@ image: "./356217073-223515153953921-4327874666082653839-n.webp"
 tags: []
 category: "WordPress"
 lang: vi
-pinned: true
-pinOrder: 1
 draft: false
 ---
 
