@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import {
 	AdminRequestError,
 	normaliseAdminError,
@@ -7,6 +7,7 @@ import {
 import {
 	type AnalyticsViewRow,
 	buildAnalyticsReport,
+	isSameSiteReferrer,
 	normalizeAnalyticsPath,
 } from "../../src/lib/analytics.js";
 
@@ -67,42 +68,78 @@ export default async function handler(
 		const supabase = createClient(supabaseUrl, serviceKey, {
 			auth: { persistSession: false, autoRefreshToken: false },
 		});
-		const rows: AnalyticsViewRow[] = [];
-		for (let offset = 0; offset < maxRows; offset += pageSize) {
-			let query = supabase
-				.from("analytics_page_views")
-				.select(
-					"path,title,visitor_hash,session_hash,referrer_host,device_type,viewed_at",
-				)
-				.gte("viewed_at", from.toISOString())
-				.lt("viewed_at", to.toISOString())
-				.order("viewed_at", { ascending: false })
-				.range(offset, offset + pageSize - 1);
-			if (path) query = query.eq("path", path);
-
-			const { data, error } = await query;
-			if (error) {
-				if (error.code === "42P01" || error.code === "PGRST205") {
-					throw new AdminRequestError(
-						"Analytics chưa được khởi tạo. Hãy chạy supabase/analytics.sql một lần.",
-						503,
-					);
-				}
-				throw error;
-			}
-			rows.push(...((data ?? []) as AnalyticsViewRow[]));
-			if (!data || data.length < pageSize) break;
-		}
+		const periodDuration = to.getTime() - from.getTime();
+		const previousTo = new Date(from);
+		const previousFrom = new Date(from.getTime() - periodDuration);
+		const [current, previous] = await Promise.all([
+			loadAnalyticsRows(supabase, from, to, path),
+			loadAnalyticsRows(supabase, previousFrom, previousTo, path),
+		]);
+		const siteHost = env("PUBLIC_SITE_URL");
+		const currentRows = removeInternalReferrers(current.rows, siteHost);
+		const previousRows = removeInternalReferrers(previous.rows, siteHost);
 
 		response.status(200).json({
 			range: { from: from.toISOString(), to: to.toISOString(), path },
-			report: buildAnalyticsReport(rows, from, to),
-			truncated: rows.length >= maxRows,
+			report: buildAnalyticsReport(currentRows, from, to),
+			comparison: {
+				range: {
+					from: previousFrom.toISOString(),
+					to: previousTo.toISOString(),
+				},
+				totals: buildAnalyticsReport(previousRows, previousFrom, previousTo)
+					.totals,
+			},
+			truncated: current.truncated || previous.truncated,
 		});
 	} catch (error) {
 		const result = normaliseAdminError(error);
 		response.status(result.status).json({ error: result.message });
 	}
+}
+
+function removeInternalReferrers(rows: AnalyticsViewRow[], siteHost: string) {
+	if (!siteHost) return rows;
+	return rows.map((row) =>
+		isSameSiteReferrer(row.referrer_host, siteHost)
+			? { ...row, referrer_host: "" }
+			: row,
+	);
+}
+
+async function loadAnalyticsRows(
+	supabase: SupabaseClient,
+	from: Date,
+	to: Date,
+	path: string,
+) {
+	const rows: AnalyticsViewRow[] = [];
+	for (let offset = 0; offset < maxRows; offset += pageSize) {
+		let query = supabase
+			.from("analytics_page_views")
+			.select(
+				"path,title,visitor_hash,session_hash,referrer_host,device_type,viewed_at",
+			)
+			.gte("viewed_at", from.toISOString())
+			.lt("viewed_at", to.toISOString())
+			.order("viewed_at", { ascending: false })
+			.range(offset, offset + pageSize - 1);
+		if (path) query = query.eq("path", path);
+
+		const { data, error } = await query;
+		if (error) {
+			if (error.code === "42P01" || error.code === "PGRST205") {
+				throw new AdminRequestError(
+					"Analytics chưa được khởi tạo. Hãy chạy supabase/analytics.sql một lần.",
+					503,
+				);
+			}
+			throw error;
+		}
+		rows.push(...((data ?? []) as AnalyticsViewRow[]));
+		if (!data || data.length < pageSize) break;
+	}
+	return { rows, truncated: rows.length >= maxRows };
 }
 
 function parseDate(value: string) {

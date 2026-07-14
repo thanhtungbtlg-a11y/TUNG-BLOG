@@ -1,12 +1,18 @@
 <script lang="ts">
 import Icon from "@iconify/svelte";
 import { onMount } from "svelte";
-import type { AnalyticsReport } from "../lib/analytics";
+import type { AnalyticsReport, AnalyticsTotals } from "../lib/analytics";
 
 type Preset = "24h" | "7d" | "30d" | "90d" | "custom";
+type ChartMetric = "views" | "visitors";
+type PageSort = "views" | "visitors" | "recent";
 type AnalyticsResponse = {
 	range: { from: string; to: string; path: string };
 	report: AnalyticsReport;
+	comparison: {
+		range: { from: string; to: string };
+		totals: AnalyticsTotals;
+	};
 	truncated: boolean;
 };
 
@@ -15,6 +21,11 @@ let preset = $state<Preset>("7d");
 let selectedPath = $state("");
 let customFrom = $state(toDateInput(new Date(Date.now() - 7 * 86_400_000)));
 let customTo = $state(toDateInput(new Date()));
+let chartMetric = $state<ChartMetric>("views");
+let pageQuery = $state("");
+let pageSort = $state<PageSort>("views");
+let eventQuery = $state("");
+let eventDevice = $state("");
 let loading = $state(false);
 let error = $state("");
 let data = $state<AnalyticsResponse | null>(null);
@@ -101,6 +112,12 @@ function formatNumber(value: number) {
 	return new Intl.NumberFormat("vi-VN").format(value);
 }
 
+function formatDecimal(value: number) {
+	return new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 }).format(
+		value,
+	);
+}
+
 function formatDateTime(value: string) {
 	return new Intl.DateTimeFormat("vi-VN", {
 		dateStyle: "short",
@@ -113,6 +130,15 @@ function formatBucket(value: string) {
 	const [date, time] = value.split("T");
 	const [year, month, day] = date.split("-");
 	return time ? `${day}/${month} ${time}` : `${day}/${month}/${year.slice(2)}`;
+}
+
+function formatComparisonRange() {
+	if (!data) return "";
+	const formatter = new Intl.DateTimeFormat("vi-VN", {
+		dateStyle: "short",
+		timeZone: "Asia/Ho_Chi_Minh",
+	});
+	return `${formatter.format(new Date(data.comparison.range.from))} – ${formatter.format(new Date(data.comparison.range.to))}`;
 }
 
 function pageLabel(path: string, title: string) {
@@ -130,8 +156,128 @@ function deviceLabel(value: string) {
 	);
 }
 
-function maxSeriesViews() {
-	return Math.max(1, ...(data?.report.series.map((item) => item.views) ?? [1]));
+function sourceLabel(value: string) {
+	return value === "direct" ? "Trực tiếp" : value;
+}
+
+function metricCards() {
+	if (!data) return [];
+	const current = data.report.totals;
+	const previous = data.comparison.totals;
+	return [
+		{ label: "Lượt xem", value: current.views, previous: previous.views },
+		{
+			label: "Người xem",
+			value: current.visitors,
+			previous: previous.visitors,
+		},
+		{
+			label: "Phiên truy cập",
+			value: current.sessions,
+			previous: previous.sessions,
+		},
+		{ label: "Trang đã xem", value: current.pages, previous: previous.pages },
+		{
+			label: "Lượt / phiên",
+			value: current.viewsPerSession,
+			previous: previous.viewsPerSession,
+			decimal: true,
+		},
+		{
+			label: "Tỷ lệ thoát",
+			value: current.bounceRate,
+			previous: previous.bounceRate,
+			suffix: "%",
+			inverse: true,
+		},
+	];
+}
+
+function trend(current: number, previous: number, inverse = false) {
+	if (current === previous) return { label: "Không đổi", tone: "neutral" };
+	if (previous === 0) return { label: "Mới", tone: "neutral" };
+	const change = Math.round(((current - previous) / previous) * 100);
+	const rising = change > 0;
+	const good = inverse ? !rising : rising;
+	return {
+		label: `${rising ? "↑" : "↓"} ${Math.abs(change)}%`,
+		tone: good ? "positive" : "negative",
+	};
+}
+
+function chartValue(point: AnalyticsReport["series"][number]) {
+	return point[chartMetric];
+}
+
+function maxSeriesValue() {
+	return Math.max(1, ...(data?.report.series.map(chartValue) ?? [1]));
+}
+
+function filteredPages() {
+	if (!data) return [];
+	const query = pageQuery.trim().toLocaleLowerCase("vi");
+	return data.report.pages
+		.filter(
+			(page) =>
+				!query ||
+				page.title.toLocaleLowerCase("vi").includes(query) ||
+				page.path.toLocaleLowerCase("vi").includes(query),
+		)
+		.sort((left, right) => {
+			if (pageSort === "visitors") return right.visitors - left.visitors;
+			if (pageSort === "recent") {
+				return right.lastViewedAt.localeCompare(left.lastViewedAt);
+			}
+			return right.views - left.views;
+		})
+		.slice(0, 100);
+}
+
+function filteredEvents() {
+	if (!data) return [];
+	const query = eventQuery.trim().toLocaleLowerCase("vi");
+	return data.report.events.filter(
+		(event) =>
+			(!eventDevice || event.device === eventDevice) &&
+			(!query ||
+				event.title.toLocaleLowerCase("vi").includes(query) ||
+				event.path.toLocaleLowerCase("vi").includes(query) ||
+				event.referrer.toLocaleLowerCase("vi").includes(query)),
+	);
+}
+
+function sharePercent(views: number) {
+	const total = data?.report.totals.views ?? 0;
+	return total ? Math.round((views / total) * 100) : 0;
+}
+
+function exportEvents() {
+	const rows = filteredEvents();
+	const csvRows = [
+		["Thời gian", "Tiêu đề", "Đường dẫn", "Thiết bị", "Nguồn"],
+		...rows.map((event) => [
+			formatDateTime(event.viewedAt),
+			event.title,
+			event.path,
+			deviceLabel(event.device),
+			sourceLabel(event.referrer || "direct"),
+		]),
+	];
+	const csv = csvRows.map((row) => row.map(escapeCsv).join(",")).join("\n");
+	const url = URL.createObjectURL(
+		new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" }),
+	);
+	const link = document.createElement("a");
+	link.href = url;
+	link.download = `thong-ke-${toDateInput(new Date())}.csv`;
+	document.body.append(link);
+	link.click();
+	link.remove();
+	window.setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+function escapeCsv(value: string) {
+	return `"${value.replaceAll('"', '""')}"`;
 }
 </script>
 
@@ -139,10 +285,13 @@ function maxSeriesViews() {
 	<header class="analytics-heading">
 		<div>
 			<h2 id="analytics-title">Thống kê lượt xem</h2>
-			<p>Dữ liệu ẩn danh của blog và Second Brain, theo giờ Việt Nam.</p>
+			<p>Dữ liệu ẩn danh, theo giờ Việt Nam. Không lưu IP hoặc thông tin nhận dạng.</p>
 		</div>
-		<button class="refresh-button" type="button" onclick={loadAnalytics} disabled={loading} title="Tải lại" aria-label="Tải lại thống kê">
-			<Icon icon="material-symbols:refresh-rounded" />
+		<button class="icon-button" type="button" onclick={loadAnalytics} disabled={loading} title="Tải lại" aria-label="Tải lại thống kê">
+			<Icon
+				icon="material-symbols:refresh-rounded"
+				class={loading ? "spin" : undefined}
+			/>
 		</button>
 	</header>
 
@@ -180,26 +329,40 @@ function maxSeriesViews() {
 	{:else if loading && !data}
 		<div class="analytics-message"><Icon icon="material-symbols:progress-activity" /> Đang tải thống kê...</div>
 	{:else if data}
+		<div class="comparison-note">
+			<Icon icon="material-symbols:compare-arrows-rounded" />
+			So với kỳ liền trước: {formatComparisonRange()}
+		</div>
+
 		<div class="metric-grid">
-			<article><span>Lượt xem</span><strong>{formatNumber(data.report.totals.views)}</strong></article>
-			<article><span>Người xem</span><strong>{formatNumber(data.report.totals.visitors)}</strong></article>
-			<article><span>Phiên truy cập</span><strong>{formatNumber(data.report.totals.sessions)}</strong></article>
-			<article><span>Trang đã xem</span><strong>{formatNumber(data.report.totals.pages)}</strong></article>
-			<article><span>Tỷ lệ thoát</span><strong>{data.report.totals.bounceRate}%</strong></article>
+			{#each metricCards() as metric}
+				{@const metricTrend = trend(metric.value, metric.previous, metric.inverse)}
+				<article>
+					<span>{metric.label}</span>
+					<strong>{metric.decimal ? formatDecimal(metric.value) : formatNumber(metric.value)}{metric.suffix ?? ""}</strong>
+					<small class={metricTrend.tone}>{metricTrend.label} <span>so với kỳ trước</span></small>
+				</article>
+			{/each}
 		</div>
 
 		<section class="analytics-panel chart-panel" aria-labelledby="views-chart-title">
 			<div class="panel-heading">
-				<h3 id="views-chart-title">Lượt xem theo thời gian</h3>
-				{#if loading}<span>Đang cập nhật...</span>{/if}
+				<div>
+					<h3 id="views-chart-title">Xu hướng theo thời gian</h3>
+					<span>Các mốc không có lượt xem vẫn được hiển thị đầy đủ.</span>
+				</div>
+				<div class="segmented-control" aria-label="Chỉ số biểu đồ">
+					<button type="button" class:active={chartMetric === "views"} onclick={() => { chartMetric = "views"; }}>Lượt xem</button>
+					<button type="button" class:active={chartMetric === "visitors"} onclick={() => { chartMetric = "visitors"; }}>Người xem</button>
+				</div>
 			</div>
-			{#if data.report.series.length}
+			{#if data.report.totals.views > 0}
 				<div class="chart-scroll">
 					<div class="bar-chart" style={`--chart-columns: ${data.report.series.length}`}>
 						{#each data.report.series as point}
 							<div class="bar-column" title={`${point.views} lượt xem · ${point.visitors} người xem`}>
-								<span class="bar-value">{point.views}</span>
-								<div class="bar-track"><span style={`height: ${(point.views / maxSeriesViews()) * 100}%`}></span></div>
+								<span class="bar-value">{chartValue(point)}</span>
+								<div class="bar-track"><span style={`height: ${(chartValue(point) / maxSeriesValue()) * 100}%`}></span></div>
 								<small>{formatBucket(point.bucket)}</small>
 							</div>
 						{/each}
@@ -210,62 +373,118 @@ function maxSeriesViews() {
 			{/if}
 		</section>
 
-		<div class="analytics-columns">
-			<section class="analytics-panel" aria-labelledby="popular-pages-title">
-				<h3 id="popular-pages-title">Trang được xem</h3>
-				<div class="table-scroll">
-					<table>
-						<thead><tr><th>Trang</th><th>Lượt xem</th><th>Người xem</th><th>Lần cuối</th></tr></thead>
-						<tbody>
-							{#each data.report.pages as page}
-								<tr>
-									<td><a href={page.path} target="_blank" rel="noopener">{page.title || page.path}</a><small>{page.path}</small></td>
-									<td>{formatNumber(page.views)}</td>
-									<td>{formatNumber(page.visitors)}</td>
-									<td>{formatDateTime(page.lastViewedAt)}</td>
-								</tr>
-							{:else}
-								<tr><td colspan="4">Chưa có dữ liệu.</td></tr>
-							{/each}
-						</tbody>
-					</table>
+		<section class="analytics-panel" aria-labelledby="popular-pages-title">
+			<div class="panel-heading table-heading">
+				<div>
+					<h3 id="popular-pages-title">Trang được xem</h3>
+					<span>Tối đa 100 kết quả trong bộ lọc hiện tại.</span>
+				</div>
+				<div class="table-tools">
+					<label class="search-control">
+						<Icon icon="material-symbols:search-rounded" />
+						<input aria-label="Tìm trang" placeholder="Tìm tiêu đề hoặc đường dẫn" bind:value={pageQuery} />
+					</label>
+					<select aria-label="Sắp xếp trang" bind:value={pageSort}>
+						<option value="views">Nhiều lượt xem</option>
+						<option value="visitors">Nhiều người xem</option>
+						<option value="recent">Mới xem gần đây</option>
+					</select>
+				</div>
+			</div>
+			<div class="table-scroll">
+				<table>
+					<thead><tr><th>Trang</th><th>Lượt xem</th><th>Người xem</th><th>Tỷ trọng</th><th>Lần cuối</th></tr></thead>
+					<tbody>
+						{#each filteredPages() as page}
+							<tr>
+								<td><a href={page.path} target="_blank" rel="noopener">{page.title || page.path}</a><small>{page.path}</small></td>
+								<td>{formatNumber(page.views)}</td>
+								<td>{formatNumber(page.visitors)}</td>
+								<td><span class="share-value">{sharePercent(page.views)}%</span><span class="share-track"><span style={`width: ${sharePercent(page.views)}%`}></span></span></td>
+								<td>{formatDateTime(page.lastViewedAt)}</td>
+							</tr>
+						{:else}
+							<tr><td colspan="5">Không tìm thấy trang phù hợp.</td></tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
+		</section>
+
+		<div class="breakdown-grid">
+			<section class="analytics-panel" aria-labelledby="sections-title">
+				<h3 id="sections-title">Loại nội dung</h3>
+				<div class="breakdown-list">
+					{#each data.report.sections as item}
+						<div class="breakdown-item">
+							<p><span>{item.name}</span><strong>{formatNumber(item.views)} <small>{sharePercent(item.views)}%</small></strong></p>
+							<span class="breakdown-track"><span style={`width: ${sharePercent(item.views)}%`}></span></span>
+						</div>
+					{:else}<p class="empty-copy">Chưa có dữ liệu nội dung.</p>{/each}
 				</div>
 			</section>
 
 			<section class="analytics-panel" aria-labelledby="devices-title">
-				<h3 id="devices-title">Thiết bị và nguồn truy cập</h3>
+				<h3 id="devices-title">Thiết bị</h3>
 				<div class="breakdown-list">
 					{#each data.report.devices as item}
-						<div><span>{deviceLabel(item.name)}</span><strong>{formatNumber(item.views)}</strong></div>
-					{:else}<p>Chưa có dữ liệu thiết bị.</p>{/each}
+						<div class="breakdown-item">
+							<p><span>{deviceLabel(item.name)}</span><strong>{formatNumber(item.views)} <small>{sharePercent(item.views)}%</small></strong></p>
+							<span class="breakdown-track"><span style={`width: ${sharePercent(item.views)}%`}></span></span>
+						</div>
+					{:else}<p class="empty-copy">Chưa có dữ liệu thiết bị.</p>{/each}
 				</div>
-				<h4>Nguồn giới thiệu</h4>
+			</section>
+
+			<section class="analytics-panel" aria-labelledby="referrers-title">
+				<h3 id="referrers-title">Nguồn truy cập</h3>
 				<div class="breakdown-list">
 					{#each data.report.referrers as item}
-						<div><span>{item.name}</span><strong>{formatNumber(item.views)}</strong></div>
-					{:else}<p>Chủ yếu là truy cập trực tiếp.</p>{/each}
+						<div class="breakdown-item">
+							<p><span title={sourceLabel(item.name)}>{sourceLabel(item.name)}</span><strong>{formatNumber(item.views)} <small>{sharePercent(item.views)}%</small></strong></p>
+							<span class="breakdown-track"><span style={`width: ${sharePercent(item.views)}%`}></span></span>
+						</div>
+					{:else}<p class="empty-copy">Chưa có dữ liệu nguồn truy cập.</p>{/each}
 				</div>
 			</section>
 		</div>
 
 		<section class="analytics-panel" aria-labelledby="view-history-title">
-			<div class="panel-heading">
-				<h3 id="view-history-title">Lịch sử lượt xem</h3>
-				<span>Tối đa 250 lượt gần nhất trong bộ lọc</span>
+			<div class="panel-heading table-heading">
+				<div>
+					<h3 id="view-history-title">Lịch sử lượt xem</h3>
+					<span>{filteredEvents().length} / {data.report.events.length} lượt gần nhất trong bộ lọc.</span>
+				</div>
+				<div class="table-tools">
+					<label class="search-control">
+						<Icon icon="material-symbols:search-rounded" />
+						<input aria-label="Tìm lịch sử" placeholder="Tìm trang hoặc nguồn" bind:value={eventQuery} />
+					</label>
+					<select aria-label="Lọc thiết bị" bind:value={eventDevice}>
+						<option value="">Tất cả thiết bị</option>
+						<option value="desktop">Máy tính</option>
+						<option value="mobile">Điện thoại</option>
+						<option value="tablet">Máy tính bảng</option>
+						<option value="unknown">Không rõ</option>
+					</select>
+					<button class="export-button" type="button" onclick={exportEvents} disabled={!filteredEvents().length} title="Xuất CSV">
+						<Icon icon="material-symbols:download-rounded" /> CSV
+					</button>
+				</div>
 			</div>
-			<div class="table-scroll">
+			<div class="table-scroll history-table">
 				<table>
 					<thead><tr><th>Thời gian</th><th>Trang</th><th>Thiết bị</th><th>Nguồn</th></tr></thead>
 					<tbody>
-						{#each data.report.events as event}
+						{#each filteredEvents() as event}
 							<tr>
 								<td>{formatDateTime(event.viewedAt)}</td>
 								<td><a href={event.path} target="_blank" rel="noopener">{event.title || event.path}</a><small>{event.path}</small></td>
 								<td>{deviceLabel(event.device)}</td>
-								<td>{event.referrer || "Trực tiếp"}</td>
+								<td>{sourceLabel(event.referrer || "direct")}</td>
 							</tr>
 						{:else}
-							<tr><td colspan="4">Chưa có lượt xem.</td></tr>
+							<tr><td colspan="4">Không có lượt xem phù hợp.</td></tr>
 						{/each}
 					</tbody>
 				</table>
@@ -273,7 +492,7 @@ function maxSeriesViews() {
 		</section>
 
 		{#if data.truncated}
-			<div class="analytics-message warning">Khoảng thời gian này có trên 20.000 lượt xem. Bảng đang hiển thị phần dữ liệu gần nhất.</div>
+			<div class="analytics-message warning">Khoảng thời gian này có trên 20.000 lượt xem. Báo cáo đang dùng phần dữ liệu gần nhất.</div>
 		{/if}
 	{/if}
 </section>
@@ -296,7 +515,6 @@ function maxSeriesViews() {
 
 	h2,
 	h3,
-	h4,
 	p {
 		margin: 0;
 	}
@@ -309,11 +527,6 @@ function maxSeriesViews() {
 		font-size: 0.95rem;
 	}
 
-	h4 {
-		margin-top: 1rem;
-		font-size: 0.78rem;
-	}
-
 	.analytics-heading p,
 	.panel-heading span,
 	.empty-copy {
@@ -322,9 +535,17 @@ function maxSeriesViews() {
 		font-size: 0.76rem;
 	}
 
-	.refresh-button {
+	.icon-button {
 		width: 2.5rem;
 		padding: 0;
+	}
+
+	.spin {
+		animation: spin 700ms linear infinite;
+	}
+
+	@keyframes spin {
+		to { transform: rotate(360deg); }
 	}
 
 	.analytics-filters {
@@ -354,19 +575,23 @@ function maxSeriesViews() {
 		font-weight: 750;
 	}
 
-	.path-filter select {
-		min-width: 0;
-	}
-
 	.apply-button {
 		border-color: transparent;
 		background: var(--primary);
 		color: white;
 	}
 
+	.comparison-note {
+		display: flex;
+		align-items: center;
+		gap: 0.35rem;
+		color: var(--meta-color);
+		font-size: 0.72rem;
+	}
+
 	.metric-grid {
 		display: grid;
-		grid-template-columns: repeat(5, minmax(0, 1fr));
+		grid-template-columns: repeat(6, minmax(0, 1fr));
 		gap: 0.65rem;
 	}
 
@@ -383,19 +608,54 @@ function maxSeriesViews() {
 		padding: 0.8rem;
 	}
 
-	.metric-grid span {
+	.metric-grid > article > span {
 		color: var(--meta-color);
 		font-size: 0.72rem;
 	}
 
 	.metric-grid strong {
-		font-size: 1.45rem;
+		font-size: 1.4rem;
 		line-height: 1;
 	}
+
+	.metric-grid small {
+		font-size: 0.64rem;
+		font-weight: 750;
+	}
+
+	.metric-grid small span {
+		color: var(--meta-color);
+		font-weight: 500;
+	}
+
+	.positive { color: #16a34a; }
+	.negative { color: #dc2626; }
+	.neutral { color: var(--meta-color); }
 
 	.analytics-panel {
 		min-width: 0;
 		padding: 0.8rem;
+	}
+
+	.segmented-control {
+		display: inline-flex;
+		padding: 0.18rem;
+		border: 1px solid var(--card-border);
+		border-radius: 6px;
+		background: var(--btn-regular-bg);
+	}
+
+	.segmented-control button {
+		min-height: 2rem;
+		padding: 0.35rem 0.65rem;
+		border: 0;
+		background: transparent;
+		font-size: 0.7rem;
+	}
+
+	.segmented-control button.active {
+		background: var(--primary);
+		color: white;
 	}
 
 	.chart-scroll,
@@ -406,7 +666,7 @@ function maxSeriesViews() {
 	.bar-chart {
 		display: grid;
 		grid-template-columns: repeat(var(--chart-columns), minmax(2.25rem, 1fr));
-		gap: 0.4rem;
+		gap: 0.35rem;
 		min-width: max(100%, calc(var(--chart-columns) * 2.65rem));
 		height: 15rem;
 		padding-top: 1rem;
@@ -423,7 +683,7 @@ function maxSeriesViews() {
 	.bar-value,
 	.bar-column small {
 		color: var(--meta-color);
-		font-size: 0.64rem;
+		font-size: 0.62rem;
 	}
 
 	.bar-track {
@@ -437,16 +697,45 @@ function maxSeriesViews() {
 		right: 15%;
 		bottom: 0;
 		left: 15%;
-		min-height: 3px;
+		min-height: 2px;
 		border-radius: 4px 4px 1px 1px;
 		background: var(--primary);
 		transition: height 180ms ease;
 	}
 
-	.analytics-columns {
-		display: grid;
-		grid-template-columns: minmax(0, 1.65fr) minmax(15rem, 0.7fr);
-		gap: 0.85rem;
+	.table-heading {
+		align-items: flex-end;
+	}
+
+	.table-tools {
+		display: flex;
+		align-items: center;
+		gap: 0.45rem;
+	}
+
+	.search-control {
+		display: flex;
+		align-items: center;
+		gap: 0.35rem;
+		min-width: 13rem;
+		padding: 0 0.55rem;
+		border: 1px solid var(--card-border);
+		border-radius: 5px;
+		background: var(--btn-regular-bg);
+	}
+
+	.search-control input {
+		min-width: 0;
+		border: 0;
+		background: transparent;
+	}
+
+	.search-control input:focus {
+		outline: 0;
+	}
+
+	.export-button {
+		white-space: nowrap;
 	}
 
 	table {
@@ -470,9 +759,9 @@ function maxSeriesViews() {
 		font-size: 0.68rem;
 	}
 
-	td:nth-child(2),
+	td:first-child,
 	td small {
-		max-width: 22rem;
+		max-width: 24rem;
 	}
 
 	td small {
@@ -488,25 +777,73 @@ function maxSeriesViews() {
 		font-weight: 700;
 	}
 
-	.breakdown-list {
-		display: grid;
-		gap: 0.2rem;
-		margin-top: 0.55rem;
+	.share-value {
+		display: inline-block;
+		min-width: 2.2rem;
 	}
 
-	.breakdown-list div {
+	.share-track,
+	.breakdown-track {
+		display: block;
+		overflow: hidden;
+		height: 0.25rem;
+		border-radius: 99px;
+		background: var(--btn-regular-bg);
+	}
+
+	.share-track {
+		width: 4rem;
+		margin-top: 0.25rem;
+	}
+
+	.share-track span,
+	.breakdown-track span {
+		display: block;
+		height: 100%;
+		border-radius: inherit;
+		background: var(--primary);
+	}
+
+	.breakdown-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 0.85rem;
+	}
+
+	.breakdown-list {
+		display: grid;
+		gap: 0.65rem;
+		margin-top: 0.75rem;
+	}
+
+	.breakdown-item p {
 		display: flex;
 		justify-content: space-between;
 		gap: 0.8rem;
-		padding: 0.45rem 0;
-		border-bottom: 1px solid var(--line-divider);
-		font-size: 0.76rem;
+		margin-bottom: 0.3rem;
+		font-size: 0.74rem;
 	}
 
-	.breakdown-list span {
+	.breakdown-item p > span {
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+	}
+
+	.breakdown-item strong small {
+		color: var(--meta-color);
+		font-weight: 500;
+	}
+
+	.history-table {
+		max-height: 32rem;
+	}
+
+	.history-table thead {
+		position: sticky;
+		top: 0;
+		z-index: 1;
+		background: var(--card-bg);
 	}
 
 	.analytics-message {
@@ -533,15 +870,26 @@ function maxSeriesViews() {
 		color: #b45309;
 	}
 
-	@media (max-width: 900px) {
+	@media (max-width: 1050px) {
 		.metric-grid {
 			grid-template-columns: repeat(3, minmax(0, 1fr));
 		}
 
-		.analytics-columns {
-			grid-template-columns: 1fr;
+		.breakdown-grid {
+			grid-template-columns: 1fr 1fr;
 		}
 
+		.breakdown-grid > :last-child {
+			grid-column: span 2;
+		}
+
+		.table-heading {
+			align-items: flex-start;
+			flex-direction: column;
+		}
+	}
+
+	@media (max-width: 900px) {
 		.analytics-filters,
 		.analytics-filters:has(input[type="date"]) {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -553,24 +901,53 @@ function maxSeriesViews() {
 	}
 
 	@media (max-width: 640px) {
-		.analytics-heading {
+		.analytics-heading,
+		.panel-heading {
 			align-items: flex-start;
 		}
 
 		.metric-grid,
 		.analytics-filters,
-		.analytics-filters:has(input[type="date"]) {
+		.analytics-filters:has(input[type="date"]),
+		.breakdown-grid {
 			grid-template-columns: 1fr 1fr;
 		}
 
-		.metric-grid article:last-child,
 		.path-filter,
-		.apply-button {
+		.apply-button,
+		.breakdown-grid > :last-child {
 			grid-column: span 2;
+		}
+
+		.metric-grid article {
+			padding: 0.7rem;
+		}
+
+		.metric-grid strong {
+			font-size: 1.2rem;
 		}
 
 		.analytics-panel {
 			padding: 0.65rem;
+		}
+
+		.panel-heading {
+			flex-direction: column;
+		}
+
+		.segmented-control,
+		.table-tools,
+		.search-control {
+			width: 100%;
+		}
+
+		.table-tools {
+			align-items: stretch;
+			flex-direction: column;
+		}
+
+		.segmented-control button {
+			flex: 1;
 		}
 	}
 </style>

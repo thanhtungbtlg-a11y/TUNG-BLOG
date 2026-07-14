@@ -2,6 +2,7 @@ import { createHmac } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import {
 	isAnalyticsId,
+	isSameSiteReferrer,
 	normalizeAnalyticsPath,
 	normalizeAnalyticsTitle,
 	normalizeReferrerHost,
@@ -66,13 +67,20 @@ export default async function handler(
 			auth: { persistSession: false, autoRefreshToken: false },
 		});
 		const secret = env("ANALYTICS_HASH_SECRET") || serviceKey;
+		const referrerHost = normalizeReferrerHost(body.referrer);
+		const siteHost =
+			header(request.headers, "x-forwarded-host") ||
+			header(request.headers, "host") ||
+			env("PUBLIC_SITE_URL");
 		const { error } = await supabase.from("analytics_page_views").insert({
 			id: eventId,
 			path,
 			title,
 			visitor_hash: digest(visitorId, secret),
 			session_hash: digest(sessionId, secret),
-			referrer_host: normalizeReferrerHost(body.referrer),
+			referrer_host: isSameSiteReferrer(referrerHost, siteHost)
+				? ""
+				: referrerHost,
 			device_type: detectDevice(userAgent),
 		});
 

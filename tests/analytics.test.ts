@@ -3,6 +3,8 @@ import test from "node:test";
 import {
 	buildAnalyticsReport,
 	isAnalyticsId,
+	isSameSiteReferrer,
+	normalizeAnalyticsHostname,
 	normalizeAnalyticsPath,
 	normalizeAnalyticsTitle,
 	normalizeReferrerHost,
@@ -21,6 +23,14 @@ test("normalizes analytics input without keeping query details", () => {
 		"www.google.com",
 	);
 	assert.equal(normalizeReferrerHost("not a url"), "");
+	assert.equal(
+		normalizeAnalyticsHostname("WWW.THANHTUNG0209.COM:443"),
+		"thanhtung0209.com",
+	);
+	assert.equal(
+		isSameSiteReferrer("www.thanhtung0209.com", "thanhtung0209.com"),
+		true,
+	);
 });
 
 test("accepts UUID identifiers used by the anonymous tracker", () => {
@@ -70,12 +80,23 @@ test("aggregates page views, visitors, sessions and exact events", () => {
 		sessions: 2,
 		pages: 2,
 		bounceRate: 50,
+		viewsPerSession: 1.5,
 	});
+	assert.equal(report.series.length, 25);
 	assert.equal(report.pages[0].path, "/posts/hello");
 	assert.equal(report.pages[0].views, 2);
 	assert.equal(report.events[0].path, "/archive");
 	assert.deepEqual(report.devices, [
 		{ name: "mobile", views: 2 },
 		{ name: "desktop", views: 1 },
+	]);
+	assert.deepEqual(report.referrers, [
+		{ name: "direct", views: 1 },
+		{ name: "facebook.com", views: 1 },
+		{ name: "google.com", views: 1 },
+	]);
+	assert.deepEqual(report.sections, [
+		{ name: "Bài viết", views: 2 },
+		{ name: "Kho bài", views: 1 },
 	]);
 });

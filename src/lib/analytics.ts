@@ -8,14 +8,17 @@ export type AnalyticsViewRow = {
 	viewed_at: string;
 };
 
+export type AnalyticsTotals = {
+	views: number;
+	visitors: number;
+	sessions: number;
+	pages: number;
+	bounceRate: number;
+	viewsPerSession: number;
+};
+
 export type AnalyticsReport = {
-	totals: {
-		views: number;
-		visitors: number;
-		sessions: number;
-		pages: number;
-		bounceRate: number;
-	};
+	totals: AnalyticsTotals;
 	series: Array<{
 		bucket: string;
 		views: number;
@@ -37,6 +40,7 @@ export type AnalyticsReport = {
 	}>;
 	devices: Array<{ name: string; views: number }>;
 	referrers: Array<{ name: string; views: number }>;
+	sections: Array<{ name: string; views: number }>;
 };
 
 const vietnamTimeParts = new Intl.DateTimeFormat("en-CA", {
@@ -77,6 +81,25 @@ export function normalizeReferrerHost(value: unknown) {
 	}
 }
 
+export function normalizeAnalyticsHostname(value: unknown) {
+	if (typeof value !== "string" || !value.trim()) return "";
+	const candidate = value.split(",", 1)[0]?.trim().toLowerCase() ?? "";
+	try {
+		const hostname = new URL(
+			candidate.includes("://") ? candidate : `https://${candidate}`,
+		).hostname;
+		return hostname.replace(/^www\./, "").slice(0, 180);
+	} catch {
+		return "";
+	}
+}
+
+export function isSameSiteReferrer(referrerHost: string, siteHost: string) {
+	const referrer = normalizeAnalyticsHostname(referrerHost);
+	const site = normalizeAnalyticsHostname(siteHost);
+	return Boolean(referrer && site && referrer === site);
+}
+
 export function isAnalyticsId(value: unknown): value is string {
 	return (
 		typeof value === "string" &&
@@ -106,6 +129,11 @@ export function buildAnalyticsReport(
 	const bucketMap = new Map<string, { views: number; visitors: Set<string> }>();
 	const deviceMap = new Map<string, number>();
 	const referrerMap = new Map<string, number>();
+	const sectionMap = new Map<string, number>();
+
+	for (const bucket of buildBucketRange(from, to, useHourlyBuckets)) {
+		bucketMap.set(bucket, { views: 0, visitors: new Set<string>() });
+	}
 
 	for (const row of rows) {
 		visitors.add(row.visitor_hash);
@@ -135,12 +163,10 @@ export function buildAnalyticsReport(
 		bucketMap.set(bucketKey, bucket);
 
 		deviceMap.set(row.device_type, (deviceMap.get(row.device_type) ?? 0) + 1);
-		if (row.referrer_host) {
-			referrerMap.set(
-				row.referrer_host,
-				(referrerMap.get(row.referrer_host) ?? 0) + 1,
-			);
-		}
+		const referrer = row.referrer_host || "direct";
+		referrerMap.set(referrer, (referrerMap.get(referrer) ?? 0) + 1);
+		const section = getAnalyticsSection(row.path);
+		sectionMap.set(section, (sectionMap.get(section) ?? 0) + 1);
 	}
 
 	const bouncedSessions = [...sessions.values()].filter(
@@ -154,6 +180,9 @@ export function buildAnalyticsReport(
 			pages: pageMap.size,
 			bounceRate: sessions.size
 				? Math.round((bouncedSessions / sessions.size) * 100)
+				: 0,
+			viewsPerSession: sessions.size
+				? Math.round((rows.length / sessions.size) * 10) / 10
 				: 0,
 		},
 		series: [...bucketMap.entries()]
@@ -189,7 +218,33 @@ export function buildAnalyticsReport(
 			})),
 		devices: rankedCounts(deviceMap),
 		referrers: rankedCounts(referrerMap).slice(0, 12),
+		sections: rankedCounts(sectionMap),
 	};
+}
+
+function buildBucketRange(from: Date, to: Date, includeHour: boolean) {
+	const bucketSize = includeHour ? 60 * 60 * 1000 : 24 * 60 * 60 * 1000;
+	const buckets = new Set<string>();
+	for (
+		let timestamp = from.getTime();
+		timestamp <= to.getTime();
+		timestamp += bucketSize
+	) {
+		buckets.add(
+			getVietnamBucket(new Date(timestamp).toISOString(), includeHour),
+		);
+	}
+	return buckets;
+}
+
+function getAnalyticsSection(path: string) {
+	if (path === "/") return "Trang chủ";
+	if (path.startsWith("/posts/")) return "Bài viết";
+	if (path === "/archive" || path.startsWith("/archive/")) return "Kho bài";
+	if (path === "/gallery" || path.startsWith("/gallery/")) return "Kho ảnh";
+	if (path === "/brain" || path.startsWith("/brain/")) return "Second Brain";
+	if (path === "/about" || path.startsWith("/about/")) return "Giới thiệu";
+	return "Trang khác";
 }
 
 function getVietnamBucket(value: string, includeHour: boolean) {
