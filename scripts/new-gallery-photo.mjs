@@ -73,7 +73,7 @@ try {
 	await fs.mkdir(path.dirname(metadataFile), { recursive: true });
 	await fs.writeFile(
 		metadataFile,
-		`${JSON.stringify(metadata, null, 2)}\n`,
+		`${JSON.stringify(metadata, null, "\t")}\n`,
 		"utf8",
 	);
 

@@ -194,7 +194,7 @@ async function readMediaItems(): Promise<MediaItem[]> {
 }
 
 function encodeItems(items: MediaItem[]) {
-	return Buffer.from(`${JSON.stringify(items, null, 2)}\n`, "utf8");
+	return Buffer.from(`${JSON.stringify(items, null, "\t")}\n`, "utf8");
 }
 
 function parseBody(value: unknown) {

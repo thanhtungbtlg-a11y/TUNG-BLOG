@@ -87,7 +87,7 @@ const metadata = [...preserved, ...uniqueImported].sort((a, b) => {
 });
 await fs.writeFile(
 	metadataFile,
-	`${JSON.stringify(metadata, null, 2)}\n`,
+	`${JSON.stringify(metadata, null, "\t")}\n`,
 	"utf8",
 );
 
