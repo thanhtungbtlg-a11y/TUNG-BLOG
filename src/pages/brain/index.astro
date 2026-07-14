@@ -1,0 +1,344 @@
+---
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { Icon } from "astro-icon/components";
+import { brainTopics } from "../../data/brain-topics";
+
+const liveTopics = brainTopics.filter((topic) => topic.status === "live");
+---
+
+<MainGridLayout
+	title="Second Brain"
+	description="Các kho kiến thức Obsidian công khai của Nguyễn Thanh Tùng."
+	wide
+>
+	<header class="brain-header onload-animation">
+		<div class="brain-header__icon" aria-hidden="true">
+			<Icon name="material-symbols:neurology-outline-rounded" />
+		</div>
+		<div>
+			<p class="brain-kicker">Kho kiến thức</p>
+			<h1>Second Brain</h1>
+			<p class="brain-intro">
+				Mỗi chủ đề là một không gian Obsidian độc lập. Chọn một vault để khám phá
+				ghi chú, liên kết và sơ đồ kiến thức được xuất bản bằng Quartz.
+			</p>
+		</div>
+	</header>
+
+	<section class="brain-topics" aria-labelledby="brain-topics-title">
+		<div class="brain-section-heading onload-animation">
+			<div>
+				<p class="brain-kicker">Danh sách vault</p>
+				<h2 id="brain-topics-title">Chọn chủ đề</h2>
+			</div>
+			<span>{liveTopics.length} đang hoạt động</span>
+		</div>
+
+		<div class="brain-topic-grid">
+			{
+				brainTopics.map((topic, index) =>
+					topic.status === "live" && topic.href ? (
+						<a
+							href={topic.href}
+							class="brain-topic brain-topic--live card-base interactive-card onload-animation"
+							style={`animation-delay: calc(var(--content-delay) + ${index * 70}ms)`}
+							data-no-swup
+						>
+							<div class="brain-topic__topline">
+								<span class="brain-topic__icon" aria-hidden="true">
+									<Icon name={topic.icon} />
+								</span>
+								<span class="brain-status brain-status--live">
+									<span aria-hidden="true" />
+									Đang hoạt động
+								</span>
+							</div>
+							<div class="brain-topic__content">
+								<h3>{topic.title}</h3>
+								<p>{topic.description}</p>
+							</div>
+							<span class="brain-topic__action">
+								Mở kho kiến thức
+								<Icon name="material-symbols:arrow-forward-rounded" />
+							</span>
+						</a>
+					) : (
+						<article
+							class="brain-topic brain-topic--soon card-base onload-animation"
+							style={`animation-delay: calc(var(--content-delay) + ${index * 70}ms)`}
+							aria-disabled="true"
+						>
+							<div class="brain-topic__topline">
+								<span class="brain-topic__icon" aria-hidden="true">
+									<Icon name={topic.icon} />
+								</span>
+								<span class="brain-status">Sắp ra mắt</span>
+							</div>
+							<div class="brain-topic__content">
+								<h3>{topic.title}</h3>
+								<p>{topic.description}</p>
+							</div>
+							<span class="brain-topic__placeholder" aria-hidden="true">
+								<Icon name="material-symbols:more-horiz" />
+							</span>
+						</article>
+					),
+				)
+			}
+		</div>
+	</section>
+</MainGridLayout>
+
+<style>
+	.brain-header {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr);
+		gap: clamp(1rem, 3vw, 1.75rem);
+		align-items: center;
+		padding: clamp(1.4rem, 4vw, 2.75rem) clamp(1.1rem, 4vw, 3rem);
+		border-bottom: 1px solid var(--line-divider);
+	}
+
+	.brain-header__icon {
+		display: grid;
+		place-items: center;
+		width: clamp(4rem, 8vw, 5.5rem);
+		aspect-ratio: 1;
+		border: 1px solid color-mix(in oklch, var(--primary), transparent 58%);
+		border-radius: var(--radius-large);
+		background: color-mix(in oklch, var(--primary), transparent 88%);
+		color: var(--primary);
+		font-size: clamp(2rem, 5vw, 3rem);
+	}
+
+	.brain-kicker {
+		margin: 0 0 0.35rem;
+		color: var(--primary);
+		font-size: 0.76rem;
+		font-weight: 900;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+	}
+
+	.brain-header h1,
+	.brain-section-heading h2,
+	.brain-topic h3,
+	.brain-intro,
+	.brain-topic p {
+		margin: 0;
+	}
+
+	.brain-header h1 {
+		color: var(--content-color);
+		font-size: clamp(2rem, 5vw, 3.25rem);
+		font-weight: 900;
+		line-height: 1.05;
+	}
+
+	.brain-intro {
+		max-width: 48rem;
+		margin-top: 0.8rem;
+		color: var(--content-color);
+		font-size: clamp(0.98rem, 2vw, 1.08rem);
+		font-weight: 550;
+		line-height: 1.7;
+		opacity: 0.76;
+	}
+
+	.brain-topics {
+		padding: clamp(1.25rem, 3vw, 2rem) 0;
+	}
+
+	.brain-section-heading {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		align-items: flex-end;
+		padding: 0 0.25rem 1rem;
+	}
+
+	.brain-section-heading h2 {
+		color: var(--content-color);
+		font-size: clamp(1.35rem, 3vw, 1.75rem);
+		font-weight: 900;
+	}
+
+	.brain-section-heading > span {
+		color: var(--meta-color);
+		font-size: 0.82rem;
+		font-weight: 750;
+	}
+
+	.brain-topic-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 1rem;
+	}
+
+	.brain-topic {
+		display: flex;
+		flex-direction: column;
+		min-height: 17rem;
+		padding: clamp(1.1rem, 3vw, 1.5rem);
+		border: 1px solid var(--line-divider);
+		border-radius: var(--radius-large);
+		color: var(--content-color);
+	}
+
+	.brain-topic--live {
+		position: relative;
+		overflow: hidden;
+		background:
+			linear-gradient(
+				145deg,
+				color-mix(in oklch, var(--primary), transparent 90%),
+				transparent 55%
+			),
+			var(--card-bg);
+		text-decoration: none;
+	}
+
+	.brain-topic--live::after {
+		position: absolute;
+		right: -3.5rem;
+		bottom: -4.5rem;
+		width: 12rem;
+		aspect-ratio: 1;
+		border: 1px solid color-mix(in oklch, var(--primary), transparent 78%);
+		border-radius: 50%;
+		content: "";
+		transition: transform 180ms ease;
+	}
+
+	.brain-topic--live:hover::after {
+		transform: scale(1.08);
+	}
+
+	.brain-topic--soon {
+		border-style: dashed;
+		background: color-mix(in oklch, var(--card-bg), transparent 18%);
+		opacity: 0.68;
+	}
+
+	.brain-topic__topline,
+	.brain-status,
+	.brain-topic__action {
+		display: flex;
+		align-items: center;
+	}
+
+	.brain-topic__topline {
+		justify-content: space-between;
+		gap: 0.75rem;
+	}
+
+	.brain-topic__icon {
+		display: grid;
+		place-items: center;
+		width: 3rem;
+		aspect-ratio: 1;
+		border-radius: 0.75rem;
+		background: var(--btn-regular-bg);
+		color: var(--primary);
+		font-size: 1.55rem;
+	}
+
+	.brain-status {
+		gap: 0.4rem;
+		min-height: 2rem;
+		padding: 0 0.7rem;
+		border-radius: 999px;
+		background: var(--btn-regular-bg);
+		color: var(--meta-color);
+		font-size: 0.73rem;
+		font-weight: 850;
+	}
+
+	.brain-status--live {
+		color: var(--primary);
+	}
+
+	.brain-status--live > span {
+		width: 0.45rem;
+		aspect-ratio: 1;
+		border-radius: 50%;
+		background: currentColor;
+		box-shadow: 0 0 0 0.25rem color-mix(in oklch, currentColor, transparent 82%);
+	}
+
+	.brain-topic__content {
+		margin-top: 1.5rem;
+	}
+
+	.brain-topic h3 {
+		font-size: clamp(1.45rem, 3vw, 2rem);
+		font-weight: 900;
+		line-height: 1.15;
+	}
+
+	.brain-topic p {
+		max-width: 34rem;
+		margin-top: 0.7rem;
+		color: var(--meta-color);
+		font-weight: 560;
+		line-height: 1.65;
+	}
+
+	.brain-topic__action {
+		position: relative;
+		z-index: 1;
+		gap: 0.4rem;
+		align-self: flex-start;
+		margin-top: auto;
+		padding-top: 1.25rem;
+		color: var(--primary);
+		font-size: 0.88rem;
+		font-weight: 850;
+	}
+
+	.brain-topic__action :global(svg) {
+		font-size: 1.2rem;
+		transition: transform 180ms ease;
+	}
+
+	.brain-topic--live:hover .brain-topic__action :global(svg) {
+		transform: translateX(0.2rem);
+	}
+
+	.brain-topic__placeholder {
+		display: grid;
+		place-items: center;
+		align-self: flex-start;
+		width: 2.5rem;
+		aspect-ratio: 1;
+		margin-top: auto;
+		border-radius: 0.65rem;
+		background: var(--btn-regular-bg);
+		color: var(--meta-color);
+	}
+
+	@media (max-width: 720px) {
+		.brain-header {
+			grid-template-columns: 1fr;
+		}
+
+		.brain-topic-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.brain-topic {
+			min-height: 15rem;
+		}
+	}
+
+	@media (max-width: 460px) {
+		.brain-header {
+			padding-inline: 0.35rem;
+		}
+
+		.brain-section-heading {
+			align-items: flex-start;
+			flex-direction: column;
+		}
+	}
+</style>

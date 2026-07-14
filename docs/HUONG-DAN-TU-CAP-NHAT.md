@@ -194,7 +194,8 @@ Xem cấu hình chi tiết tại `docs/ADMIN-DASHBOARD.md`.
 
 ## 9. Cập nhật Second Brain từ Obsidian
 
-Second Brain dùng Quartz v5, nằm riêng trong `brain/` và được xuất bản tại `/brain/`.
+Second Brain có trang chọn vault tại `/brain/`. Vault LEED dùng Quartz v5, nằm riêng
+trong `brain/` và được xuất bản tại `/brain/leed/`.
 Không cần sửa code Astro trong `src/` khi chỉ cập nhật ghi chú.
 
 Mỗi ghi chú muốn công khai phải có frontmatter:
@@ -215,7 +216,7 @@ pnpm brain:sync
 pnpm brain:dev
 ```
 
-Mở `http://localhost:8080/brain/` để xem thử. Khi ổn, nhấn `Ctrl + C` để dừng server.
+Mở `http://localhost:8080/brain/leed/` để xem thử. Khi ổn, nhấn `Ctrl + C` để dừng server.
 
 Nếu dùng vault khác:
 
@@ -263,7 +264,8 @@ Kiểm tra ít nhất:
 - nút email mở trang soạn thư Gmail với người nhận đã điền sẵn;
 - tìm kiếm `Ctrl + K`;
 - player, comment và chế độ sáng/tối;
-- liên kết **Second Brain** mở `/brain/`.
+- liên kết **Second Brain** mở trang chọn vault `/brain/`;
+- vault **LEED** mở Quartz tại `/brain/leed/`.
 
 ## 11. Kiểm tra trước khi push
 
@@ -327,7 +329,8 @@ Bản Quartz v4 cũ vẫn được giữ tại branch `codex/quartz-v4-backup` v
 | `public/gallery/` | Ảnh Kho ảnh |
 | `public/music/` | MP3 và ảnh bìa nhạc |
 | `public/favicon/` | Logo và favicon |
-| `brain/content/` | Ghi chú công khai đã đồng bộ từ Obsidian |
+| `src/data/brain-topics.ts` | Danh sách vault hiển thị ở trang Second Brain |
+| `brain/content/` | Ghi chú LEED công khai đã đồng bộ từ Obsidian |
 | `brain/quartz.config.yaml` | Tên, màu, URL và bố cục Second Brain |
 | `scripts/` | Lệnh tự động hóa |
 | `docs/` | Tài liệu sử dụng |

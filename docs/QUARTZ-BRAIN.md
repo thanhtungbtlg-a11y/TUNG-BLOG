@@ -1,18 +1,22 @@
 # Quản lý Thanh Tùng's Second Brain
 
-Second Brain dùng Quartz v5 và được xuất bản tại:
+Second Brain dùng một trang trung tâm để chọn vault. Vault LEED hiện dùng Quartz v5
+và được xuất bản tại:
 
-- `https://www.thanhtung0209.com/brain/`
+- Trang chọn vault: `https://www.thanhtung0209.com/brain/`
+- Quartz LEED: `https://www.thanhtung0209.com/brain/leed/`
 - Vault mặc định: `C:\Users\NITRO 5\Downloads\LEED_Obsidian_Vault`
 
-Đường dẫn `/brain/` được giữ ổn định để liên kết cũ không bị hỏng. Tên hiển thị trên
-menu và trang Quartz là **Second Brain**.
+Menu **Second Brain** mở `/brain/`. Từ đây người đọc chọn **LEED** để vào Quartz.
+Các đường dẫn ghi chú cũ dưới `/brain/` được tạo trang chuyển hướng sang
+`/brain/leed/` khi build để liên kết đã chia sẻ không bị hỏng.
 
 ## Ranh giới với blog
 
-Quartz nằm riêng trong `brain/`; không dùng component, CSS hoặc route Astro của blog.
-Blog chỉ gọi `scripts/build-brain.mjs` ở cuối quá trình build rồi xuất website tĩnh vào
-`dist/brain`.
+Quartz LEED nằm riêng trong `brain/`; không dùng component, CSS hoặc route Astro của blog.
+Trang chọn vault nằm tại `src/pages/brain/index.astro`. Blog gọi
+`scripts/build-brain.mjs` ở cuối quá trình build rồi xuất Quartz LEED vào
+`dist/brain/leed`.
 
 Muốn đổi tên, màu, font hoặc bố cục Second Brain, sửa `brain/quartz.config.yaml`.
 Không cần sửa thư mục `src/` của blog.
@@ -41,11 +45,19 @@ Không cần sửa thư mục `src/` của blog.
    pnpm brain:dev
    ```
 
-6. Mở `http://localhost:8080/brain/`.
+6. Mở `http://localhost:8080/brain/leed/`.
 7. Nhấn `Ctrl + C` để dừng server.
 8. Chạy `pnpm build`, commit và push lên GitHub.
 
-## Dùng vault khác
+## Thêm một vault Quartz khác
+
+Mỗi vault là một website Quartz độc lập. Trang `/brain/` đã có các vị trí **Sắp ra mắt**.
+Khi thêm vault mới cần tạo một thư mục Quartz riêng, build vào
+`dist/brain/<ten-vault>` và đổi vị trí tương ứng trong `src/data/brain-topics.ts` từ
+`soon` thành `live`.
+
+Lệnh dưới đây chỉ dùng để thay nguồn ghi chú của Quartz LEED hiện tại, không tạo thêm
+một website Quartz mới:
 
 ```powershell
 pnpm brain:sync -- "D:\Obsidian\My Vault"

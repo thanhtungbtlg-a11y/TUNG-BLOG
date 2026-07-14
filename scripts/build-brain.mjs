@@ -14,8 +14,12 @@ import { fileURLToPath } from "node:url";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const brainDir = join(repoRoot, "brain");
-const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+const brainHubDir = join(repoRoot, "dist", "brain");
 const serve = process.argv.includes("--serve");
+const leedOutputDir = serve
+	? join(brainDir, "public", "leed")
+	: join(brainHubDir, "leed");
+const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
 const nodeModulesDir = join(brainDir, "node_modules");
 const dependencyMarker = join(nodeModulesDir, ".quartz-package-lock");
 const dependencyFingerprint = createHash("sha256")
@@ -61,32 +65,31 @@ const quartzArgs = [
 	"quartz/bootstrap-cli.mjs",
 	"build",
 	"--output",
-	serve ? "public" : "../dist/brain",
+	serve ? "public/leed" : "../dist/brain/leed",
 ];
 
-if (serve) quartzArgs.push("--serve", "--baseDir", "brain");
+if (serve) quartzArgs.push("--serve", "--baseDir", "brain/leed");
 run(process.execPath, quartzArgs);
 
-const outputDir = serve
-	? join(brainDir, "public")
-	: join(repoRoot, "dist", "brain");
 const trackerSource = join(
 	repoRoot,
 	"public",
 	"scripts",
 	"analytics-tracker.js",
 );
-const trackerOutput = join(outputDir, "scripts", "analytics-tracker.js");
+const trackerOutput = join(leedOutputDir, "scripts", "analytics-tracker.js");
 mkdirSync(dirname(trackerOutput), { recursive: true });
 copyFileSync(trackerSource, trackerOutput);
 
 const trackerTag =
 	'<script defer src="/scripts/analytics-tracker.js" data-persist></script>';
-for (const htmlFile of findHtmlFiles(outputDir)) {
+for (const htmlFile of findHtmlFiles(leedOutputDir)) {
 	const html = readFileSync(htmlFile, "utf8");
 	if (html.includes("analytics-tracker.js")) continue;
 	writeFileSync(htmlFile, html.replace("</body>", `${trackerTag}</body>`));
 }
+
+if (!serve) createLegacyRedirects(leedOutputDir, brainHubDir);
 
 function findHtmlFiles(directory) {
 	const files = [];
@@ -96,4 +99,23 @@ function findHtmlFiles(directory) {
 		else if (entry.isFile() && entry.name.endsWith(".html")) files.push(path);
 	}
 	return files;
+}
+
+function createLegacyRedirects(sourceDirectory, destinationDirectory) {
+	for (const htmlFile of findHtmlFiles(sourceDirectory)) {
+		const relativePath = htmlFile
+			.slice(sourceDirectory.length + 1)
+			.replaceAll("\\", "/");
+		if (relativePath === "index.html") continue;
+
+		const redirectFile = join(destinationDirectory, relativePath);
+		if (existsSync(redirectFile)) continue;
+
+		const target = `/brain/leed/${relativePath.replace(/index\.html$/, "")}`;
+		mkdirSync(dirname(redirectFile), { recursive: true });
+		writeFileSync(
+			redirectFile,
+			`<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0;url=${target}"><link rel="canonical" href="${target}"><title>Chuyển đến kho LEED</title></head><body><a href="${target}">Mở kho LEED</a></body></html>`,
+		);
+	}
 }

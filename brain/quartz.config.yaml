@@ -2,14 +2,14 @@
 
 # Quartz is isolated in brain/. Nothing in this file changes the Astro blog.
 configuration:
-  pageTitle: "Thanh Tùng's Second Brain"
-  pageTitleSuffix: " · Second Brain"
+  pageTitle: "LEED · Second Brain"
+  pageTitleSuffix: " · LEED"
   enableSPA: true
   enablePopovers: true
   analytics:
     provider: vercel
   locale: vi-VN
-  baseUrl: www.thanhtung0209.com/brain
+  baseUrl: www.thanhtung0209.com/brain/leed
   ignorePatterns:
     - private
     - templates
@@ -138,7 +138,7 @@ plugins:
       width: 1200
       height: 630
       excludeRoot: false
-      defaultTitle: Thanh Tùng's Second Brain
+      defaultTitle: LEED · Second Brain
       defaultDescription: Ghi chú công khai về LEED, công trình xanh và tư duy bền vững.
   - source: github:quartz-community/content-page
     enabled: true
