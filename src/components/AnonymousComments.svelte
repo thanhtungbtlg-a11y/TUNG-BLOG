@@ -27,6 +27,10 @@ type CommentReactionCountsRow = CommentReactionCounts & {
 	comment_id: string;
 };
 
+type CommentApiResponse = {
+	error?: unknown;
+};
+
 let { slug } = $props<{ slug: string }>();
 
 const maxLength = 600;
@@ -182,9 +186,16 @@ async function createComment(
 				website,
 			}),
 		});
-		const result = await response.json();
+		const result = await readCommentApiResponse(response);
 		if (!response.ok) {
-			throw new Error(result.error ?? "Chưa gửi được bình luận.");
+			const apiMessage =
+				typeof result.error === "string" ? result.error : undefined;
+			throw new Error(
+				apiMessage ??
+					(response.status >= 500
+						? "Hệ thống bình luận đang gặp sự cố. Vui lòng thử lại sau."
+						: "Chưa gửi được bình luận. Vui lòng thử lại."),
+			);
 		}
 		if (isReply) {
 			replyBody = "";
@@ -205,6 +216,20 @@ async function createComment(
 	} finally {
 		if (isReply) submittingReplyFor = null;
 		else submitting = false;
+	}
+}
+
+async function readCommentApiResponse(
+	response: Response,
+): Promise<CommentApiResponse> {
+	if (!response.headers.get("content-type")?.includes("application/json")) {
+		return {};
+	}
+
+	try {
+		return (await response.json()) as CommentApiResponse;
+	} catch {
+		return {};
 	}
 }
 

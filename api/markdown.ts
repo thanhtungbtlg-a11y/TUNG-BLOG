@@ -1,6 +1,6 @@
 import TurndownService from "turndown";
-import { normalizeMarkdownPath } from "../src/lib/markdown-path";
-import { getPublicSiteUrl } from "../src/lib/site-url";
+import { normalizeMarkdownPath } from "../src/lib/markdown-path.js";
+import { getPublicSiteUrl } from "../src/lib/site-url.js";
 
 type ApiRequest = {
 	method?: string;

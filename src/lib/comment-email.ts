@@ -1,4 +1,4 @@
-import { getPublicSiteUrl } from "./site-url";
+import { getPublicSiteUrl } from "./site-url.js";
 
 const ownerEmail = "thanhtungbtlg@gmail.com";
 

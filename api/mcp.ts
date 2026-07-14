@@ -1,4 +1,4 @@
-import { getPublicSiteUrl } from "../src/lib/site-url";
+import { getPublicSiteUrl } from "../src/lib/site-url.js";
 
 type JsonRpcRequest = {
 	jsonrpc?: string;
