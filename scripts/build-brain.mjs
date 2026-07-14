@@ -1,6 +1,14 @@
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+	copyFileSync,
+	existsSync,
+	mkdirSync,
+	readdirSync,
+	readFileSync,
+	rmSync,
+	writeFileSync,
+} from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -58,3 +66,34 @@ const quartzArgs = [
 
 if (serve) quartzArgs.push("--serve", "--baseDir", "brain");
 run(process.execPath, quartzArgs);
+
+const outputDir = serve
+	? join(brainDir, "public")
+	: join(repoRoot, "dist", "brain");
+const trackerSource = join(
+	repoRoot,
+	"public",
+	"scripts",
+	"analytics-tracker.js",
+);
+const trackerOutput = join(outputDir, "scripts", "analytics-tracker.js");
+mkdirSync(dirname(trackerOutput), { recursive: true });
+copyFileSync(trackerSource, trackerOutput);
+
+const trackerTag =
+	'<script defer src="/scripts/analytics-tracker.js" data-persist></script>';
+for (const htmlFile of findHtmlFiles(outputDir)) {
+	const html = readFileSync(htmlFile, "utf8");
+	if (html.includes("analytics-tracker.js")) continue;
+	writeFileSync(htmlFile, html.replace("</body>", `${trackerTag}</body>`));
+}
+
+function findHtmlFiles(directory) {
+	const files = [];
+	for (const entry of readdirSync(directory, { withFileTypes: true })) {
+		const path = join(directory, entry.name);
+		if (entry.isDirectory()) files.push(...findHtmlFiles(path));
+		else if (entry.isFile() && entry.name.endsWith(".html")) files.push(path);
+	}
+	return files;
+}

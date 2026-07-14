@@ -1,4 +1,4 @@
-import { createClient, type User } from "@supabase/supabase-js";
+import { type AuthUser, createClient } from "@supabase/supabase-js";
 
 export class AdminRequestError extends Error {
 	constructor(
@@ -13,7 +13,9 @@ function env(name: string) {
 	return process.env[name] ?? "";
 }
 
-export async function requireAdminToken(authorization: string): Promise<User> {
+export async function requireAdminToken(
+	authorization: string,
+): Promise<AuthUser> {
 	const token = authorization.startsWith("Bearer ")
 		? authorization.slice(7)
 		: "";
@@ -40,14 +42,17 @@ export async function requireAdminToken(authorization: string): Promise<User> {
 		global: { headers: { Authorization: `Bearer ${token}` } },
 	});
 
-	const {
-		data: { user },
-		error: userError,
-	} = await supabase.auth.getUser(token);
-
-	if (userError || !user) {
+	const userResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
+		headers: {
+			apikey: supabaseKey,
+			Authorization: `Bearer ${token}`,
+		},
+	});
+	if (!userResponse.ok) {
 		throw new AdminRequestError("Phiên đăng nhập đã hết hạn.", 401);
 	}
+	const user = (await userResponse.json()) as AuthUser;
+	if (!user.id) throw new AdminRequestError("Phiên đăng nhập đã hết hạn.", 401);
 
 	const { data: admin, error: adminError } = await supabase
 		.from("comment_admins")

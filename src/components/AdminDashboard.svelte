@@ -3,6 +3,7 @@ import Icon from "@iconify/svelte";
 import { createClient, type Session } from "@supabase/supabase-js";
 import MarkdownIt from "markdown-it";
 import { onMount, tick } from "svelte";
+import AdminAnalytics from "./AdminAnalytics.svelte";
 
 type PostSummary = {
 	slug: string;
@@ -107,7 +108,7 @@ let authReady = $state(false);
 let isAdmin = $state(false);
 let email = $state("");
 let password = $state("");
-let activeTab = $state<"posts" | "media" | "comments">("posts");
+let activeTab = $state<"posts" | "media" | "comments" | "analytics">("posts");
 let selectedSlug = $state("");
 let postSearch = $state("");
 let commentStatus = $state<"all" | "pending" | "approved">("pending");
@@ -381,6 +382,11 @@ async function openCommentsTab() {
 	clearMessages();
 	activeTab = "comments";
 	await loadComments();
+}
+
+function openAnalyticsTab() {
+	clearMessages();
+	activeTab = "analytics";
 }
 
 async function loadMedia() {
@@ -1061,6 +1067,9 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 				<Icon icon="material-symbols:forum-outline-rounded" /> Bình luận
 				{#if comments.some((comment) => comment.status === "pending")}<span class="dot"></span>{/if}
 			</button>
+			<button class:active={activeTab === "analytics"} type="button" onclick={openAnalyticsTab}>
+				<Icon icon="material-symbols:monitoring-rounded" /> Thống kê
+			</button>
 		</nav>
 
 		{#if error}<div class="feedback error" role="alert">{error}</div>{/if}
@@ -1244,6 +1253,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 					{/if}
 				{/if}
 			</section>
+		{:else if activeTab === "analytics"}
+			<AdminAnalytics accessToken={session?.access_token ?? ""} />
 		{:else}
 			<div class="comment-tools">
 				<select aria-label="Trạng thái" bind:value={commentStatus}>
@@ -1469,6 +1480,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 	}
 
 	.admin-tabs {
+		flex-wrap: wrap;
 		gap: 0.35rem;
 		padding: 0.75rem 0;
 	}

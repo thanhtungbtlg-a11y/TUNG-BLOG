@@ -34,6 +34,12 @@ Các biến Supabase đang dùng cho comment vẫn giữ nguyên:
 Chạy lại toàn bộ `supabase/comments.sql` trong Supabase SQL Editor để tạo hàm
 gửi comment có rate limit. Script có thể chạy lại an toàn.
 
+Để bật tab **Thống kê**, chạy toàn bộ `supabase/analytics.sql` một lần trong
+Supabase SQL Editor. Tracker không lưu IP, email hoặc tên người dùng; mã người xem
+và phiên truy cập được băm ở API trước khi ghi vào database. Có thể thêm biến
+`ANALYTICS_HASH_SECRET` bằng một chuỗi ngẫu nhiên dài để mã băm vẫn ổn định khi
+đổi Supabase secret key. Nếu không thêm, hệ thống tự dùng server key hiện có.
+
 Sau khi thêm biến, redeploy website một lần.
 
 ## Đăng nhập
@@ -81,3 +87,14 @@ không được lưu trong database.
 - Chọn **Ảnh bài viết** để dùng thư viện `public/media/` cũ: đổi tên, sửa alt text,
   sao chép mã ảnh hoặc chèn vào bài đang mở.
 - Mỗi thao tác lưu, tải hoặc xóa tạo một commit GitHub; Vercel tự triển khai bản mới.
+
+## Thống kê
+
+- Tab **Thống kê** theo dõi blog và toàn bộ khu vực `/brain/`.
+- Có bộ lọc 24 giờ, 7 ngày, 30 ngày, 90 ngày hoặc khoảng ngày tùy chọn.
+- Có thể lọc riêng từng đường dẫn để biết trang nào được xem và thời điểm cụ thể.
+- Bảng hiển thị lượt xem, người xem ẩn danh, phiên truy cập, tỷ lệ thoát, thiết bị
+  và nguồn giới thiệu. Lịch sử chi tiết giữ tối đa 250 lượt gần nhất của bộ lọc.
+- Trang `/admin/`, bot, localhost và trình duyệt bật Do Not Track không được tính.
+- Vercel Analytics vẫn hoạt động song song; tab này là dữ liệu riêng để bạn có
+  bộ lọc và lịch sử chi tiết ngay trong website.
