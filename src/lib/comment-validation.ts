@@ -21,6 +21,22 @@ export function normaliseCommentAuthor(value: unknown): string {
 		.replace(/\s+/g, " ");
 }
 
+export function normaliseCommentContent(value: unknown): string {
+	return String(value ?? "")
+		.trim()
+		.toLocaleLowerCase("vi");
+}
+
+export function hasMatchingCommentContent(
+	comments: Array<{ body?: unknown }>,
+	value: unknown,
+): boolean {
+	const fingerprint = normaliseCommentContent(value);
+	return comments.some(
+		(comment) => normaliseCommentContent(comment.body) === fingerprint,
+	);
+}
+
 export function hasControlCharacters(value: string): boolean {
 	return [...value].some((character) => {
 		const code = character.charCodeAt(0);

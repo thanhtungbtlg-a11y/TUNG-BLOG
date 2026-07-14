@@ -1,14 +1,16 @@
 import { createHash } from "node:crypto";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { sendAdminCommentNotification } from "../src/lib/comment-email.js";
 import {
 	type CommentHeaders,
 	getClientIp,
 	hasControlCharacters,
+	hasMatchingCommentContent,
 	isUuid,
 	isValidEmail,
 	looksLikeCommentSpam,
 	normaliseCommentAuthor,
+	normaliseCommentContent,
 	parseCommentBody,
 } from "../src/lib/comment-validation.js";
 
@@ -99,22 +101,30 @@ export default async function handler(
 		const ipHash = digest(
 			`${getClientIp(request.headers)}:${env("COMMENT_RATE_LIMIT_SECRET") || serviceKey}`,
 		);
-		const bodyHash = digest(content.toLocaleLowerCase("vi"));
+		const bodyHash = digest(normaliseCommentContent(content));
 		const supabase = createClient(supabaseUrl, serviceKey, {
 			auth: { persistSession: false, autoRefreshToken: false },
 		});
-		const { data: commentId, error } = await supabase.rpc(
+		const submissionPayload = {
+			p_slug: slug,
+			p_body: content,
+			p_ip_hash: ipHash,
+			p_body_hash: bodyHash,
+			p_parent_id: parentId || null,
+			p_author_name: authorName || "Ẩn danh",
+			p_notification_email: notificationEmail,
+		};
+		let submission = await supabase.rpc(
 			"submit_blog_comment",
-			{
-				p_slug: slug,
-				p_body: content,
-				p_ip_hash: ipHash,
-				p_body_hash: bodyHash,
-				p_parent_id: parentId || null,
-				p_author_name: authorName || "Ẩn danh",
-				p_notification_email: notificationEmail,
-			},
+			submissionPayload,
 		);
+		if (
+			submission.error?.message.includes("DUPLICATE") &&
+			(await removeStaleDuplicateLog(supabase, slug, content, ipHash, bodyHash))
+		) {
+			submission = await supabase.rpc("submit_blog_comment", submissionPayload);
+		}
+		const { data: commentId, error } = submission;
 		if (error) {
 			if (
 				error.message.includes("INVALID_NAME") ||
@@ -167,6 +177,41 @@ export default async function handler(
 
 function digest(value: string) {
 	return createHash("sha256").update(value).digest("hex");
+}
+
+async function removeStaleDuplicateLog(
+	supabase: SupabaseClient,
+	slug: string,
+	content: string,
+	ipHash: string,
+	bodyHash: string,
+) {
+	const { data: existingComments, error: lookupError } = await supabase
+		.from("blog_comments")
+		.select("body")
+		.eq("slug", slug);
+	if (lookupError) {
+		console.error("Duplicate comment lookup error", lookupError);
+		return false;
+	}
+
+	const matchingCommentExists = hasMatchingCommentContent(
+		existingComments ?? [],
+		content,
+	);
+	if (matchingCommentExists) return false;
+
+	const { error: cleanupError } = await supabase
+		.from("comment_submission_log")
+		.delete()
+		.eq("ip_hash", ipHash)
+		.eq("body_hash", bodyHash)
+		.eq("slug", slug);
+	if (cleanupError) {
+		console.error("Stale duplicate cleanup error", cleanupError);
+		return false;
+	}
+	return true;
 }
 
 function env(name: string) {

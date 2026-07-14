@@ -3,10 +3,12 @@ import test from "node:test";
 import {
 	getClientIp,
 	hasControlCharacters,
+	hasMatchingCommentContent,
 	isUuid,
 	isValidEmail,
 	looksLikeCommentSpam,
 	normaliseCommentAuthor,
+	normaliseCommentContent,
 	parseCommentBody,
 } from "../src/lib/comment-validation.ts";
 
@@ -18,6 +20,31 @@ test("normalizes optional comment author names", () => {
 	assert.equal(normaliseCommentAuthor(undefined), "");
 	assert.equal(hasControlCharacters("Nguyễn Thanh Tùng"), false);
 	assert.equal(hasControlCharacters("Thanh\nTùng"), true);
+});
+
+test("normalizes comment content for duplicate detection", () => {
+	assert.equal(
+		normaliseCommentContent("  Em Tùng lớn rồi :D  "),
+		normaliseCommentContent("em tùng lớn rồi :D"),
+	);
+	assert.notEqual(
+		normaliseCommentContent("Bình luận thứ nhất"),
+		normaliseCommentContent("Bình luận thứ hai"),
+	);
+	assert.equal(
+		hasMatchingCommentContent(
+			[{ body: " Em Tùng lớn rồi :D " }],
+			"em tùng lớn rồi :D",
+		),
+		true,
+	);
+	assert.equal(
+		hasMatchingCommentContent(
+			[{ body: "Bình luận đã bị xoá" }],
+			"Bình luận mới",
+		),
+		false,
+	);
 });
 
 test("validates UUID and optional notification email", () => {

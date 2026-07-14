@@ -110,11 +110,45 @@ drop policy if exists "Anyone can submit pending comments" on public.blog_commen
 
 create table if not exists public.comment_submission_log (
 	id uuid primary key default gen_random_uuid(),
+	comment_id uuid not null
+		references public.blog_comments(id)
+		on delete cascade,
 	ip_hash text not null,
 	body_hash text not null,
 	slug text not null,
 	created_at timestamptz not null default now()
 );
+
+alter table public.comment_submission_log
+	add column if not exists comment_id uuid;
+
+-- Rows created by older versions cannot be linked reliably. Clearing them once
+-- prevents a deleted/rejected comment from blocking a legitimate resubmission.
+delete from public.comment_submission_log
+	where comment_id is null;
+
+do $$
+begin
+	if not exists (
+		select 1
+		from pg_constraint
+		where conname = 'comment_submission_log_comment_id_fkey'
+			and conrelid = 'public.comment_submission_log'::regclass
+	) then
+		alter table public.comment_submission_log
+			add constraint comment_submission_log_comment_id_fkey
+			foreign key (comment_id)
+			references public.blog_comments(id)
+			on delete cascade;
+	end if;
+end
+$$;
+
+alter table public.comment_submission_log
+	alter column comment_id set not null;
+
+create unique index if not exists comment_submission_log_comment_id_idx
+	on public.comment_submission_log (comment_id);
 
 create index if not exists comment_submission_log_ip_created_idx
 	on public.comment_submission_log (ip_hash, created_at desc);
@@ -194,6 +228,7 @@ begin
 		from public.comment_submission_log
 		where ip_hash = p_ip_hash
 			and body_hash = p_body_hash
+			and slug = v_slug
 			and created_at >= now() - interval '24 hours'
 	) then
 		raise exception 'DUPLICATE';
@@ -208,8 +243,8 @@ begin
 		values (v_id, v_notification_email);
 	end if;
 
-	insert into public.comment_submission_log (ip_hash, body_hash, slug)
-	values (p_ip_hash, p_body_hash, v_slug);
+	insert into public.comment_submission_log (comment_id, ip_hash, body_hash, slug)
+	values (v_id, p_ip_hash, p_body_hash, v_slug);
 
 	delete from public.comment_submission_log
 	where created_at < now() - interval '7 days';
