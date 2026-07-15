@@ -43,3 +43,4 @@ src/music/
 *.WordPress.*.xml
 
 .vercel
+.env*.local

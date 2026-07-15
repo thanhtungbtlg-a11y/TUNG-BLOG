@@ -4,6 +4,15 @@ import { Icon } from "astro-icon/components";
 import { brainTopics } from "../../data/brain-topics";
 
 const liveTopics = brainTopics.filter((topic) => topic.status === "live");
+const vaultDateFormatter = new Intl.DateTimeFormat("vi-VN", {
+	dateStyle: "short",
+	timeStyle: "short",
+	timeZone: "Asia/Ho_Chi_Minh",
+});
+
+function formatVaultUpdate(value: string) {
+	return vaultDateFormatter.format(new Date(value));
+}
 ---
 
 <MainGridLayout
@@ -57,6 +66,19 @@ const liveTopics = brainTopics.filter((topic) => topic.status === "live");
 								<h3>{topic.title}</h3>
 								<p>{topic.description}</p>
 							</div>
+							{
+								topic.lastUpdated && (
+									<time
+										class="brain-topic__updated"
+										datetime={topic.lastUpdated}
+									>
+										<Icon name="material-symbols:update-rounded" />
+										<span>
+											Cập nhật lần cuối: {formatVaultUpdate(topic.lastUpdated)}
+										</span>
+									</time>
+								)
+							}
 							<span class="brain-topic__action">
 								Mở kho kiến thức
 								<Icon name="material-symbols:arrow-forward-rounded" />
@@ -222,7 +244,8 @@ const liveTopics = brainTopics.filter((topic) => topic.status === "live");
 
 	.brain-topic__topline,
 	.brain-status,
-	.brain-topic__action {
+	.brain-topic__action,
+	.brain-topic__updated {
 		display: flex;
 		align-items: center;
 	}
@@ -282,6 +305,22 @@ const liveTopics = brainTopics.filter((topic) => topic.status === "live");
 		color: var(--meta-color);
 		font-weight: 560;
 		line-height: 1.65;
+	}
+
+	.brain-topic__updated {
+		position: relative;
+		z-index: 1;
+		gap: 0.4rem;
+		align-self: flex-start;
+		margin-top: 1rem;
+		color: var(--meta-color);
+		font-size: 0.78rem;
+		font-weight: 700;
+	}
+
+	.brain-topic__updated :global(svg) {
+		flex: 0 0 auto;
+		font-size: 1rem;
 	}
 
 	.brain-topic__action {

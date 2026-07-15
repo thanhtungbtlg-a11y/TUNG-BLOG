@@ -4,6 +4,12 @@ import { fileURLToPath } from "node:url";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const contentDir = join(repoRoot, "brain", "content");
+const vaultStatusFile = join(
+	repoRoot,
+	"src",
+	"data",
+	"brain-vault-status.json",
+);
 const defaultVault = "C:\\Users\\NITRO 5\\Downloads\\LEED_Obsidian_Vault";
 const vaultDir = resolve(
 	process.argv[2] || process.env.OBSIDIAN_VAULT_PATH || defaultVault,
@@ -51,6 +57,15 @@ async function countMarkdown(directory) {
 	return count;
 }
 
+async function readVaultStatus() {
+	try {
+		return JSON.parse(await readFile(vaultStatusFile, "utf8"));
+	} catch (error) {
+		if (error?.code === "ENOENT") return {};
+		throw error;
+	}
+}
+
 await readdir(vaultDir);
 await rm(contentDir, { recursive: true, force: true });
 await mkdir(contentDir, { recursive: true });
@@ -82,4 +97,14 @@ await writeFile(join(contentDir, "index.md"), index, "utf8");
 
 // Ensure the generated landing page can be read before reporting success.
 await readFile(join(contentDir, "index.md"), "utf8");
+const vaultStatus = await readVaultStatus();
+vaultStatus.leed = {
+	lastSyncedAt: new Date().toISOString(),
+	noteCount,
+};
+await writeFile(
+	vaultStatusFile,
+	`${JSON.stringify(vaultStatus, null, 2)}\n`,
+	"utf8",
+);
 console.log(`Synced ${noteCount} Obsidian notes to brain/content.`);

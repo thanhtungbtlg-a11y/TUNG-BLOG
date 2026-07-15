@@ -1,9 +1,12 @@
+import brainVaultStatus from "./brain-vault-status.json";
+
 export type BrainTopic = {
 	title: string;
 	description: string;
 	icon: string;
 	status: "live" | "soon";
 	href?: string;
+	lastUpdated?: string;
 };
 
 export const brainTopics = [
@@ -14,6 +17,7 @@ export const brainTopics = [
 		icon: "material-symbols:energy-savings-leaf-outline-rounded",
 		status: "live",
 		href: "/brain/leed/",
+		lastUpdated: brainVaultStatus.leed.lastSyncedAt,
 	},
 	{
 		title: "Vault 02",
