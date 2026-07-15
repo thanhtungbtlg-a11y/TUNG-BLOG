@@ -11,6 +11,7 @@ import "../styles/expressive-code.css";
 import "../styles/photoswipe.css";
 import ConfigCarrier from "@components/ConfigCarrier.astro";
 import MusicPlayer from "@components/MusicPlayer.svelte";
+import PortfolioGate from "@components/PortfolioGate.svelte";
 import ReadingProgress from "@components/ReadingProgress.svelte";
 import Analytics from "@vercel/analytics/astro";
 import { Icon } from "astro-icon/components";
@@ -201,6 +202,7 @@ const ogLocale = siteLang.replace("-", "_");
 		</template>
 		{setOGTypeArticle && <ReadingProgress client:idle />}
 		<slot />
+		<PortfolioGate client:load />
 		{!hidePlayer && <MusicPlayer client:idle />}
 		{enableAnalytics && <Analytics />}
 		{enableCustomAnalytics && <script is:inline src="/scripts/analytics-tracker.js" defer></script>}

@@ -446,6 +446,20 @@ $: filteredItems = (
 $: activeIndex = Math.min(activeIndex, Math.max(filteredItems.length - 1, 0));
 
 function selectItem(item: CommandItem) {
+	const destination = new URL(item.url, window.location.origin);
+	if (
+		destination.origin === window.location.origin &&
+		(destination.pathname === "/portfolio" ||
+			destination.pathname.startsWith("/portfolio/"))
+	) {
+		window.dispatchEvent(
+			new CustomEvent("portfolio:request", {
+				detail: { href: destination.href },
+			}),
+		);
+		closePalette();
+		return;
+	}
 	window.location.href = item.url;
 	closePalette();
 }
