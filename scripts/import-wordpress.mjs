@@ -107,7 +107,7 @@ for (const item of posts) {
 	const sourceLink = item.link
 		? `\n<!-- Imported from WordPress: ${item.link} -->\n`
 		: "";
-	const body = markdown || "_Bài viết được import từ WordPress._";
+	const body = markdown || "_Imported from WordPress._";
 
 	await writeFile(targetFile, `${frontmatter}${sourceLink}\n${body}\n`, "utf8");
 	imported += 1;

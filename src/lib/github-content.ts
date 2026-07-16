@@ -11,7 +11,7 @@ function getConfig(requireToken = false) {
 	const token = env("GITHUB_TOKEN");
 	if (requireToken && !token) {
 		throw new AdminRequestError(
-			"Thiếu GITHUB_TOKEN trong Environment Variables của Vercel.",
+			"GITHUB_TOKEN is missing from the Vercel environment variables.",
 			503,
 		);
 	}
@@ -53,29 +53,32 @@ async function githubFetch(pathname: string, init: RequestInit = {}) {
 	if (!response.ok) {
 		const details = await response.text();
 		if (response.status === 404) {
-			throw new AdminRequestError("Không tìm thấy dữ liệu trên GitHub.", 404);
+			throw new AdminRequestError(
+				"The requested GitHub data was not found.",
+				404,
+			);
 		}
 		console.error("GitHub API error", response.status, details);
 		if (response.status === 401) {
 			throw new AdminRequestError(
-				"GITHUB_TOKEN không hợp lệ hoặc đã hết hạn.",
+				"GITHUB_TOKEN is invalid or has expired.",
 				502,
 			);
 		}
 		if (response.status === 403) {
 			throw new AdminRequestError(
-				"GITHUB_TOKEN chưa có quyền Contents: Read and write cho repository.",
+				"GITHUB_TOKEN needs Contents: Read and write access to the repository.",
 				502,
 			);
 		}
 		if (response.status === 409 || response.status === 422) {
 			throw new AdminRequestError(
-				"GitHub vừa có thay đổi mới. Vui lòng tải lại rồi thử lần nữa.",
+				"The GitHub content changed recently. Reload the page and try again.",
 				409,
 			);
 		}
 		throw new AdminRequestError(
-			`GitHub chưa xử lý được yêu cầu (HTTP ${response.status}).`,
+			`GitHub could not process the request (HTTP ${response.status}).`,
 			502,
 		);
 	}
@@ -101,7 +104,10 @@ export async function commitRepositoryFiles(
 	);
 	const parentSha = String(ref.object?.sha ?? "");
 	if (!parentSha) {
-		throw new AdminRequestError("Không đọc được nhánh GitHub hiện tại.", 502);
+		throw new AdminRequestError(
+			"The current GitHub branch could not be read.",
+			502,
+		);
 	}
 
 	const parent = await githubFetch(
@@ -169,7 +175,7 @@ function postPath(slug: string) {
 export function validateSlug(slug: string) {
 	if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
 		throw new AdminRequestError(
-			"Slug chỉ gồm chữ thường không dấu, số và dấu gạch ngang.",
+			"Slugs may contain only lowercase unaccented letters, numbers, and hyphens.",
 		);
 	}
 	return slug;
@@ -234,7 +240,7 @@ export async function savePost(
 	const title = String(post.title ?? "").trim();
 	const published = String(post.published ?? "").trim();
 	if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(published)) {
-		throw new AdminRequestError("Tiêu đề và ngày đăng chưa hợp lệ.");
+		throw new AdminRequestError("The title or publication date is invalid.");
 	}
 
 	const tags = Array.isArray(post.tags)
@@ -286,11 +292,11 @@ export async function savePostImage(
 		.replace(/^-+|-+$/g, "");
 
 	if (!safeFilename || !/\.(webp|jpe?g|png|gif)$/.test(safeFilename)) {
-		throw new AdminRequestError("Tên hoặc định dạng ảnh chưa hợp lệ.");
+		throw new AdminRequestError("The image name or format is invalid.");
 	}
 
 	if (base64.length > 5_000_000) {
-		throw new AdminRequestError("Ảnh sau nén vẫn quá lớn.");
+		throw new AdminRequestError("The compressed image is still too large.");
 	}
 
 	const pathname = `src/content/posts/${slug}/${safeFilename}`;

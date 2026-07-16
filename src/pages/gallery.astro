@@ -34,11 +34,11 @@ const galleryItems: GalleryItem[] = (galleryMetadata as GalleryMetadata[])
 		filename: item.filename,
 		src: `/gallery/${item.filename.split("/").map(encodeURIComponent).join("/")}`,
 		thumbnail: `/gallery/${(item.thumbnail || item.filename).split("/").map(encodeURIComponent).join("/")}`,
-		title: item.title?.trim() || "Khoảnh khắc không tên",
+		title: item.title?.trim() || "Untitled moment",
 		description: item.description?.trim() || "",
 		date: item.date?.trim() || "",
-		year: item.date?.slice(0, 4) || "Không rõ",
-		album: item.album?.trim() || "Ảnh chọn lọc",
+		year: item.date?.slice(0, 4) || "Unknown",
+		album: item.album?.trim() || "Selected photos",
 		width: item.width || 1600,
 		height: item.height || 1200,
 		order: Number.isFinite(item.order) ? Number(item.order) : 0,
@@ -47,7 +47,7 @@ const galleryItems: GalleryItem[] = (galleryMetadata as GalleryMetadata[])
 		(a, b) =>
 			b.date.localeCompare(a.date) ||
 			a.order - b.order ||
-			b.filename.localeCompare(a.filename, "vi"),
+			b.filename.localeCompare(a.filename, "en"),
 	);
 
 const groups = Object.entries(
@@ -59,30 +59,30 @@ const groups = Object.entries(
 	})
 	.sort(
 		(a, b) =>
-			b.date.localeCompare(a.date) || a.album.localeCompare(b.album, "vi"),
+			b.date.localeCompare(a.date) || a.album.localeCompare(b.album, "en"),
 	);
 const years = [...new Set(galleryItems.map((item) => item.year))].sort((a, b) =>
 	b.localeCompare(a),
 );
 const albums = [...new Set(galleryItems.map((item) => item.album))].sort(
-	(a, b) => b.localeCompare(a, "vi"),
+	(a, b) => b.localeCompare(a, "en"),
 );
-const dateFormatter = new Intl.DateTimeFormat("vi-VN", {
+const dateFormatter = new Intl.DateTimeFormat("en-GB", {
 	year: "numeric",
 	month: "long",
 	day: "numeric",
 });
 
 function formatDate(value: string) {
-	if (!value) return "Không rõ ngày";
+	if (!value) return "Date unknown";
 	const date = new Date(`${value}T00:00:00`);
 	return Number.isNaN(date.getTime()) ? value : dateFormatter.format(date);
 }
 ---
 
 <MainGridLayout
-	title="Kho ảnh"
-	description="Những bức ảnh và khoảnh khắc được lưu lại bởi Nguyễn Thanh Tùng."
+	title="Gallery"
+	description="Photographs and moments collected by Nguyễn Thanh Tùng."
 	wide={true}
 	immediateContent={true}
 >
@@ -92,40 +92,40 @@ function formatDate(value: string) {
 				<Icon name="fa6-regular:images" />
 			</div>
 			<div>
-				<p class="gallery-kicker">Nhật ký bằng hình ảnh</p>
-				<h1>Kho ảnh</h1>
-				<p id="gallery-summary">{galleryItems.length} ảnh trong {groups.length} bộ</p>
+				<p class="gallery-kicker">A visual journal</p>
+				<h1>Gallery</h1>
+				<p id="gallery-summary">{galleryItems.length} photos across {groups.length} collections</p>
 			</div>
 		</div>
 	</header>
 
 	{galleryItems.length > 0 ? (
 		<>
-			<section class="gallery-toolbar" aria-label="Lọc kho ảnh">
+			<section class="gallery-toolbar" aria-label="Filter the gallery">
 				<label class="gallery-search-field">
-					<span>Tìm kiếm</span>
+					<span>Search</span>
 					<span class="gallery-search">
 						<Icon name="fa6-solid:magnifying-glass" aria-hidden="true" />
-						<input id="gallery-search" type="search" placeholder="Tên ảnh, mô tả hoặc bộ ảnh" autocomplete="off" />
+						<input id="gallery-search" type="search" placeholder="Title, description, or collection" autocomplete="off" />
 					</span>
 				</label>
 				<label>
-					<span>Năm</span>
+					<span>Year</span>
 					<select id="gallery-year">
-						<option value="">Tất cả</option>
+						<option value="">All</option>
 						{years.map((year) => <option value={year}>{year}</option>)}
 					</select>
 				</label>
 				<label>
-					<span>Bộ ảnh</span>
+					<span>Collection</span>
 					<select id="gallery-album">
-						<option value="">Tất cả</option>
+						<option value="">All</option>
 						{albums.map((album) => <option value={album}>{album}</option>)}
 					</select>
 				</label>
 				<button id="gallery-reset" type="button" class="gallery-reset" disabled>
 					<Icon name="fa6-solid:filter-circle-xmark" aria-hidden="true" />
-					Xóa lọc
+					Clear filters
 				</button>
 			</section>
 
@@ -137,16 +137,16 @@ function formatDate(value: string) {
 								<h2>{group.album}</h2>
 								<p>{formatDate(group.date)}</p>
 							</div>
-							<span data-gallery-group-count>{group.items.length} ảnh</span>
+							<span data-gallery-group-count>{group.items.length} {group.items.length === 1 ? "photo" : "photos"}</span>
 						</header>
-						<div class="photo-gallery" aria-label={`Bộ ảnh ${group.album}`}>
+						<div class="photo-gallery" aria-label={`${group.album} collection`}>
 							{group.items.map((item, index) => (
 								<figure
 									class="gallery-card card-base interactive-card"
 									data-gallery-item
 									data-year={item.year}
-									data-album={item.album.toLocaleLowerCase("vi")}
-									data-search={`${item.title} ${item.description} ${item.album}`.toLocaleLowerCase("vi")}
+									data-album={item.album.toLocaleLowerCase("en")}
+									data-search={`${item.title} ${item.description} ${item.album}`.toLocaleLowerCase("en")}
 								>
 									<button
 										type="button"
@@ -155,7 +155,7 @@ function formatDate(value: string) {
 										data-pswp-height={item.height}
 										data-pswp-title={item.title}
 										data-pswp-description={item.description}
-										aria-label={`Xem ảnh ${item.title}`}
+										aria-label={`View ${item.title}`}
 										class="gallery-image-link"
 									>
 										<img
@@ -180,13 +180,13 @@ function formatDate(value: string) {
 			</div>
 			<div id="gallery-empty" class="gallery-empty card-base" hidden>
 				<Icon name="fa6-regular:image" aria-hidden="true" />
-				<p>Không tìm thấy ảnh phù hợp.</p>
+				<p>No matching photos found.</p>
 			</div>
 		</>
 	) : (
 		<div class="gallery-empty card-base">
 			<Icon name="fa6-regular:image" aria-hidden="true" />
-			<p>Chưa có ảnh trong kho.</p>
+			<p>The gallery is empty.</p>
 		</div>
 	)}
 
@@ -208,8 +208,8 @@ function formatDate(value: string) {
 		album.value = normalizeRestoredValue(album.value);
 
 		const apply = () => {
-			const query = search.value.trim().toLocaleLowerCase('vi');
-			const selectedAlbum = album.value.trim().toLocaleLowerCase('vi');
+			const query = search.value.trim().toLocaleLowerCase('en');
+			const selectedAlbum = album.value.trim().toLocaleLowerCase('en');
 			let visibleItems = 0;
 			let visibleGroups = 0;
 
@@ -226,13 +226,13 @@ function formatDate(value: string) {
 
 				group.hidden = groupItems === 0;
 				const count = group.querySelector('[data-gallery-group-count]');
-				if (count) count.textContent = `${groupItems} ảnh`;
+				if (count) count.textContent = `${groupItems} ${groupItems === 1 ? 'photo' : 'photos'}`;
 				if (groupItems > 0) visibleGroups += 1;
 				visibleItems += groupItems;
 			});
 
 			reset.disabled = !query && !year.value && !selectedAlbum;
-			if (summary) summary.textContent = `${visibleItems} ảnh trong ${visibleGroups} bộ`;
+			if (summary) summary.textContent = `${visibleItems} ${visibleItems === 1 ? 'photo' : 'photos'} across ${visibleGroups} ${visibleGroups === 1 ? 'collection' : 'collections'}`;
 			if (empty) empty.hidden = visibleItems !== 0;
 		};
 

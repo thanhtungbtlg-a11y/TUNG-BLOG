@@ -1,20 +1,20 @@
 ---
 title: LEED · Second Brain
-description: Khu vườn ghi chú Obsidian về LEED, công trình xanh và tư duy bền vững.
+description: A public Obsidian knowledge vault about LEED, green buildings, and sustainable design.
 publish: true
 ---
 
-# Kho kiến thức LEED
+# LEED Knowledge Vault
 
-Chào mừng bạn đến với khu vườn ghi chú công khai của Nguyễn Thanh Tùng. Nội dung ở đây được viết và liên kết trong Obsidian, sau đó xuất bản bằng Quartz.
+Welcome to Nguyễn Thanh Tùng's public knowledge vault. These notes are written and connected in Obsidian, then published with Quartz.
 
-## Bắt đầu khám phá
+## Start exploring
 
-- [[00_Index|Mở mục lục LEED Core Concepts & Strategies]]
-- [[pages/Page 001|Bắt đầu đọc từ trang 1]]
-- Dùng ô **Tìm kiếm** để tìm trong toàn bộ ghi chú.
-- Mở **Graph View** để xem các ý tưởng liên kết với nhau như thế nào.
+- [[00_Index|Open the LEED Core Concepts & Strategies index]]
+- [[pages/Page 001|Start reading from page 1]]
+- Use **Search** to find anything across the vault.
+- Open **Graph View** to explore how ideas connect.
 
-> Kho LEED hiện có 108 ghi chú được đồng bộ từ vault công khai.
+> This LEED vault currently contains 108 notes synced from the public vault.
 
-[Xem các vault khác](https://www.thanhtung0209.com/brain/) · [Quay về blog](https://www.thanhtung0209.com/)
+[View other vaults](https://www.thanhtung0209.com/brain/) · [Return to the main site](https://www.thanhtung0209.com/)

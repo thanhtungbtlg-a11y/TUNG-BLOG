@@ -110,27 +110,27 @@ function toDate(date: Date | string) {
 }
 
 function uniqueSorted(values: string[]) {
-	return [...new Set(values)].sort((a, b) => a.localeCompare(b, "vi"));
+	return [...new Set(values)].sort((a, b) => a.localeCompare(b, "en"));
 }
 
 function normalizeSearch(value: string) {
 	return value
 		.normalize("NFD")
 		.replace(/\p{Diacritic}/gu, "")
-		.toLocaleLowerCase("vi")
+		.toLocaleLowerCase("en")
 		.trim();
 }
 
 function formatDay(date: Date | string) {
 	const normalized = toDate(date);
-	return normalized.toLocaleDateString("vi-VN", {
+	return normalized.toLocaleDateString("en-GB", {
 		day: "2-digit",
 		month: "2-digit",
 	});
 }
 
 function formatFullDate(date: Date | string) {
-	return toDate(date).toLocaleDateString("vi-VN", {
+	return toDate(date).toLocaleDateString("en-GB", {
 		day: "2-digit",
 		month: "long",
 		year: "numeric",
@@ -138,7 +138,7 @@ function formatFullDate(date: Date | string) {
 }
 
 function monthLabel(date: Date | string) {
-	return toDate(date).toLocaleDateString("vi-VN", {
+	return toDate(date).toLocaleDateString("en-GB", {
 		month: "long",
 	});
 }
@@ -218,9 +218,9 @@ function setViewMode(mode: ViewMode) {
 <section class="archive-shell">
 	<header class="archive-header">
 		<div>
-			<p>Kho bài</p>
-			<h1 aria-live="polite">{filteredPosts.length} bài viết</h1>
-			<span class="archive-total">trong {sortedPosts.length} bài đã lưu</span>
+			<p>Archive</p>
+			<h1 aria-live="polite">{filteredPosts.length} {filteredPosts.length === 1 ? "post" : "posts"}</h1>
+			<span class="archive-total">from {sortedPosts.length} saved posts</span>
 		</div>
 		<button
 			type="button"
@@ -229,53 +229,53 @@ function setViewMode(mode: ViewMode) {
 			onclick={clearFilters}
 		>
 			<Icon icon="material-symbols:filter-alt-off-outline-rounded" />
-			Xóa lọc
+			Clear filters
 		</button>
 	</header>
 
 	<div class="archive-filters">
 		<label class="archive-search">
-			<span>Tìm nhanh</span>
+			<span>Quick search</span>
 			<div>
 				<Icon icon="material-symbols:search-rounded" aria-hidden="true" />
 				<input
 					type="search"
-					placeholder="Tìm tiêu đề, chủ đề hoặc thẻ"
-					aria-label="Tìm trong Kho bài"
+					placeholder="Search titles, topics, or tags"
+					aria-label="Search the archive"
 					bind:value={query}
 					oninput={updateUrl}
 				/>
 			</div>
 		</label>
 		<label>
-			<span>Năm</span>
+			<span>Year</span>
 			<select bind:value={selectedYear} onchange={updateUrl}>
-				<option value="all">Tất cả</option>
+				<option value="all">All</option>
 				{#each yearOptions as year}<option value={year}>{year}</option>{/each}
 			</select>
 		</label>
 		<label>
-			<span>Danh mục</span>
+			<span>Category</span>
 			<select bind:value={selectedCategory} onchange={updateUrl}>
-				<option value="all">Tất cả</option>
-				<option value="__uncategorized">Chưa phân loại</option>
+				<option value="all">All</option>
+				<option value="__uncategorized">Uncategorized</option>
 				{#each categoryOptions as category}<option value={category}>{category}</option>{/each}
 			</select>
 		</label>
 		<label>
-			<span>Thẻ</span>
+			<span>Tag</span>
 			<select bind:value={selectedTag} onchange={updateUrl}>
-				<option value="all">Tất cả</option>
+				<option value="all">All</option>
 				{#each tagOptions as tag}<option value={tag}>{tag}</option>{/each}
 			</select>
 		</label>
-		<div class="view-switch" role="group" aria-label="Kiểu hiển thị">
+		<div class="view-switch" role="group" aria-label="View mode">
 			<button
 				type="button"
 				class:active={viewMode === "timeline"}
-				aria-label="Dòng thời gian"
+				aria-label="Timeline"
 				aria-pressed={viewMode === "timeline"}
-				title="Dòng thời gian"
+				title="Timeline"
 				onclick={() => setViewMode("timeline")}
 			>
 				<Icon icon="material-symbols:view-timeline-rounded" />
@@ -283,9 +283,9 @@ function setViewMode(mode: ViewMode) {
 			<button
 				type="button"
 				class:active={viewMode === "grid"}
-				aria-label="Lưới"
+				aria-label="Grid"
 				aria-pressed={viewMode === "grid"}
-				title="Lưới"
+				title="Grid"
 				onclick={() => setViewMode("grid")}
 			>
 				<Icon icon="material-symbols:grid-view-rounded" />
@@ -293,9 +293,9 @@ function setViewMode(mode: ViewMode) {
 			<button
 				type="button"
 				class:active={viewMode === "list"}
-				aria-label="Danh sách"
+				aria-label="List"
 				aria-pressed={viewMode === "list"}
-				title="Danh sách"
+				title="List"
 				onclick={() => setViewMode("list")}
 			>
 				<Icon icon="material-symbols:view-list-rounded" />
@@ -304,10 +304,10 @@ function setViewMode(mode: ViewMode) {
 	</div>
 
 	{#if pinnedPosts.length}
-		<section class="pinned-section" aria-label="Bài ghim">
+		<section class="pinned-section" aria-label="Pinned posts">
 			<div class="section-title">
 				<Icon icon="material-symbols:push-pin-outline-rounded" />
-				<span>Bài ghim</span>
+				<span>Pinned posts</span>
 			</div>
 			<div class="pinned-grid">
 				{#each pinnedPosts as post}
@@ -316,7 +316,7 @@ function setViewMode(mode: ViewMode) {
 							<strong>{post.data.title}</strong>
 							<small>{formatFullDate(post.data.published)}</small>
 						</div>
-						<p>{post.data.description || post.data.category || "Bài viết nổi bật"}</p>
+						<p>{post.data.description || post.data.category || "Featured post"}</p>
 						<span>{formatTags(post.data.tags)}</span>
 					</a>
 				{/each}
@@ -325,17 +325,17 @@ function setViewMode(mode: ViewMode) {
 	{/if}
 
 	{#if latestPosts.length}
-		<section class="latest-section" aria-label="Mới cập nhật">
+		<section class="latest-section" aria-label="Recently updated">
 			<div class="section-title">
 				<Icon icon="material-symbols:history-rounded" />
-				<span>Mới cập nhật</span>
+				<span>Recently updated</span>
 			</div>
 			<div class="latest-grid">
 				{#each latestPosts as post}
 					<a class="latest-card" href={getPostUrlBySlug(post.slug)}>
 						<time>{formatFullDate(post.data.published)}</time>
 						<strong>{post.data.title}</strong>
-						<p>{post.data.description || post.data.category || "Bài viết mới"}</p>
+						<p>{post.data.description || post.data.category || "New post"}</p>
 					</a>
 				{/each}
 			</div>
@@ -345,7 +345,7 @@ function setViewMode(mode: ViewMode) {
 	<section class="timeline-section">
 		<div class="section-title">
 			<Icon icon={viewMode === "timeline" ? "material-symbols:view-timeline-rounded" : viewMode === "grid" ? "material-symbols:grid-view-rounded" : "material-symbols:view-list-rounded"} />
-			<span>{viewMode === "timeline" ? "Dòng thời gian" : "Bài viết"}</span>
+			<span>{viewMode === "timeline" ? "Timeline" : "Posts"}</span>
 		</div>
 
 		{#if viewMode === "timeline"}
@@ -354,7 +354,7 @@ function setViewMode(mode: ViewMode) {
 				<section class="year-group">
 					<div class="year-row">
 						<strong>{group.year}</strong>
-						<span>{group.count} bài</span>
+						<span>{group.count} {group.count === 1 ? "post" : "posts"}</span>
 					</div>
 
 					{#each group.months as month}
@@ -367,9 +367,9 @@ function setViewMode(mode: ViewMode) {
 										<span class="post-dot"></span>
 										<span class="post-main">
 											<strong>{post.data.title}</strong>
-											<small>{post.data.category || "Chưa phân loại"} {formatTags(post.data.tags)}</small>
+											<small>{post.data.category || "Uncategorized"} {formatTags(post.data.tags)}</small>
 										</span>
-										{#if post.data.latest}<span class="latest-badge">Mới</span>{/if}
+										{#if post.data.latest}<span class="latest-badge">New</span>{/if}
 									</a>
 								{/each}
 							</div>
@@ -380,7 +380,7 @@ function setViewMode(mode: ViewMode) {
 		{:else}
 			<div class="archive-empty">
 				<Icon icon="material-symbols:inventory-2-outline-rounded" />
-				<span>Không có bài viết phù hợp.</span>
+				<span>No matching posts found.</span>
 			</div>
 		{/if}
 		{:else if viewMode === "grid"}
@@ -390,18 +390,18 @@ function setViewMode(mode: ViewMode) {
 						<a class="archive-card" href={getPostUrlBySlug(post.slug)}>
 							<div class="archive-card-meta">
 								<time>{formatFullDate(post.data.published)}</time>
-								{#if post.data.latest}<span class="latest-badge">Mới</span>{/if}
+								{#if post.data.latest}<span class="latest-badge">New</span>{/if}
 							</div>
 							<strong>{post.data.title}</strong>
-							<p>{post.data.description || post.data.category || "Chưa phân loại"}</p>
-							<small>{post.data.category || "Chưa phân loại"} {formatTags(post.data.tags)}</small>
+							<p>{post.data.description || post.data.category || "Uncategorized"}</p>
+							<small>{post.data.category || "Uncategorized"} {formatTags(post.data.tags)}</small>
 						</a>
 					{/each}
 				</div>
 			{:else}
 				<div class="archive-empty">
 					<Icon icon="material-symbols:inventory-2-outline-rounded" />
-					<span>Không có bài viết phù hợp.</span>
+					<span>No matching posts found.</span>
 				</div>
 			{/if}
 		{:else}
@@ -412,9 +412,9 @@ function setViewMode(mode: ViewMode) {
 							<time>{formatDay(post.data.published)}</time>
 							<span class="compact-main">
 								<strong>{post.data.title}</strong>
-								<small>{post.data.category || "Chưa phân loại"} {formatTags(post.data.tags)}</small>
+								<small>{post.data.category || "Uncategorized"} {formatTags(post.data.tags)}</small>
 							</span>
-							{#if post.data.latest}<span class="latest-badge">Mới</span>{/if}
+							{#if post.data.latest}<span class="latest-badge">New</span>{/if}
 							<Icon class="compact-arrow" icon="material-symbols:chevron-right-rounded" />
 						</a>
 					{/each}
@@ -422,7 +422,7 @@ function setViewMode(mode: ViewMode) {
 			{:else}
 				<div class="archive-empty">
 					<Icon icon="material-symbols:inventory-2-outline-rounded" />
-					<span>Không có bài viết phù hợp.</span>
+					<span>No matching posts found.</span>
 				</div>
 			{/if}
 		{/if}

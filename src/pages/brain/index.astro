@@ -4,7 +4,7 @@ import { Icon } from "astro-icon/components";
 import { brainTopics } from "../../data/brain-topics";
 
 const liveTopics = brainTopics.filter((topic) => topic.status === "live");
-const vaultDateFormatter = new Intl.DateTimeFormat("vi-VN", {
+const vaultDateFormatter = new Intl.DateTimeFormat("en-GB", {
 	dateStyle: "short",
 	timeStyle: "short",
 	timeZone: "Asia/Ho_Chi_Minh",
@@ -17,7 +17,7 @@ function formatVaultUpdate(value: string) {
 
 <MainGridLayout
 	title="Second Brain"
-	description="Các kho kiến thức Obsidian công khai của Nguyễn Thanh Tùng."
+	description="Nguyễn Thanh Tùng's public Obsidian knowledge vaults."
 	wide
 >
 	<header class="brain-header onload-animation">
@@ -25,11 +25,11 @@ function formatVaultUpdate(value: string) {
 			<Icon name="material-symbols:neurology-outline-rounded" />
 		</div>
 		<div>
-			<p class="brain-kicker">Kho kiến thức</p>
+			<p class="brain-kicker">Knowledge vaults</p>
 			<h1>Second Brain</h1>
 			<p class="brain-intro">
-				Mỗi chủ đề là một không gian Obsidian độc lập. Chọn một vault để khám phá
-				ghi chú, liên kết và sơ đồ kiến thức được xuất bản bằng Quartz.
+				Each topic is an independent Obsidian space. Choose a vault to explore
+				notes, connections, and knowledge graphs published with Quartz.
 			</p>
 		</div>
 	</header>
@@ -37,10 +37,10 @@ function formatVaultUpdate(value: string) {
 	<section class="brain-topics" aria-labelledby="brain-topics-title">
 		<div class="brain-section-heading onload-animation">
 			<div>
-				<p class="brain-kicker">Danh sách vault</p>
-				<h2 id="brain-topics-title">Chọn chủ đề</h2>
+				<p class="brain-kicker">Vault directory</p>
+				<h2 id="brain-topics-title">Choose a topic</h2>
 			</div>
-			<span>{liveTopics.length} đang hoạt động</span>
+			<span>{liveTopics.length} active</span>
 		</div>
 
 		<div class="brain-topic-grid">
@@ -59,7 +59,7 @@ function formatVaultUpdate(value: string) {
 								</span>
 								<span class="brain-status brain-status--live">
 									<span aria-hidden="true" />
-									Đang hoạt động
+									Active
 								</span>
 							</div>
 							<div class="brain-topic__content">
@@ -74,13 +74,13 @@ function formatVaultUpdate(value: string) {
 									>
 										<Icon name="material-symbols:update-rounded" />
 										<span>
-											Cập nhật lần cuối: {formatVaultUpdate(topic.lastUpdated)}
+											Last updated: {formatVaultUpdate(topic.lastUpdated)}
 										</span>
 									</time>
 								)
 							}
 							<span class="brain-topic__action">
-								Mở kho kiến thức
+								Open vault
 								<Icon name="material-symbols:arrow-forward-rounded" />
 							</span>
 						</a>
@@ -94,7 +94,7 @@ function formatVaultUpdate(value: string) {
 								<span class="brain-topic__icon" aria-hidden="true">
 									<Icon name={topic.icon} />
 								</span>
-								<span class="brain-status">Sắp ra mắt</span>
+								<span class="brain-status">Coming soon</span>
 							</div>
 							<div class="brain-topic__content">
 								<h3>{topic.title}</h3>

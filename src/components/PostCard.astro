@@ -45,9 +45,9 @@ const hasCover = image !== undefined && image !== null && image !== "";
 
 const coverWidth = featured ? "42%" : "28%";
 const badge = pinned
-	? { icon: "material-symbols:push-pin", text: "Nổi bật" }
+	? { icon: "material-symbols:push-pin", text: "Featured" }
 	: latest
-		? { icon: "material-symbols:stars-rounded", text: "Mới nhất" }
+		? { icon: "material-symbols:stars-rounded", text: "Latest" }
 		: null;
 
 const { remarkPluginFrontmatter } = await entry.render();
@@ -101,7 +101,7 @@ const { remarkPluginFrontmatter } = await entry.render();
                   class="transition opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-100 text-white text-5xl">
             </Icon>
         </div>
-        <ImageWrapper src={image} basePath={path.join("content/posts/", getDir(entry.id))} alt={`Ảnh bìa: ${title}`}
+        <ImageWrapper src={image} basePath={path.join("content/posts/", getDir(entry.id))} alt={`Cover image: ${title}`}
                   widths={[320, 480, 640, 960]}
                   sizes={featured ? "(max-width: 767px) calc(100vw - 2rem), 42vw" : "(max-width: 767px) calc(100vw - 2rem), 28vw"}
                   class="w-full h-full cover-zoom">

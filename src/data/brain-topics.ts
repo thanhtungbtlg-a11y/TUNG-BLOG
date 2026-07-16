@@ -13,7 +13,7 @@ export const brainTopics = [
 	{
 		title: "LEED",
 		description:
-			"Ghi chú về công trình xanh, hệ thống chứng nhận LEED và tư duy thiết kế bền vững.",
+			"Notes on green buildings, LEED certification systems, and sustainable design thinking.",
 		icon: "material-symbols:energy-savings-leaf-outline-rounded",
 		status: "live",
 		href: "/brain/leed/",
@@ -21,19 +21,19 @@ export const brainTopics = [
 	},
 	{
 		title: "Vault 02",
-		description: "Không gian cho một chủ đề Obsidian mới.",
+		description: "Space reserved for a future Obsidian topic.",
 		icon: "material-symbols:folder-open-outline-rounded",
 		status: "soon",
 	},
 	{
 		title: "Vault 03",
-		description: "Không gian cho một chủ đề Obsidian mới.",
+		description: "Space reserved for a future Obsidian topic.",
 		icon: "material-symbols:folder-open-outline-rounded",
 		status: "soon",
 	},
 	{
 		title: "Vault 04",
-		description: "Không gian cho một chủ đề Obsidian mới.",
+		description: "Space reserved for a future Obsidian topic.",
 		icon: "material-symbols:folder-open-outline-rounded",
 		status: "soon",
 	},

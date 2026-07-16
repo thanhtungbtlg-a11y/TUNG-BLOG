@@ -1,7 +1,7 @@
-Chào bạn, mình là Nguyễn Thanh Tùng.
+Hi, I'm Nguyễn Thanh Tùng.
 
-Đây là blog cá nhân nơi mình lưu lại những suy nghĩ, kỷ niệm, những lần tự hỏi về công việc, cuộc sống, gia đình và những ngày rất bình thường nhưng vẫn đáng nhớ.
+This is my personal space for thoughts, photographs, notes, and the questions that surface between work, family, and ordinary days worth remembering.
 
-Mình từng viết blog trên WordPress, sau đó chuyển các bài viết cũ về website riêng này để có một góc nhỏ gọn gàng hơn, chủ động hơn và đúng tinh thần của mình hơn.
+I started writing on WordPress and later brought those older posts here, where I can shape a quieter and more intentional home for everything I want to keep.
 
-Nếu bạn đang đọc đến đây, cảm ơn bạn đã ghé qua.
+Thanks for stopping by. I hope you find something here that stays with you.

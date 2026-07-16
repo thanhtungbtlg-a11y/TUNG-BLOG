@@ -59,7 +59,7 @@ async function loadAnalytics() {
 		if (!response.ok || !("report" in result)) {
 			throw new Error(
 				("error" in result && result.error) ||
-					"Chưa tải được dữ liệu thống kê.",
+					"Analytics data could not be loaded.",
 			);
 		}
 		data = result;
@@ -74,7 +74,7 @@ async function loadAnalytics() {
 		error =
 			cause instanceof Error
 				? cause.message
-				: "Chưa tải được dữ liệu thống kê.";
+				: "Analytics data could not be loaded.";
 	} finally {
 		loading = false;
 	}
@@ -90,7 +90,7 @@ function getRange() {
 			Number.isNaN(customEnd.getTime()) ||
 			customStart >= customEnd
 		) {
-			throw new Error("Khoảng ngày tùy chỉnh chưa hợp lệ.");
+			throw new Error("The custom date range is invalid.");
 		}
 		return { from: customStart, to: customEnd };
 	}
@@ -109,17 +109,17 @@ function toDateInput(date: Date) {
 }
 
 function formatNumber(value: number) {
-	return new Intl.NumberFormat("vi-VN").format(value);
+	return new Intl.NumberFormat("en-GB").format(value);
 }
 
 function formatDecimal(value: number) {
-	return new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 }).format(
+	return new Intl.NumberFormat("en-GB", { maximumFractionDigits: 1 }).format(
 		value,
 	);
 }
 
 function formatDateTime(value: string) {
-	return new Intl.DateTimeFormat("vi-VN", {
+	return new Intl.DateTimeFormat("en-GB", {
 		dateStyle: "short",
 		timeStyle: "medium",
 		timeZone: "Asia/Ho_Chi_Minh",
@@ -134,7 +134,7 @@ function formatBucket(value: string) {
 
 function formatComparisonRange() {
 	if (!data) return "";
-	const formatter = new Intl.DateTimeFormat("vi-VN", {
+	const formatter = new Intl.DateTimeFormat("en-GB", {
 		dateStyle: "short",
 		timeZone: "Asia/Ho_Chi_Minh",
 	});
@@ -148,16 +148,16 @@ function pageLabel(path: string, title: string) {
 function deviceLabel(value: string) {
 	return (
 		{
-			desktop: "Máy tính",
-			mobile: "Điện thoại",
-			tablet: "Máy tính bảng",
-			unknown: "Không rõ",
+			desktop: "Desktop",
+			mobile: "Mobile",
+			tablet: "Tablet",
+			unknown: "Unknown",
 		}[value] ?? value
 	);
 }
 
 function sourceLabel(value: string) {
-	return value === "direct" ? "Trực tiếp" : value;
+	return value === "direct" ? "Direct" : value;
 }
 
 function metricCards() {
@@ -165,26 +165,26 @@ function metricCards() {
 	const current = data.report.totals;
 	const previous = data.comparison.totals;
 	return [
-		{ label: "Lượt xem", value: current.views, previous: previous.views },
+		{ label: "Views", value: current.views, previous: previous.views },
 		{
-			label: "Người xem",
+			label: "Visitors",
 			value: current.visitors,
 			previous: previous.visitors,
 		},
 		{
-			label: "Phiên truy cập",
+			label: "Sessions",
 			value: current.sessions,
 			previous: previous.sessions,
 		},
-		{ label: "Trang đã xem", value: current.pages, previous: previous.pages },
+		{ label: "Pages viewed", value: current.pages, previous: previous.pages },
 		{
-			label: "Lượt / phiên",
+			label: "Views / session",
 			value: current.viewsPerSession,
 			previous: previous.viewsPerSession,
 			decimal: true,
 		},
 		{
-			label: "Tỷ lệ thoát",
+			label: "Bounce rate",
 			value: current.bounceRate,
 			previous: previous.bounceRate,
 			suffix: "%",
@@ -194,8 +194,8 @@ function metricCards() {
 }
 
 function trend(current: number, previous: number, inverse = false) {
-	if (current === previous) return { label: "Không đổi", tone: "neutral" };
-	if (previous === 0) return { label: "Mới", tone: "neutral" };
+	if (current === previous) return { label: "No change", tone: "neutral" };
+	if (previous === 0) return { label: "New", tone: "neutral" };
 	const change = Math.round(((current - previous) / previous) * 100);
 	const rising = change > 0;
 	const good = inverse ? !rising : rising;
@@ -254,7 +254,7 @@ function sharePercent(views: number) {
 function exportEvents() {
 	const rows = filteredEvents();
 	const csvRows = [
-		["Thời gian", "Tiêu đề", "Đường dẫn", "Thiết bị", "Nguồn"],
+		["Time", "Title", "Path", "Device", "Source"],
 		...rows.map((event) => [
 			formatDateTime(event.viewedAt),
 			event.title,
@@ -284,10 +284,10 @@ function escapeCsv(value: string) {
 <section class="analytics-dashboard" aria-labelledby="analytics-title">
 	<header class="analytics-heading">
 		<div>
-			<h2 id="analytics-title">Thống kê lượt xem</h2>
-			<p>Dữ liệu ẩn danh, theo giờ Việt Nam. Không lưu IP hoặc thông tin nhận dạng.</p>
+			<h2 id="analytics-title">View analytics</h2>
+			<p>Anonymous data in Vietnam time. No IP addresses or identifying information are stored.</p>
 		</div>
-		<button class="icon-button" type="button" onclick={loadAnalytics} disabled={loading} title="Tải lại" aria-label="Tải lại thống kê">
+		<button class="icon-button" type="button" onclick={loadAnalytics} disabled={loading} title="Refresh" aria-label="Refresh analytics">
 			<Icon
 				icon="material-symbols:refresh-rounded"
 				class={loading ? "spin" : undefined}
@@ -297,41 +297,41 @@ function escapeCsv(value: string) {
 
 	<form class="analytics-filters" onsubmit={(event) => { event.preventDefault(); void loadAnalytics(); }}>
 		<label>
-			<span>Thời gian</span>
+			<span>Time range</span>
 			<select bind:value={preset}>
-				<option value="24h">24 giờ qua</option>
-				<option value="7d">7 ngày qua</option>
-				<option value="30d">30 ngày qua</option>
-				<option value="90d">90 ngày qua</option>
-				<option value="custom">Tùy chọn</option>
+				<option value="24h">Last 24 hours</option>
+				<option value="7d">Last 7 days</option>
+				<option value="30d">Last 30 days</option>
+				<option value="90d">Last 90 days</option>
+				<option value="custom">Custom</option>
 			</select>
 		</label>
 		{#if preset === "custom"}
-			<label><span>Từ ngày</span><input type="date" bind:value={customFrom} /></label>
-			<label><span>Đến ngày</span><input type="date" bind:value={customTo} /></label>
+			<label><span>From</span><input type="date" bind:value={customFrom} /></label>
+			<label><span>To</span><input type="date" bind:value={customTo} /></label>
 		{/if}
 		<label class="path-filter">
-			<span>Trang được xem</span>
+			<span>Page viewed</span>
 			<select bind:value={selectedPath}>
-				<option value="">Tất cả trang</option>
+				<option value="">All pages</option>
 				{#each knownPages as page}
 					<option value={page.path}>{pageLabel(page.path, page.title)}</option>
 				{/each}
 			</select>
 		</label>
 		<button class="apply-button" type="submit" disabled={loading}>
-			<Icon icon="material-symbols:filter-alt-outline-rounded" /> Áp dụng
+			<Icon icon="material-symbols:filter-alt-outline-rounded" /> Apply
 		</button>
 	</form>
 
 	{#if error}
 		<div class="analytics-message error" role="alert">{error}</div>
 	{:else if loading && !data}
-		<div class="analytics-message"><Icon icon="material-symbols:progress-activity" /> Đang tải thống kê...</div>
+		<div class="analytics-message"><Icon icon="material-symbols:progress-activity" /> Loading analytics...</div>
 	{:else if data}
 		<div class="comparison-note">
 			<Icon icon="material-symbols:compare-arrows-rounded" />
-			So với kỳ liền trước: {formatComparisonRange()}
+			Compared with the previous period: {formatComparisonRange()}
 		</div>
 
 		<div class="metric-grid">
@@ -340,7 +340,7 @@ function escapeCsv(value: string) {
 				<article>
 					<span>{metric.label}</span>
 					<strong>{metric.decimal ? formatDecimal(metric.value) : formatNumber(metric.value)}{metric.suffix ?? ""}</strong>
-					<small class={metricTrend.tone}>{metricTrend.label} <span>so với kỳ trước</span></small>
+					<small class={metricTrend.tone}>{metricTrend.label} <span>vs previous period</span></small>
 				</article>
 			{/each}
 		</div>
@@ -348,19 +348,19 @@ function escapeCsv(value: string) {
 		<section class="analytics-panel chart-panel" aria-labelledby="views-chart-title">
 			<div class="panel-heading">
 				<div>
-					<h3 id="views-chart-title">Xu hướng theo thời gian</h3>
-					<span>Các mốc không có lượt xem vẫn được hiển thị đầy đủ.</span>
+					<h3 id="views-chart-title">Trend over time</h3>
+					<span>Intervals with no views are still shown.</span>
 				</div>
-				<div class="segmented-control" aria-label="Chỉ số biểu đồ">
-					<button type="button" class:active={chartMetric === "views"} onclick={() => { chartMetric = "views"; }}>Lượt xem</button>
-					<button type="button" class:active={chartMetric === "visitors"} onclick={() => { chartMetric = "visitors"; }}>Người xem</button>
+				<div class="segmented-control" aria-label="Chart metric">
+					<button type="button" class:active={chartMetric === "views"} onclick={() => { chartMetric = "views"; }}>Views</button>
+					<button type="button" class:active={chartMetric === "visitors"} onclick={() => { chartMetric = "visitors"; }}>Visitors</button>
 				</div>
 			</div>
 			{#if data.report.totals.views > 0}
 				<div class="chart-scroll">
 					<div class="bar-chart" style={`--chart-columns: ${data.report.series.length}`}>
 						{#each data.report.series as point}
-							<div class="bar-column" title={`${point.views} lượt xem · ${point.visitors} người xem`}>
+							<div class="bar-column" title={`${point.views} views · ${point.visitors} visitors`}>
 								<span class="bar-value">{chartValue(point)}</span>
 								<div class="bar-track"><span style={`height: ${(chartValue(point) / maxSeriesValue()) * 100}%`}></span></div>
 								<small>{formatBucket(point.bucket)}</small>
@@ -369,31 +369,31 @@ function escapeCsv(value: string) {
 					</div>
 				</div>
 			{:else}
-				<p class="empty-copy">Chưa có lượt xem trong khoảng thời gian này.</p>
+				<p class="empty-copy">No views in this period.</p>
 			{/if}
 		</section>
 
 		<section class="analytics-panel" aria-labelledby="popular-pages-title">
 			<div class="panel-heading table-heading">
 				<div>
-					<h3 id="popular-pages-title">Trang được xem</h3>
-					<span>Tối đa 100 kết quả trong bộ lọc hiện tại.</span>
+					<h3 id="popular-pages-title">Pages viewed</h3>
+					<span>Up to 100 results for the current filters.</span>
 				</div>
 				<div class="table-tools">
 					<label class="search-control">
 						<Icon icon="material-symbols:search-rounded" />
-						<input aria-label="Tìm trang" placeholder="Tìm tiêu đề hoặc đường dẫn" bind:value={pageQuery} />
+						<input aria-label="Search pages" placeholder="Search title or path" bind:value={pageQuery} />
 					</label>
-					<select aria-label="Sắp xếp trang" bind:value={pageSort}>
-						<option value="views">Nhiều lượt xem</option>
-						<option value="visitors">Nhiều người xem</option>
-						<option value="recent">Mới xem gần đây</option>
+					<select aria-label="Sort pages" bind:value={pageSort}>
+						<option value="views">Most views</option>
+						<option value="visitors">Most visitors</option>
+						<option value="recent">Recently viewed</option>
 					</select>
 				</div>
 			</div>
 			<div class="table-scroll">
 				<table>
-					<thead><tr><th>Trang</th><th>Lượt xem</th><th>Người xem</th><th>Tỷ trọng</th><th>Lần cuối</th></tr></thead>
+					<thead><tr><th>Page</th><th>Views</th><th>Visitors</th><th>Share</th><th>Last viewed</th></tr></thead>
 					<tbody>
 						{#each filteredPages() as page}
 							<tr>
@@ -404,7 +404,7 @@ function escapeCsv(value: string) {
 								<td>{formatDateTime(page.lastViewedAt)}</td>
 							</tr>
 						{:else}
-							<tr><td colspan="5">Không tìm thấy trang phù hợp.</td></tr>
+							<tr><td colspan="5">No matching pages found.</td></tr>
 						{/each}
 					</tbody>
 				</table>
@@ -413,38 +413,38 @@ function escapeCsv(value: string) {
 
 		<div class="breakdown-grid">
 			<section class="analytics-panel" aria-labelledby="sections-title">
-				<h3 id="sections-title">Loại nội dung</h3>
+				<h3 id="sections-title">Content type</h3>
 				<div class="breakdown-list">
 					{#each data.report.sections as item}
 						<div class="breakdown-item">
 							<p><span>{item.name}</span><strong>{formatNumber(item.views)} <small>{sharePercent(item.views)}%</small></strong></p>
 							<span class="breakdown-track"><span style={`width: ${sharePercent(item.views)}%`}></span></span>
 						</div>
-					{:else}<p class="empty-copy">Chưa có dữ liệu nội dung.</p>{/each}
+					{:else}<p class="empty-copy">No content data yet.</p>{/each}
 				</div>
 			</section>
 
 			<section class="analytics-panel" aria-labelledby="devices-title">
-				<h3 id="devices-title">Thiết bị</h3>
+				<h3 id="devices-title">Devices</h3>
 				<div class="breakdown-list">
 					{#each data.report.devices as item}
 						<div class="breakdown-item">
 							<p><span>{deviceLabel(item.name)}</span><strong>{formatNumber(item.views)} <small>{sharePercent(item.views)}%</small></strong></p>
 							<span class="breakdown-track"><span style={`width: ${sharePercent(item.views)}%`}></span></span>
 						</div>
-					{:else}<p class="empty-copy">Chưa có dữ liệu thiết bị.</p>{/each}
+					{:else}<p class="empty-copy">No device data yet.</p>{/each}
 				</div>
 			</section>
 
 			<section class="analytics-panel" aria-labelledby="referrers-title">
-				<h3 id="referrers-title">Nguồn truy cập</h3>
+				<h3 id="referrers-title">Traffic sources</h3>
 				<div class="breakdown-list">
 					{#each data.report.referrers as item}
 						<div class="breakdown-item">
 							<p><span title={sourceLabel(item.name)}>{sourceLabel(item.name)}</span><strong>{formatNumber(item.views)} <small>{sharePercent(item.views)}%</small></strong></p>
 							<span class="breakdown-track"><span style={`width: ${sharePercent(item.views)}%`}></span></span>
 						</div>
-					{:else}<p class="empty-copy">Chưa có dữ liệu nguồn truy cập.</p>{/each}
+					{:else}<p class="empty-copy">No traffic-source data yet.</p>{/each}
 				</div>
 			</section>
 		</div>
@@ -452,29 +452,29 @@ function escapeCsv(value: string) {
 		<section class="analytics-panel" aria-labelledby="view-history-title">
 			<div class="panel-heading table-heading">
 				<div>
-					<h3 id="view-history-title">Lịch sử lượt xem</h3>
-					<span>{filteredEvents().length} / {data.report.events.length} lượt gần nhất trong bộ lọc.</span>
+					<h3 id="view-history-title">View history</h3>
+					<span>{filteredEvents().length} / {data.report.events.length} recent views in this filter.</span>
 				</div>
 				<div class="table-tools">
 					<label class="search-control">
 						<Icon icon="material-symbols:search-rounded" />
-						<input aria-label="Tìm lịch sử" placeholder="Tìm trang hoặc nguồn" bind:value={eventQuery} />
+						<input aria-label="Search history" placeholder="Search page or source" bind:value={eventQuery} />
 					</label>
-					<select aria-label="Lọc thiết bị" bind:value={eventDevice}>
-						<option value="">Tất cả thiết bị</option>
-						<option value="desktop">Máy tính</option>
-						<option value="mobile">Điện thoại</option>
-						<option value="tablet">Máy tính bảng</option>
-						<option value="unknown">Không rõ</option>
+					<select aria-label="Filter by device" bind:value={eventDevice}>
+						<option value="">All devices</option>
+						<option value="desktop">Desktop</option>
+						<option value="mobile">Mobile</option>
+						<option value="tablet">Tablet</option>
+						<option value="unknown">Unknown</option>
 					</select>
-					<button class="export-button" type="button" onclick={exportEvents} disabled={!filteredEvents().length} title="Xuất CSV">
+					<button class="export-button" type="button" onclick={exportEvents} disabled={!filteredEvents().length} title="Export CSV">
 						<Icon icon="material-symbols:download-rounded" /> CSV
 					</button>
 				</div>
 			</div>
 			<div class="table-scroll history-table">
 				<table>
-					<thead><tr><th>Thời gian</th><th>Trang</th><th>Thiết bị</th><th>Nguồn</th></tr></thead>
+					<thead><tr><th>Time</th><th>Page</th><th>Device</th><th>Source</th></tr></thead>
 					<tbody>
 						{#each filteredEvents() as event}
 							<tr>
@@ -484,7 +484,7 @@ function escapeCsv(value: string) {
 								<td>{sourceLabel(event.referrer || "direct")}</td>
 							</tr>
 						{:else}
-							<tr><td colspan="4">Không có lượt xem phù hợp.</td></tr>
+							<tr><td colspan="4">No matching views found.</td></tr>
 						{/each}
 					</tbody>
 				</table>
@@ -492,7 +492,7 @@ function escapeCsv(value: string) {
 		</section>
 
 		{#if data.truncated}
-			<div class="analytics-message warning">Khoảng thời gian này có trên 20.000 lượt xem. Báo cáo đang dùng phần dữ liệu gần nhất.</div>
+			<div class="analytics-message warning">This period contains more than 20,000 views. The report uses the most recent available data.</div>
 		{/if}
 	{/if}
 </section>

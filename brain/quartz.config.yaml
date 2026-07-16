@@ -8,7 +8,7 @@ configuration:
   enablePopovers: true
   analytics:
     provider: vercel
-  locale: vi-VN
+  locale: en-US
   baseUrl: www.thanhtung0209.com/brain/leed
   ignorePatterns:
     - private
@@ -139,7 +139,7 @@ plugins:
       height: 630
       excludeRoot: false
       defaultTitle: LEED · Second Brain
-      defaultDescription: Ghi chú công khai về LEED, công trình xanh và tư duy bền vững.
+      defaultDescription: Public notes about LEED, green buildings, and sustainable design.
   - source: github:quartz-community/content-page
     enabled: true
   - source: github:quartz-community/folder-page
@@ -221,8 +221,8 @@ plugins:
     enabled: true
     options:
       links:
-        Về blog: https://www.thanhtung0209.com/
-        Kho bài: https://www.thanhtung0209.com/archive/
+        Main site: https://www.thanhtung0209.com/
+        Writing archive: https://www.thanhtung0209.com/archive/
         Email: https://mail.google.com/mail/?view=cm&fs=1&to=thanhtungbtlg@gmail.com
 
   # Quartz v5 additions: controlled publishing, recent notes and Obsidian Canvas.
@@ -233,7 +233,7 @@ plugins:
   - source: github:quartz-community/recent-notes
     enabled: true
     options:
-      title: Ghi chú gần đây
+      title: Recent notes
       limit: 5
       linkToMore: false
       showTags: true

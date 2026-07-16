@@ -41,7 +41,7 @@ const reactions: Array<{
 	},
 	{
 		id: "love",
-		label: "Tym",
+		label: "Love",
 		emoji: "❤️",
 	},
 	{
@@ -51,17 +51,17 @@ const reactions: Array<{
 	},
 	{
 		id: "wow",
-		label: "Woa",
+		label: "Wow",
 		emoji: "😮",
 	},
 	{
 		id: "sad",
-		label: "Buồn",
+		label: "Sad",
 		emoji: "😢",
 	},
 	{
 		id: "angry",
-		label: "Phẫn nộ",
+		label: "Angry",
 		emoji: "😡",
 	},
 ];
@@ -120,7 +120,7 @@ async function loadReactionCounts() {
 		);
 		if (rows[0]) state.counts = rowToCounts(rows[0]);
 	} catch {
-		error = "Chưa tải được cảm xúc.";
+		error = "Reactions could not be loaded.";
 	}
 }
 
@@ -155,7 +155,7 @@ async function toggleReaction(id: ReactionId) {
 	} catch {
 		state = previousState;
 		save();
-		error = "Chưa lưu được cảm xúc.";
+		error = "Your reaction could not be saved.";
 	} finally {
 		saving = false;
 	}
@@ -227,7 +227,7 @@ function isReactionId(value: unknown): value is ReactionId {
 
 <div class="reaction-panel card-base onload-animation">
 	<div class="reaction-copy">
-		<div class="reaction-title">Phản ứng của bạn</div>
+		<div class="reaction-title">Your reaction</div>
 		{#if error}
 			<div class="reaction-error" role="alert">{error}</div>
 		{/if}

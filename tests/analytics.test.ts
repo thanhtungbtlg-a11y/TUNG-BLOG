@@ -96,7 +96,7 @@ test("aggregates page views, visitors, sessions and exact events", () => {
 		{ name: "google.com", views: 1 },
 	]);
 	assert.deepEqual(report.sections, [
-		{ name: "Bài viết", views: 2 },
-		{ name: "Kho bài", views: 1 },
+		{ name: "Posts", views: 2 },
+		{ name: "Archive", views: 1 },
 	]);
 });

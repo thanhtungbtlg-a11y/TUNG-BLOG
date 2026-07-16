@@ -88,7 +88,7 @@ const quickActions: CommandItem[] = [
 	{
 		type: "page",
 		title: "Home",
-		description: "Trang chính",
+		description: "Main page",
 		url: url("/"),
 		icon: "material-symbols:home-outline-rounded",
 		weight: 10,
@@ -96,15 +96,15 @@ const quickActions: CommandItem[] = [
 	{
 		type: "page",
 		title: "Archive",
-		description: "Tất cả bài viết",
+		description: "All posts",
 		url: url("/archive/"),
 		icon: "material-symbols:inventory-2-outline-rounded",
 		weight: 9,
 	},
 	{
 		type: "page",
-		title: "Kho ảnh",
-		description: "Ảnh và những khoảnh khắc",
+		title: "Gallery",
+		description: "Photographs and moments",
 		url: url("/gallery/"),
 		icon: "material-symbols:photo-library-outline-rounded",
 		weight: 9,
@@ -112,15 +112,15 @@ const quickActions: CommandItem[] = [
 	{
 		type: "page",
 		title: "Second Brain",
-		description: "Ghi chú Obsidian và bản đồ kiến thức",
+		description: "Obsidian notes and knowledge graphs",
 		url: url("/brain/"),
 		icon: "material-symbols:neurology-outline-rounded",
 		weight: 9,
 	},
 	{
 		type: "page",
-		title: "Hồ sơ",
-		description: "Kinh nghiệm và định hướng nghề nghiệp",
+		title: "Portfolio",
+		description: "Experience and professional direction",
 		url: url("/portfolio/"),
 		icon: "material-symbols:person-outline-rounded",
 		weight: 9,
@@ -128,7 +128,7 @@ const quickActions: CommandItem[] = [
 	{
 		type: "page",
 		title: "About",
-		description: "Thông tin cá nhân",
+		description: "Personal information",
 		url: url("/about/"),
 		icon: "fa6-regular:address-card",
 		weight: 8,
@@ -399,7 +399,7 @@ $: commandItems = [
 		description:
 			post.description ||
 			[post.category, ...post.tags].filter(Boolean).join(" / ") ||
-			"Bài viết",
+			"Post",
 		url: post.url,
 		icon: "material-symbols:article-outline-rounded",
 		weight: 7,
@@ -420,7 +420,7 @@ $: commandItems = [
 	...searchIndex.tags.map((tag) => ({
 		type: "tag" as const,
 		title: `#${tag.name}`,
-		description: `${tag.count} bài viết`,
+		description: `${tag.count} ${tag.count === 1 ? "post" : "posts"}`,
 		url: tagUrl(tag.name),
 		icon: "material-symbols:tag-rounded",
 		weight: 5,
@@ -428,7 +428,7 @@ $: commandItems = [
 	...searchIndex.categories.map((category) => ({
 		type: "category" as const,
 		title: category.name,
-		description: `${category.count} bài viết`,
+		description: `${category.count} ${category.count === 1 ? "post" : "posts"}`,
 		url: category.url,
 		icon: "material-symbols:folder-outline-rounded",
 		weight: 6,
@@ -509,7 +509,7 @@ function handleInputKeydown(event: KeyboardEvent) {
 					bind:this={searchInput}
 					bind:value={keyword}
 					onkeydown={handleInputKeydown}
-					placeholder="Tìm nội dung, hoặc dùng tag: category: year:"
+					placeholder="Search content, or use tag: category: year:"
 					aria-label="Command search"
 				/>
 				<button class="command-close" aria-label="Close search" onclick={closePalette}>
@@ -561,7 +561,7 @@ function handleInputKeydown(event: KeyboardEvent) {
 				{:else}
 					<div class="command-empty">
 						<Icon icon="material-symbols:search-off-rounded" />
-						<span>Không tìm thấy kết quả</span>
+						<span>No results found</span>
 					</div>
 				{/if}
 			</div>

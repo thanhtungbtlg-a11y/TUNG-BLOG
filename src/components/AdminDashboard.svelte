@@ -129,7 +129,7 @@ let galleryLoading = $state(false);
 let galleryTitle = $state("");
 let galleryDescription = $state("");
 let galleryDate = $state(new Date().toISOString().slice(0, 10));
-let galleryAlbum = $state("Ảnh chọn lọc");
+let galleryAlbum = $state("Selected photos");
 let galleryOrder = $state(0);
 let editor = $state(createEmptyPost());
 let editorMode = $state<"write" | "preview">("write");
@@ -192,13 +192,13 @@ async function signIn() {
 	});
 	busy = false;
 	if (signInError) {
-		error = "Không đăng nhập được. Kiểm tra lại email và mật khẩu.";
+		error = "Sign-in failed. Check your email address and password.";
 		return;
 	}
 	session = data.session;
 	password = "";
 	await verifyAdmin();
-	if (!isAdmin) error = "Tài khoản này chưa có quyền quản trị.";
+	if (!isAdmin) error = "This account does not have administrator access.";
 }
 
 async function signOut() {
@@ -223,7 +223,7 @@ function createEmptyPost(): EditorPost {
 		description: "",
 		image: "",
 		tags: "",
-		category: "Nhật ký cá nhân",
+		category: "Personal journal",
 		lang: "vi",
 		draft: false,
 		pinned: false,
@@ -277,7 +277,7 @@ async function savePost() {
 	if (busy) return;
 	const slug = selectedSlug || editor.slug.trim() || slugify(editor.title);
 	if (!slug || !editor.title.trim()) {
-		error = "Nhập tiêu đề và slug trước khi lưu.";
+		error = "Enter a title and slug before saving.";
 		return;
 	}
 
@@ -308,7 +308,7 @@ async function savePost() {
 		const index = posts.findIndex((post) => post.slug === slug);
 		if (index >= 0) posts[index] = summary;
 		else posts = [summary, ...posts];
-		notice = "Đã lưu vào GitHub. Vercel đang triển khai bản mới.";
+		notice = "Saved to GitHub. Vercel is deploying the update.";
 	} catch (saveError) {
 		error = errorMessage(saveError);
 	} finally {
@@ -323,7 +323,7 @@ async function uploadImage(event: Event) {
 
 	const slug = selectedSlug || editor.slug.trim() || slugify(editor.title);
 	if (!slug) {
-		error = "Nhập tiêu đề hoặc slug trước khi tải ảnh.";
+		error = "Enter a title or slug before uploading an image.";
 		input.value = "";
 		return;
 	}
@@ -344,7 +344,7 @@ async function uploadImage(event: Event) {
 		});
 		insertImageMarkdown(result.filename);
 		if (!editor.image) editor.image = result.filename;
-		notice = "Đã tải và chèn ảnh WebP vào nội dung.";
+		notice = "The WebP image was uploaded and inserted into the post.";
 	} catch (uploadError) {
 		error = errorMessage(uploadError);
 	} finally {
@@ -458,7 +458,8 @@ async function uploadGalleryPhoto(event: Event) {
 		galleryTitle = "";
 		galleryDescription = "";
 		galleryOrder = 0;
-		notice = "Đã thêm ảnh vào Kho ảnh. Vercel đang triển khai bản mới.";
+		notice =
+			"The photo was added to the gallery. Vercel is deploying the update.";
 	} catch (uploadError) {
 		error = errorMessage(uploadError);
 	} finally {
@@ -495,7 +496,7 @@ async function saveGalleryPhoto(item: GalleryAdminItem) {
 				a.localeCompare(b, "vi"),
 			);
 		}
-		notice = "Đã lưu thông tin và thứ tự ảnh.";
+		notice = "Photo details and order were saved.";
 	} catch (saveError) {
 		error = errorMessage(saveError);
 	} finally {
@@ -507,7 +508,7 @@ async function deleteGalleryPhoto(item: GalleryAdminItem) {
 	if (
 		busy ||
 		!window.confirm(
-			`Xóa “${item.title}” khỏi Kho ảnh? File ảnh và thumbnail cũng sẽ bị xóa.`,
+			`Remove “${item.title}” from the gallery? The photo and thumbnail files will also be deleted.`,
 		)
 	)
 		return;
@@ -521,7 +522,7 @@ async function deleteGalleryPhoto(item: GalleryAdminItem) {
 		galleryItems = galleryItems.filter(
 			(entry) => entry.filename !== item.filename,
 		);
-		notice = "Đã xóa ảnh khỏi Kho ảnh.";
+		notice = "The photo was removed from the gallery.";
 	} catch (deleteError) {
 		error = errorMessage(deleteError);
 	} finally {
@@ -566,7 +567,7 @@ async function moveGalleryPhoto(item: GalleryAdminItem, change: number) {
 		galleryItems = galleryItems.map(
 			(entry) => updatedByFilename.get(entry.filename) ?? entry,
 		);
-		notice = "Đã cập nhật thứ tự ảnh trong album.";
+		notice = "The photo order in this collection was updated.";
 	} catch (moveError) {
 		error = errorMessage(moveError);
 	} finally {
@@ -614,7 +615,7 @@ async function uploadMedia(event: Event) {
 		});
 		media = [result.item as MediaItem, ...media];
 		mediaAlt = "";
-		notice = "Đã thêm ảnh WebP/AVIF. Vercel đang triển khai ảnh mới.";
+		notice = "The WebP/AVIF image was added. Vercel is deploying it.";
 	} catch (uploadError) {
 		error = errorMessage(uploadError);
 	} finally {
@@ -634,7 +635,7 @@ async function saveMedia(item: MediaItem) {
 		});
 		const index = media.findIndex((entry) => entry.id === item.id);
 		if (index >= 0) media[index] = result.item as MediaItem;
-		notice = "Đã cập nhật ảnh. Vercel đang triển khai thay đổi.";
+		notice = "The image was updated. Vercel is deploying the change.";
 	} catch (saveError) {
 		error = errorMessage(saveError);
 	} finally {
@@ -646,7 +647,7 @@ async function deleteMedia(item: MediaItem) {
 	if (
 		busy ||
 		!window.confirm(
-			`Xóa ảnh “${item.name}”? Các bài đang dùng ảnh này có thể bị mất ảnh.`,
+			`Delete “${item.name}”? Posts using this image may display a broken image.`,
 		)
 	)
 		return;
@@ -658,7 +659,7 @@ async function deleteMedia(item: MediaItem) {
 			body: JSON.stringify({ id: item.id }),
 		});
 		media = media.filter((entry) => entry.id !== item.id);
-		notice = "Đã xóa ảnh khỏi thư viện.";
+		notice = "The image was deleted from the media library.";
 	} catch (deleteError) {
 		error = errorMessage(deleteError);
 	} finally {
@@ -679,12 +680,12 @@ async function reuseMedia(item: MediaItem) {
 	activeTab = "posts";
 	await tick();
 	bodyTextarea?.focus();
-	notice = "Đã chèn ảnh vào nội dung bài đang mở.";
+	notice = "The image was inserted into the open post.";
 }
 
 async function copyMedia(item: MediaItem) {
 	await navigator.clipboard.writeText(mediaMarkdown(item));
-	notice = "Đã sao chép mã ảnh.";
+	notice = "The image markup was copied.";
 }
 
 function insertMediaMarkdown(value: string) {
@@ -707,7 +708,7 @@ function insertImageMarkdown(filename: string) {
 	editorMode = "write";
 	const start = bodyTextarea?.selectionStart ?? editor.body.length;
 	const end = bodyTextarea?.selectionEnd ?? start;
-	const markdown = `\n\n![Mô tả ảnh](${filename})\n\n`;
+	const markdown = `\n\n![Image description](${filename})\n\n`;
 	editor.body = `${editor.body.slice(0, start)}${markdown}${editor.body.slice(end)}`;
 	void tick().then(() => {
 		bodyTextarea?.focus();
@@ -719,7 +720,7 @@ function insertImageMarkdown(filename: string) {
 }
 
 function previewHtml() {
-	const markdown = editor.body.trim() || "_Chưa có nội dung._";
+	const markdown = editor.body.trim() || "_No content yet._";
 	return markdownParser.render(resolvePreviewAssets(markdown));
 }
 
@@ -767,12 +768,12 @@ async function loadComments() {
 			comments = ((legacyData ?? []) as BlogComment[]).map((comment) => ({
 				...comment,
 				parent_id: null,
-				author_name: "Ẩn danh",
+				author_name: "Anonymous",
 				is_author: false,
 			}));
 			return;
 		}
-		error = "Không tải được bình luận.";
+		error = "Comments could not be loaded.";
 		return;
 	}
 	comments = (data ?? []) as BlogComment[];
@@ -794,26 +795,26 @@ async function approveComment(comment: BlogComment) {
 			}),
 		});
 		Object.assign(comment, result.data);
-		notice = moderationNotice("Đã duyệt bình luận.", result.notification);
+		notice = moderationNotice("The comment was approved.", result.notification);
 	} catch (approveError) {
 		error =
 			approveError instanceof Error
 				? approveError.message
-				: "Chưa duyệt được bình luận.";
+				: "The comment could not be approved.";
 	} finally {
 		busy = false;
 	}
 }
 
 async function deleteComment(comment: BlogComment) {
-	if (!supabase || busy || !window.confirm("Xóa bình luận này?")) return;
+	if (!supabase || busy || !window.confirm("Delete this comment?")) return;
 	busy = true;
 	const { error: deleteError } = await supabase
 		.from("blog_comments")
 		.delete()
 		.eq("id", comment.id);
 	busy = false;
-	if (deleteError) error = "Chưa xóa được bình luận.";
+	if (deleteError) error = "The comment could not be deleted.";
 	else comments = comments.filter((item) => item.id !== comment.id);
 }
 
@@ -821,7 +822,7 @@ async function replyToComment(comment: BlogComment) {
 	if (!session?.user || busy) return;
 	const trimmed = adminReplyBody.trim();
 	if (!trimmed) {
-		error = "Nhập nội dung trả lời trước đã.";
+		error = "Write a reply before submitting.";
 		return;
 	}
 
@@ -842,12 +843,12 @@ async function replyToComment(comment: BlogComment) {
 		comments = [result.data, ...comments];
 		replyingCommentId = null;
 		adminReplyBody = "";
-		notice = moderationNotice("Đã đăng trả lời của bạn.", result.notification);
+		notice = moderationNotice("Your reply was published.", result.notification);
 	} catch (replyError) {
 		error =
 			replyError instanceof Error
 				? replyError.message
-				: "Chưa gửi được trả lời.";
+				: "The reply could not be submitted.";
 	} finally {
 		busy = false;
 	}
@@ -862,12 +863,12 @@ async function testCommentEmail() {
 			method: "POST",
 			body: JSON.stringify({ action: "test_email" }),
 		});
-		notice = "Đã gửi email thử. Kiểm tra hộp thư đến và Spam.";
+		notice = "The test email was sent. Check your inbox and spam folder.";
 	} catch (testError) {
 		error =
 			testError instanceof Error
 				? testError.message
-				: "Email thử chưa gửi được.";
+				: "The test email could not be sent.";
 	} finally {
 		busy = false;
 	}
@@ -878,7 +879,7 @@ function moderationNotice(
 	notification?: CommentNotification,
 ) {
 	if (notification?.reason === "send_failed") {
-		return `${successMessage} Email phản hồi chưa gửi được; hãy dùng nút kiểm tra email.`;
+		return `${successMessage} The reply notification email failed; use the test email button to check the configuration.`;
 	}
 	return successMessage;
 }
@@ -886,7 +887,7 @@ function moderationNotice(
 function commentAuthorName(comment: BlogComment) {
 	return comment.is_author
 		? "Nguyễn Thanh Tùng"
-		: comment.author_name || "Ẩn danh";
+		: comment.author_name || "Anonymous";
 }
 
 function visiblePosts() {
@@ -916,7 +917,7 @@ async function adminFetch<T = Record<string, unknown>>(
 	path: string,
 	init: RequestInit = {},
 ): Promise<T> {
-	if (!session?.access_token) throw new Error("Bạn chưa đăng nhập.");
+	if (!session?.access_token) throw new Error("You are not signed in.");
 	const response = await fetch(path, {
 		...init,
 		headers: {
@@ -938,8 +939,8 @@ async function adminFetch<T = Record<string, unknown>>(
 		throw new Error(
 			serverMessage ||
 				(response.status >= 500
-					? "Dịch vụ máy chủ đang tạm gián đoạn. Vui lòng thử lại sau."
-					: "Yêu cầu chưa hoàn tất."),
+					? "The server is temporarily unavailable. Please try again later."
+					: "The request could not be completed."),
 		);
 	}
 	return data as T;
@@ -956,7 +957,9 @@ async function compressImage(file: File) {
 	return new Promise<Blob>((resolve, reject) =>
 		canvas.toBlob(
 			(blob) =>
-				blob ? resolve(blob) : reject(new Error("Không nén được ảnh.")),
+				blob
+					? resolve(blob)
+					: reject(new Error("The image could not be compressed.")),
 			"image/webp",
 			0.82,
 		),
@@ -991,7 +994,7 @@ function slugify(value: string) {
 }
 
 function formatDate(value: string) {
-	return new Date(value).toLocaleString("vi-VN", {
+	return new Date(value).toLocaleString("en-GB", {
 		dateStyle: "medium",
 		timeStyle: "short",
 	});
@@ -1003,7 +1006,9 @@ function clearMessages() {
 }
 
 function errorMessage(value: unknown) {
-	return value instanceof Error ? value.message : "Yêu cầu chưa hoàn tất.";
+	return value instanceof Error
+		? value.message
+		: "The request could not be completed.";
 }
 function formatBytes(value: number) {
 	if (value < 1024) return `${value} B`;
@@ -1030,17 +1035,17 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 </script>
 
 {#if !authReady}
-	<div class="admin-loading"><Icon icon="material-symbols:progress-activity" /> Đang kiểm tra phiên...</div>
+	<div class="admin-loading"><Icon icon="material-symbols:progress-activity" /> Checking session...</div>
 {:else if !supabase}
-	<div class="admin-loading error">Supabase chưa được cấu hình.</div>
+	<div class="admin-loading error">Supabase has not been configured.</div>
 {:else if !isAdmin}
 	<section class="login-panel card-base">
 		<div class="login-icon"><Icon icon="material-symbols:admin-panel-settings-outline-rounded" /></div>
-		<h1>Quản trị blog</h1>
+		<h1>Blog admin</h1>
 		<form onsubmit={(event) => { event.preventDefault(); void signIn(); }}>
 			<label>Email<input type="email" autocomplete="username" bind:value={email} required /></label>
-			<label>Mật khẩu<input type="password" autocomplete="current-password" bind:value={password} required /></label>
-			<button type="submit" disabled={busy}><Icon icon="material-symbols:login-rounded" /> Đăng nhập</button>
+			<label>Password<input type="password" autocomplete="current-password" bind:value={password} required /></label>
+			<button type="submit" disabled={busy}><Icon icon="material-symbols:login-rounded" /> Sign in</button>
 		</form>
 		{#if error}<p class="feedback error">{error}</p>{/if}
 	</section>
@@ -1048,27 +1053,27 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 	<section class="admin-shell card-base">
 		<header class="admin-header">
 			<div>
-				<h1>Quản trị blog</h1>
+				<h1>Blog admin</h1>
 				<p>{session?.user.email}</p>
 			</div>
-			<button class="icon-button" type="button" title="Đăng xuất" aria-label="Đăng xuất" onclick={signOut}>
+			<button class="icon-button" type="button" title="Sign out" aria-label="Sign out" onclick={signOut}>
 				<Icon icon="material-symbols:logout-rounded" />
 			</button>
 		</header>
 
-		<nav class="admin-tabs" aria-label="Khu vực quản trị">
+		<nav class="admin-tabs" aria-label="Admin sections">
 			<button class:active={activeTab === "posts"} type="button" onclick={openPostsTab}>
-				<Icon icon="material-symbols:article-outline-rounded" /> Bài viết
+				<Icon icon="material-symbols:article-outline-rounded" /> Posts
 			</button>
 			<button class:active={activeTab === "media"} type="button" onclick={openMediaTab}>
-				<Icon icon="material-symbols:photo-library-outline-rounded" /> Kho ảnh
+				<Icon icon="material-symbols:photo-library-outline-rounded" /> Media
 			</button>
 			<button class:active={activeTab === "comments"} type="button" onclick={openCommentsTab}>
-				<Icon icon="material-symbols:forum-outline-rounded" /> Bình luận
+				<Icon icon="material-symbols:forum-outline-rounded" /> Comments
 				{#if comments.some((comment) => comment.status === "pending")}<span class="dot"></span>{/if}
 			</button>
 			<button class:active={activeTab === "analytics"} type="button" onclick={openAnalyticsTab}>
-				<Icon icon="material-symbols:monitoring-rounded" /> Thống kê
+				<Icon icon="material-symbols:monitoring-rounded" /> Analytics
 			</button>
 		</nav>
 
@@ -1079,14 +1084,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 			<div class="post-workspace">
 				<aside class="post-browser">
 					<div class="browser-tools">
-						<label class="search-field"><Icon icon="material-symbols:search-rounded" /><input aria-label="Tìm bài" placeholder="Tìm bài" bind:value={postSearch} /></label>
-						<button class="icon-button primary" type="button" title="Bài mới" aria-label="Tạo bài mới" onclick={newPost}><Icon icon="material-symbols:add-rounded" /></button>
+						<label class="search-field"><Icon icon="material-symbols:search-rounded" /><input aria-label="Search posts" placeholder="Search posts" bind:value={postSearch} /></label>
+						<button class="icon-button primary" type="button" title="New post" aria-label="Create a new post" onclick={newPost}><Icon icon="material-symbols:add-rounded" /></button>
 					</div>
 					<div class="post-list">
 						{#each visiblePosts() as post}
 							<button class:active={selectedSlug === post.slug} type="button" onclick={() => loadPost(post.slug)}>
 								<span>{post.title}</span>
-								<small>{post.published}{post.pinned ? " · Ghim" : post.latest ? " · Mới" : ""}</small>
+								<small>{post.published}{post.pinned ? " · Pinned" : post.latest ? " · New" : ""}</small>
 							</button>
 						{/each}
 					</div>
@@ -1094,27 +1099,27 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 				<form class="post-editor" onsubmit={(event) => { event.preventDefault(); void savePost(); }}>
 					<div class="form-grid">
-						<label class="wide-field">Tiêu đề<input bind:value={editor.title} oninput={() => { if (!selectedSlug) editor.slug = slugify(editor.title); }} required /></label>
+						<label class="wide-field">Title<input bind:value={editor.title} oninput={() => { if (!selectedSlug) editor.slug = slugify(editor.title); }} required /></label>
 						<label>Slug<input bind:value={editor.slug} disabled={Boolean(selectedSlug)} required /></label>
-						<label>Ngày đăng<input type="date" bind:value={editor.published} required /></label>
-						<label>Danh mục<input bind:value={editor.category} /></label>
-						<label>Thẻ<input bind:value={editor.tags} placeholder="nhật ký, cuộc sống" /></label>
-						<label class="wide-field">Mô tả<input bind:value={editor.description} /></label>
-						<label class="wide-field">Ảnh bìa<input bind:value={editor.image} /></label>
-						<label>Ngôn ngữ<input bind:value={editor.lang} /></label>
-						<label class="number-field">Thứ tự ghim<input type="number" min="0" bind:value={editor.pinOrder} /></label>
-						<label class="number-field">Thứ tự mới<input type="number" min="0" bind:value={editor.latestOrder} /></label>
+						<label>Published<input type="date" bind:value={editor.published} required /></label>
+						<label>Category<input bind:value={editor.category} /></label>
+						<label>Tags<input bind:value={editor.tags} placeholder="journal, life" /></label>
+						<label class="wide-field">Description<input bind:value={editor.description} /></label>
+						<label class="wide-field">Cover image<input bind:value={editor.image} /></label>
+						<label>Language<input bind:value={editor.lang} /></label>
+						<label class="number-field">Pin order<input type="number" min="0" bind:value={editor.pinOrder} /></label>
+						<label class="number-field">Latest order<input type="number" min="0" bind:value={editor.latestOrder} /></label>
 					</div>
 
 					<div class="toggle-row">
 						<label><input type="checkbox" bind:checked={editor.pinned} /> Ghim</label>
-						<label><input type="checkbox" bind:checked={editor.latest} /> Mới nhất</label>
-						<label><input type="checkbox" bind:checked={editor.draft} /> Bản nháp</label>
+						<label><input type="checkbox" bind:checked={editor.latest} /> Latest</label>
+						<label><input type="checkbox" bind:checked={editor.draft} /> Draft</label>
 					</div>
 
 					<div class="editor-toolbar">
-						<strong>Nội dung</strong>
-						<div class="editor-mode-switch" aria-label="Chế độ soạn bài">
+						<strong>Content</strong>
+						<div class="editor-mode-switch" aria-label="Editor mode">
 							<button
 								class:active={editorMode === "write"}
 								type="button"
@@ -1130,36 +1135,36 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 								<Icon icon="material-symbols:visibility-outline-rounded" /> Preview
 							</button>
 						</div>
-						<button type="button" onclick={openLibrarySection} title="Mở ảnh bài viết">
-							<Icon icon="material-symbols:photo-library-outline-rounded" /> Ảnh bài viết
+						<button type="button" onclick={openLibrarySection} title="Open post images">
+							<Icon icon="material-symbols:photo-library-outline-rounded" /> Post images
 						</button>
-						<button type="button" disabled={uploading} onclick={() => fileInput?.click()} title="Tải và chèn ảnh">
-							<Icon icon="material-symbols:add-photo-alternate-outline-rounded" /> {uploading ? "Đang tải" : "Ảnh"}
+						<button type="button" disabled={uploading} onclick={() => fileInput?.click()} title="Upload and insert an image">
+							<Icon icon="material-symbols:add-photo-alternate-outline-rounded" /> {uploading ? "Uploading" : "Image"}
 						</button>
 						<input class="file-input" bind:this={fileInput} type="file" accept="image/*" onchange={uploadImage} />
 					</div>
 					{#if editorMode === "write"}
-						<textarea class="body-editor" bind:this={bodyTextarea} bind:value={editor.body} aria-label="Nội dung Markdown"></textarea>
+						<textarea class="body-editor" bind:this={bodyTextarea} bind:value={editor.body} aria-label="Markdown content"></textarea>
 					{:else}
-						<article class="body-preview markdown-content" aria-label="Preview bài viết">
+						<article class="body-preview markdown-content" aria-label="Post preview">
 							{@html previewHtml()}
 						</article>
 					{/if}
 
 					<div class="editor-actions">
-						{#if selectedSlug}<a href={`/posts/${selectedSlug}/`} target="_blank" rel="noopener"><Icon icon="material-symbols:open-in-new-rounded" /> Xem bài</a>{/if}
-						<button class="save-button" type="submit" disabled={busy}><Icon icon="material-symbols:save-outline-rounded" /> {busy ? "Đang lưu" : "Lưu bài"}</button>
+						{#if selectedSlug}<a href={`/posts/${selectedSlug}/`} target="_blank" rel="noopener"><Icon icon="material-symbols:open-in-new-rounded" /> View post</a>{/if}
+						<button class="save-button" type="submit" disabled={busy}><Icon icon="material-symbols:save-outline-rounded" /> {busy ? "Saving" : "Save post"}</button>
 					</div>
 				</form>
 			</div>
 		{:else if activeTab === "media"}
 			<section class="media-library">
-				<div class="media-section-switch" aria-label="Loại kho ảnh">
+				<div class="media-section-switch" aria-label="Media section">
 					<button class:active={mediaSection === "gallery"} type="button" onclick={openGallerySection}>
-						<Icon icon="material-symbols:collections-bookmark-outline-rounded" /> Kho ảnh công khai
+						<Icon icon="material-symbols:collections-bookmark-outline-rounded" /> Public gallery
 					</button>
 					<button class:active={mediaSection === "library"} type="button" onclick={openLibrarySection}>
-						<Icon icon="material-symbols:perm-media-outline-rounded" /> Ảnh bài viết
+						<Icon icon="material-symbols:perm-media-outline-rounded" /> Post images
 					</button>
 				</div>
 
@@ -1167,53 +1172,53 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 					<div class="gallery-admin-tools">
 						<label class="search-field gallery-admin-search">
 							<Icon icon="material-symbols:search-rounded" />
-							<input aria-label="Tìm trong Kho ảnh" placeholder="Tìm tên, mô tả hoặc album" bind:value={gallerySearch} />
+							<input aria-label="Search the gallery" placeholder="Search title, description, or collection" bind:value={gallerySearch} />
 						</label>
-						<label><span>Tiêu đề ảnh mới</span><input placeholder="Để trống sẽ lấy tên tệp" bind:value={galleryTitle} /></label>
+						<label><span>New photo title</span><input placeholder="Leave blank to use the filename" bind:value={galleryTitle} /></label>
 						<label>
 							<span>Album</span>
-							<input list="gallery-album-options" placeholder="Ví dụ: Đà Lạt 2026" bind:value={galleryAlbum} />
+							<input list="gallery-album-options" placeholder="For example: Da Lat 2026" bind:value={galleryAlbum} />
 							<datalist id="gallery-album-options">{#each galleryAlbums as album}<option value={album}></option>{/each}</datalist>
 						</label>
-						<label><span>Ngày chụp</span><input type="date" bind:value={galleryDate} /></label>
-						<label><span>Thứ tự</span><input type="number" min="0" step="1" bind:value={galleryOrder} title="Để 0 để tự xếp cuối album" /></label>
-						<label class="gallery-description-field"><span>Mô tả</span><input placeholder="Hiện dưới ảnh và trong lightbox" bind:value={galleryDescription} /></label>
+						<label><span>Capture date</span><input type="date" bind:value={galleryDate} /></label>
+						<label><span>Order</span><input type="number" min="0" step="1" bind:value={galleryOrder} title="Use 0 to place it at the end of the collection" /></label>
+						<label class="gallery-description-field"><span>Description</span><input placeholder="Shown below the photo and in the lightbox" bind:value={galleryDescription} /></label>
 						<button class="media-upload-button" type="button" disabled={uploading} onclick={() => galleryFileInput?.click()}>
-							<Icon icon="material-symbols:upload-rounded" /> {uploading ? "Đang tối ưu" : "Chọn ảnh"}
+							<Icon icon="material-symbols:upload-rounded" /> {uploading ? "Optimizing" : "Choose photo"}
 						</button>
 						<input class="file-input" bind:this={galleryFileInput} type="file" accept="image/*" onchange={uploadGalleryPhoto} />
 					</div>
 
 					{#if galleryLoading}
-						<div class="empty-state"><Icon icon="material-symbols:progress-activity" /> Đang tải Kho ảnh...</div>
+						<div class="empty-state"><Icon icon="material-symbols:progress-activity" /> Loading gallery...</div>
 					{:else if !galleryLoaded}
 						<div class="empty-state gallery-load-error">
 							<Icon icon="material-symbols:cloud-off-outline-rounded" />
-							<span>Chưa tải được dữ liệu Kho ảnh.</span>
-							<button type="button" onclick={loadGallery}><Icon icon="material-symbols:refresh-rounded" /> Thử lại</button>
+							<span>Gallery data could not be loaded.</span>
+							<button type="button" onclick={loadGallery}><Icon icon="material-symbols:refresh-rounded" /> Try again</button>
 						</div>
 					{:else if visibleGalleryItems().length === 0}
-						<div class="empty-state"><Icon icon="material-symbols:collections-bookmark-outline-rounded" /> Chưa có ảnh phù hợp.</div>
+						<div class="empty-state"><Icon icon="material-symbols:collections-bookmark-outline-rounded" /> No matching photos found.</div>
 					{:else}
 						<div class="gallery-admin-grid">
 							{#each visibleGalleryItems() as item (item.filename)}
 								<article class="gallery-admin-card">
 									<img src={item.thumbnailSrc} alt={item.title} loading="lazy" width={item.width} height={item.height} />
 									<div class="gallery-admin-card-body">
-										<label>Tiêu đề<input bind:value={item.title} /></label>
+										<label>Title<input bind:value={item.title} /></label>
 										<label>Album<input list="gallery-album-options" bind:value={item.album} /></label>
-										<label>Ngày chụp<input type="date" bind:value={item.date} /></label>
-										<label>Mô tả<textarea rows="2" bind:value={item.description} placeholder="Mô tả khoảnh khắc này"></textarea></label>
+										<label>Capture date<input type="date" bind:value={item.date} /></label>
+										<label>Description<textarea rows="2" bind:value={item.description} placeholder="Describe this moment"></textarea></label>
 										<div class="gallery-order-row">
-											<label>Thứ tự<input type="number" min="0" step="1" bind:value={item.order} /></label>
-											<button class="icon-button" type="button" onclick={() => moveGalleryPhoto(item, -1)} disabled={busy} title="Đưa lên trước" aria-label="Đưa ảnh lên trước"><Icon icon="material-symbols:arrow-upward-rounded" /></button>
-											<button class="icon-button" type="button" onclick={() => moveGalleryPhoto(item, 1)} disabled={busy} title="Đưa xuống sau" aria-label="Đưa ảnh xuống sau"><Icon icon="material-symbols:arrow-downward-rounded" /></button>
+											<label>Order<input type="number" min="0" step="1" bind:value={item.order} /></label>
+											<button class="icon-button" type="button" onclick={() => moveGalleryPhoto(item, -1)} disabled={busy} title="Move earlier" aria-label="Move photo earlier"><Icon icon="material-symbols:arrow-upward-rounded" /></button>
+											<button class="icon-button" type="button" onclick={() => moveGalleryPhoto(item, 1)} disabled={busy} title="Move later" aria-label="Move photo later"><Icon icon="material-symbols:arrow-downward-rounded" /></button>
 										</div>
 										<small>{item.width}×{item.height} · {item.filename}</small>
 										<div class="media-actions">
 											<a href={item.src} target="_blank" rel="noopener"><Icon icon="material-symbols:open-in-new-rounded" /> Xem</a>
-											<button class="icon-button" type="button" onclick={() => saveGalleryPhoto(item)} disabled={busy} title="Lưu thông tin ảnh" aria-label="Lưu thông tin ảnh"><Icon icon="material-symbols:save-outline-rounded" /></button>
-											<button class="icon-button danger" type="button" onclick={() => deleteGalleryPhoto(item)} disabled={busy} title="Xóa khỏi Kho ảnh" aria-label="Xóa khỏi Kho ảnh"><Icon icon="material-symbols:delete-outline-rounded" /></button>
+											<button class="icon-button" type="button" onclick={() => saveGalleryPhoto(item)} disabled={busy} title="Save photo details" aria-label="Save photo details"><Icon icon="material-symbols:save-outline-rounded" /></button>
+											<button class="icon-button danger" type="button" onclick={() => deleteGalleryPhoto(item)} disabled={busy} title="Remove from gallery" aria-label="Remove from gallery"><Icon icon="material-symbols:delete-outline-rounded" /></button>
 										</div>
 									</div>
 								</article>
@@ -1222,29 +1227,29 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 					{/if}
 				{:else}
 					<div class="media-tools">
-						<label class="search-field"><Icon icon="material-symbols:search-rounded" /><input aria-label="Tìm ảnh bài viết" placeholder="Tìm theo tên hoặc mô tả" bind:value={mediaSearch} /></label>
-						<label class="media-alt-field"><span>Mô tả ảnh mới</span><input placeholder="Nội dung ảnh dành cho người đọc và SEO" bind:value={mediaAlt} /></label>
-						<button class="media-upload-button" type="button" disabled={uploading} onclick={() => mediaFileInput?.click()}><Icon icon="material-symbols:upload-rounded" /> {uploading ? "Đang tối ưu" : "Tải ảnh"}</button>
+						<label class="search-field"><Icon icon="material-symbols:search-rounded" /><input aria-label="Search post images" placeholder="Search by name or description" bind:value={mediaSearch} /></label>
+						<label class="media-alt-field"><span>New image description</span><input placeholder="Accessible description for readers and SEO" bind:value={mediaAlt} /></label>
+						<button class="media-upload-button" type="button" disabled={uploading} onclick={() => mediaFileInput?.click()}><Icon icon="material-symbols:upload-rounded" /> {uploading ? "Optimizing" : "Upload image"}</button>
 						<input class="file-input" bind:this={mediaFileInput} type="file" accept="image/*" onchange={uploadMedia} />
 					</div>
 					{#if !mediaLoaded}
-						<div class="empty-state"><Icon icon="material-symbols:progress-activity" /> Đang tải ảnh bài viết...</div>
+						<div class="empty-state"><Icon icon="material-symbols:progress-activity" /> Loading post images...</div>
 					{:else if visibleMedia().length === 0}
-						<div class="empty-state"><Icon icon="material-symbols:perm-media-outline-rounded" /> Chưa có ảnh phù hợp.</div>
+						<div class="empty-state"><Icon icon="material-symbols:perm-media-outline-rounded" /> No matching images found.</div>
 					{:else}
 						<div class="media-grid">
 							{#each visibleMedia() as item (item.id)}
 								<article class="media-card">
 									<picture>{#if item.avif}<source srcset={item.avif} type="image/avif" />{/if}<img src={item.webp} alt={item.alt || item.name} loading="lazy" width={item.width} height={item.height} /></picture>
 									<div class="media-card-body">
-										<label>Tên tệp<input bind:value={item.name} /></label>
-										<label>Mô tả<input bind:value={item.alt} placeholder="Mô tả nội dung ảnh" /></label>
+										<label>Filename<input bind:value={item.name} /></label>
+										<label>Description<input bind:value={item.alt} placeholder="Describe the image content" /></label>
 										<small>{item.width}×{item.height} · {formatBytes(item.size)}</small>
 										<div class="media-actions">
-											<button type="button" onclick={() => reuseMedia(item)} title="Chèn vào bài đang mở"><Icon icon="material-symbols:add-photo-alternate-outline-rounded" /> Chèn</button>
-											<button class="icon-button" type="button" onclick={() => copyMedia(item)} title="Sao chép mã ảnh" aria-label="Sao chép mã ảnh"><Icon icon="material-symbols:content-copy-outline-rounded" /></button>
-											<button class="icon-button" type="button" onclick={() => saveMedia(item)} disabled={busy} title="Lưu tên và mô tả" aria-label="Lưu tên và mô tả"><Icon icon="material-symbols:save-outline-rounded" /></button>
-											<button class="icon-button danger" type="button" onclick={() => deleteMedia(item)} disabled={busy} title="Xóa ảnh" aria-label="Xóa ảnh"><Icon icon="material-symbols:delete-outline-rounded" /></button>
+											<button type="button" onclick={() => reuseMedia(item)} title="Insert into the open post"><Icon icon="material-symbols:add-photo-alternate-outline-rounded" /> Insert</button>
+											<button class="icon-button" type="button" onclick={() => copyMedia(item)} title="Copy image markup" aria-label="Copy image markup"><Icon icon="material-symbols:content-copy-outline-rounded" /></button>
+											<button class="icon-button" type="button" onclick={() => saveMedia(item)} disabled={busy} title="Save name and description" aria-label="Save name and description"><Icon icon="material-symbols:save-outline-rounded" /></button>
+											<button class="icon-button danger" type="button" onclick={() => deleteMedia(item)} disabled={busy} title="Delete image" aria-label="Delete image"><Icon icon="material-symbols:delete-outline-rounded" /></button>
 										</div>
 									</div>
 								</article>
@@ -1257,17 +1262,17 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 			<AdminAnalytics accessToken={session?.access_token ?? ""} />
 		{:else}
 			<div class="comment-tools">
-				<select aria-label="Trạng thái" bind:value={commentStatus}>
-					<option value="pending">Chờ duyệt</option>
-					<option value="approved">Đã duyệt</option>
-					<option value="all">Tất cả</option>
+				<select aria-label="Status" bind:value={commentStatus}>
+					<option value="pending">Pending</option>
+					<option value="approved">Approved</option>
+					<option value="all">All</option>
 				</select>
-				<select aria-label="Bài viết" bind:value={commentSlug}>
-					<option value="all">Tất cả bài viết</option>
+				<select aria-label="Post" bind:value={commentSlug}>
+					<option value="all">All posts</option>
 					{#each commentSlugs() as slug}<option value={slug}>{slug}</option>{/each}
 				</select>
-				<button class="icon-button" type="button" title="Tải lại" aria-label="Tải lại bình luận" onclick={loadComments}><Icon icon="material-symbols:refresh-rounded" /></button>
-				<button type="button" disabled={busy} onclick={testCommentEmail}><Icon icon="material-symbols:mark-email-read-outline-rounded" /> Gửi email thử</button>
+				<button class="icon-button" type="button" title="Refresh" aria-label="Refresh comments" onclick={loadComments}><Icon icon="material-symbols:refresh-rounded" /></button>
+				<button type="button" disabled={busy} onclick={testCommentEmail}><Icon icon="material-symbols:mark-email-read-outline-rounded" /> Send test email</button>
 			</div>
 			<div class="moderation-list">
 				{#each visibleComments() as comment}
@@ -1276,7 +1281,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 							<strong>{comment.slug}</strong>
 							<span>{commentAuthorName(comment)}</span>
 							{#if comment.parent_id}<span class="comment-badge">Reply</span>{/if}
-							{#if comment.is_author}<span class="comment-badge author">Tác giả</span>{/if}
+							{#if comment.is_author}<span class="comment-badge author">Author</span>{/if}
 							<span>{formatDate(comment.created_at)}</span>
 						</div>
 						<p>{comment.body}</p>
@@ -1289,9 +1294,9 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 								}}
 							>
 								<textarea
-									aria-label="Trả lời bình luận"
+									aria-label="Reply to comment"
 									bind:value={adminReplyBody}
-									placeholder="Viết trả lời với tên Nguyễn Thanh Tùng..."
+									placeholder="Reply as Nguyễn Thanh Tùng..."
 								></textarea>
 								<div class="admin-reply-actions">
 									<button
@@ -1301,22 +1306,22 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 											adminReplyBody = "";
 										}}
 									>
-										Hủy
+										Cancel
 									</button>
 									<button type="submit" disabled={busy}>
-										<Icon icon="material-symbols:reply-rounded" /> Gửi trả lời
+										<Icon icon="material-symbols:reply-rounded" /> Submit reply
 									</button>
 								</div>
 							</form>
 						{/if}
 						<div class="moderation-actions">
-							{#if comment.status === "approved" && !comment.is_author}<button type="button" onclick={() => { replyingCommentId = replyingCommentId === comment.id ? null : comment.id; adminReplyBody = ""; }} disabled={busy}><Icon icon="material-symbols:reply-rounded" /> Trả lời</button>{/if}
-							{#if comment.status === "pending"}<button type="button" onclick={() => approveComment(comment)} disabled={busy}><Icon icon="material-symbols:check-rounded" /> Duyệt</button>{/if}
-							<button class="danger" type="button" onclick={() => deleteComment(comment)} disabled={busy} title="Xóa bình luận"><Icon icon="material-symbols:delete-outline-rounded" /></button>
+							{#if comment.status === "approved" && !comment.is_author}<button type="button" onclick={() => { replyingCommentId = replyingCommentId === comment.id ? null : comment.id; adminReplyBody = ""; }} disabled={busy}><Icon icon="material-symbols:reply-rounded" /> Reply</button>{/if}
+							{#if comment.status === "pending"}<button type="button" onclick={() => approveComment(comment)} disabled={busy}><Icon icon="material-symbols:check-rounded" /> Approve</button>{/if}
+							<button class="danger" type="button" onclick={() => deleteComment(comment)} disabled={busy} title="Delete comment"><Icon icon="material-symbols:delete-outline-rounded" /></button>
 						</div>
 					</article>
 				{:else}
-					<div class="empty-state">Không có bình luận phù hợp.</div>
+					<div class="empty-state">No matching comments found.</div>
 				{/each}
 			</div>
 		{/if}

@@ -50,7 +50,7 @@ let {
 const configHue = siteConfig.themeColor.hue;
 const isHomePage = Astro.url.pathname === "/";
 const defaultDescription =
-	"Góc lưu giữ bài viết, ảnh chụp và những ghi chú của Nguyễn Thanh Tùng.";
+	"A personal collection of writing, photographs, and notes by Nguyễn Thanh Tùng.";
 
 let pageTitle: string;
 if (isHomePage) {
@@ -75,9 +75,9 @@ defaultOgImage.searchParams.set("subtitle", metaDescription);
 defaultOgImage.searchParams.set(
 	"category",
 	isHomePage
-		? "Trang cá nhân"
+		? "Personal journal"
 		: setOGTypeArticle
-			? "Bài viết"
+			? "Post"
 			: siteConfig.title,
 );
 const ogImageUrl = ogImage
@@ -195,7 +195,7 @@ const ogLocale = siteLang.replace("-", "_");
 
 	</head>
 	<body class="min-h-screen transition">
-		<a class="skip-link" href="#swup-container">Chuyển đến nội dung chính</a>
+		<a class="skip-link" href="#swup-container">Skip to main content</a>
 		<ConfigCarrier></ConfigCarrier>
 		<template id="photoswipe-home-icon">
 			<Icon name="fa6-solid:house" aria-hidden="true" />
@@ -400,7 +400,7 @@ function initScrollableKatex() {
 		container.className = 'katex-display-container';
 		container.setAttribute('role', 'region');
 		container.setAttribute('tabindex', '0');
-		container.setAttribute('aria-label', 'Công thức có thể cuộn ngang');
+		container.setAttribute('aria-label', 'Horizontally scrollable formula');
 
 		element.parentNode.insertBefore(container, element);
 		container.appendChild(element);
@@ -501,10 +501,10 @@ function createPhotoSwipe(gallery: string, children: string) {
 		wheelToZoom: true,
 		arrowPrev: true,
 		arrowNext: true,
-		arrowPrevTitle: "Ảnh trước",
-		arrowNextTitle: "Ảnh tiếp theo",
-		closeTitle: "Đóng",
-		zoomTitle: "Thu phóng",
+		arrowPrevTitle: "Previous image",
+		arrowNextTitle: "Next image",
+		closeTitle: "Close",
+		zoomTitle: "Zoom",
 		arrowKeys: true,
 		escKey: true,
 		allowPanToNext: true,
@@ -547,14 +547,14 @@ function createPhotoSwipe(gallery: string, children: string) {
 			const homeLink = document.createElement("a")
 			homeLink.className = "pswp__button pswp__button--home"
 			homeLink.href = "/"
-			homeLink.title = "Về trang chủ"
-			homeLink.setAttribute("aria-label", "Về trang chủ")
+			homeLink.title = "Back to home"
+			homeLink.setAttribute("aria-label", "Back to home")
 
 			const iconTemplate = document.querySelector<HTMLTemplateElement>("#photoswipe-home-icon")
 			if (iconTemplate) homeLink.append(iconTemplate.content.cloneNode(true))
 
 			const homeLabel = document.createElement("span")
-			homeLabel.textContent = "Trang chủ"
+			homeLabel.textContent = "Home"
 			homeLink.append(homeLabel)
 			homeLink.addEventListener("click", () => pswp.close())
 

@@ -18,14 +18,14 @@ const posts = page.data.map(
 
 		if (isHome && index === 0) {
 			sectionLabel = entry.data.pinned
-				? "Nổi bật"
+				? "Featured"
 				: entry.data.latest
-					? "Mới nhất"
-					: "Bài viết mới";
+					? "Latest"
+					: "New posts";
 		} else if (isHome && previous?.data.pinned && !entry.data.pinned) {
-			sectionLabel = entry.data.latest ? "Mới nhất" : "Bài viết mới";
+			sectionLabel = entry.data.latest ? "Latest" : "New posts";
 		} else if (isHome && previous?.data.latest && !entry.data.latest) {
-			sectionLabel = "Gần đây";
+			sectionLabel = "Recent";
 		}
 
 		return { entry, index, sectionLabel };
@@ -33,7 +33,7 @@ const posts = page.data.map(
 );
 ---
 
-{!isHome && <h1 class="sr-only">Bài viết của Nguyễn Thanh Tùng</h1>}
+{!isHome && <h1 class="sr-only">Posts by Nguyễn Thanh Tùng</h1>}
 <div class="transition flex flex-col rounded-[var(--radius-large)] bg-[var(--card-bg)] py-1 md:py-0 md:bg-transparent md:gap-4 mb-4">
     {posts.map(({entry, index, sectionLabel}) => (
         <>

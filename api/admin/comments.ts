@@ -40,7 +40,7 @@ export default async function handler(
 ) {
 	try {
 		if (request.method !== "POST") {
-			response.status(405).json({ error: "Phương thức không được hỗ trợ." });
+			response.status(405).json({ error: "Method not allowed." });
 			return;
 		}
 
@@ -56,7 +56,7 @@ export default async function handler(
 			} catch (error) {
 				console.error("Comment test email error", error);
 				throw new AdminRequestError(
-					"Email thử chưa gửi được. Kiểm tra RESEND_API_KEY và COMMENT_NOTIFICATION_FROM.",
+					"The test email could not be sent. Check RESEND_API_KEY and COMMENT_NOTIFICATION_FROM.",
 					502,
 				);
 			}
@@ -66,7 +66,7 @@ export default async function handler(
 
 		const commentId = String(body.comment_id ?? body.commentId ?? "").trim();
 		if (!isUuid(commentId)) {
-			throw new AdminRequestError("Bình luận không hợp lệ.");
+			throw new AdminRequestError("Invalid comment.");
 		}
 
 		const supabase = createServiceClient();
@@ -84,7 +84,7 @@ export default async function handler(
 				.single();
 			if (error || !data) {
 				throw new AdminRequestError(
-					"Bình luận đã được xử lý hoặc không còn tồn tại.",
+					"The comment has already been processed or no longer exists.",
 					409,
 				);
 			}
@@ -104,7 +104,9 @@ export default async function handler(
 		if (action === "reply") {
 			const content = String(body.body ?? "").trim();
 			if (!content || content.length > 600) {
-				throw new AdminRequestError("Trả lời phải có từ 1 đến 600 ký tự.");
+				throw new AdminRequestError(
+					"Replies must contain between 1 and 600 characters.",
+				);
 			}
 
 			const { data: target, error: targetError } = await supabase
@@ -115,7 +117,7 @@ export default async function handler(
 				.single();
 			if (targetError || !target) {
 				throw new AdminRequestError(
-					"Bình luận cần trả lời không còn tồn tại.",
+					"The comment you are replying to no longer exists.",
 					404,
 				);
 			}
@@ -136,7 +138,7 @@ export default async function handler(
 				.select(commentSelect)
 				.single();
 			if (error || !data) {
-				throw new AdminRequestError("Chưa đăng được trả lời.", 502);
+				throw new AdminRequestError("The reply could not be published.", 502);
 			}
 
 			const reply = data as BlogComment;
@@ -149,7 +151,7 @@ export default async function handler(
 			return;
 		}
 
-		throw new AdminRequestError("Thao tác không hợp lệ.");
+		throw new AdminRequestError("Invalid action.");
 	} catch (error) {
 		const result = normaliseAdminError(error);
 		response.status(result.status).json({ error: result.message });
@@ -185,7 +187,7 @@ async function notifySubscriber(
 			replyBody: reply.body,
 			replierName: reply.is_author
 				? "Nguyễn Thanh Tùng"
-				: reply.author_name || "Ẩn danh",
+				: reply.author_name || "Anonymous",
 		});
 		return { sent: true, reason: "sent" as const };
 	} catch (error) {
@@ -201,7 +203,7 @@ function createServiceClient() {
 		env("SUPABASE_SECRET_KEY") || env("SUPABASE_SERVICE_ROLE_KEY");
 	if (!supabaseUrl || !serviceKey) {
 		throw new AdminRequestError(
-			"Supabase chưa được cấu hình trên server.",
+			"Supabase has not been configured on the server.",
 			503,
 		);
 	}

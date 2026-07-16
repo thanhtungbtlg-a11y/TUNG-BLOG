@@ -85,11 +85,11 @@ async function loadComments() {
 			comments = legacyComments.map((comment) => ({
 				...comment,
 				parent_id: null,
-				author_name: "Ẩn danh",
+				author_name: "Anonymous",
 				is_author: false,
 			}));
 		} catch {
-			error = "Không tải được bình luận.";
+			error = "Comments could not be loaded.";
 		}
 	} finally {
 		await loadReactionCounts();
@@ -131,13 +131,13 @@ function validateComment(parentId?: string) {
 	const trimmed = source.trim();
 	if (!trimmed) {
 		error = isReply
-			? "Nhập nội dung trả lời trước đã."
-			: "Nhập nội dung bình luận trước đã.";
+			? "Write a reply before continuing."
+			: "Write a comment before continuing.";
 		return false;
 	}
 
 	if (trimmed.length > maxLength) {
-		error = `Bình luận tối đa ${maxLength} ký tự.`;
+		error = `Comments are limited to ${maxLength} characters.`;
 		return false;
 	}
 	return true;
@@ -146,7 +146,7 @@ function validateComment(parentId?: string) {
 async function submitComment(useIdentity: boolean) {
 	const email = useIdentity ? identityEmail.trim().toLowerCase() : "";
 	if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(email)) {
-		identityError = "Địa chỉ email chưa đúng.";
+		identityError = "Please enter a valid email address.";
 		return;
 	}
 
@@ -193,25 +193,25 @@ async function createComment(
 			throw new Error(
 				apiMessage ??
 					(response.status >= 500
-						? "Hệ thống bình luận đang gặp sự cố. Vui lòng thử lại sau."
-						: "Chưa gửi được bình luận. Vui lòng thử lại."),
+						? "The comment system is temporarily unavailable. Please try again later."
+						: "Your comment could not be submitted. Please try again."),
 			);
 		}
 		if (isReply) {
 			replyBody = "";
 			replyingTo = null;
-			notice = "Trả lời đã gửi và đang chờ duyệt.";
+			notice = "Your reply was submitted and is awaiting approval.";
 		} else {
 			body = "";
 			website = "";
-			notice = "Bình luận đã gửi và đang chờ duyệt.";
+			notice = "Your comment was submitted and is awaiting approval.";
 		}
 		return true;
 	} catch (submitError) {
 		error =
 			submitError instanceof Error
 				? submitError.message
-				: "Chưa gửi được bình luận. Thử lại sau nhé.";
+				: "Your comment could not be submitted. Please try again later.";
 		return false;
 	} finally {
 		if (isReply) submittingReplyFor = null;
@@ -294,13 +294,13 @@ function threadedComments(): ThreadedComment[] {
 function authorName(comment: BlogComment) {
 	return comment.is_author
 		? "Nguyễn Thanh Tùng"
-		: comment.author_name || "Ẩn danh";
+		: comment.author_name || "Anonymous";
 }
 
 function formatDate(value: string) {
 	const date = new Date(value);
 	if (Number.isNaN(date.getTime())) return "";
-	return date.toLocaleString("vi-VN", {
+	return date.toLocaleString("en-GB", {
 		dateStyle: "medium",
 		timeStyle: "short",
 	});
@@ -317,10 +317,10 @@ function resetMessages() {
 <section id="comments" class="comment-panel card-base onload-animation" data-anonymous-comments>
 	<header class="comment-heading">
 		<div>
-			<h2>Bình luận ẩn danh</h2>
-			<p>Ẩn danh, chờ duyệt</p>
+			<h2>Anonymous comments</h2>
+			<p>Anonymous and moderated</p>
 		</div>
-		<div class="comment-count" aria-label={`${comments.length} bình luận`}>
+		<div class="comment-count" aria-label={`${comments.length} ${comments.length === 1 ? "comment" : "comments"}`}>
 			<Icon icon="material-symbols:chat-bubble-outline-rounded" />
 			<span>{comments.length}</span>
 		</div>
@@ -329,7 +329,7 @@ function resetMessages() {
 	{#if !supabaseConfigured}
 		<div class="comment-empty">
 			<Icon icon="material-symbols:settings-outline-rounded" />
-			<span>Bình luận đang chờ cấu hình Supabase.</span>
+			<span>Comments are awaiting Supabase configuration.</span>
 		</div>
 	{:else}
 		<div class="comment-form">
@@ -339,10 +339,10 @@ function resetMessages() {
 			</label>
 			<textarea
 				data-comment-input
-				aria-label="Bình luận ẩn danh"
+				aria-label="Anonymous comment"
 				bind:value={body}
 				maxlength={maxLength}
-				placeholder="Viết bình luận ẩn danh..."
+				placeholder="Write an anonymous comment..."
 				oninput={resetMessages}
 			></textarea>
 			<div class="comment-actions">
@@ -351,7 +351,7 @@ function resetMessages() {
 				</span>
 				<button type="button" disabled={submitting} onclick={() => requestComment()}>
 					<Icon icon="material-symbols:send-rounded" />
-					{submitting ? "Đang gửi..." : "Gửi bình luận"}
+					{submitting ? "Submitting..." : "Submit comment"}
 				</button>
 			</div>
 			{#if error}<div class="message error" role="alert">{error}</div>{/if}
@@ -362,12 +362,12 @@ function resetMessages() {
 			{#if loading}
 				<div class="comment-empty">
 					<Icon icon="material-symbols:hourglass-empty-rounded" />
-					<span>Đang tải bình luận...</span>
+					<span>Loading comments...</span>
 				</div>
 			{:else if comments.length === 0}
 				<div class="comment-empty">
 					<Icon icon="material-symbols:forum-outline-rounded" />
-					<span>Chưa có bình luận nào.</span>
+					<span>No comments yet.</span>
 				</div>
 			{:else}
 				{#each threadedComments() as comment (comment.id)}
@@ -383,7 +383,7 @@ function resetMessages() {
 							<div class="comment-content">
 								<div class="comment-meta">
 									<strong>{authorName(comment)}</strong>
-									{#if comment.is_author}<span class="author-badge">Tác giả</span>{/if}
+									{#if comment.is_author}<span class="author-badge">Author</span>{/if}
 									<span>{formatDate(comment.created_at)}</span>
 								</div>
 								<p>{comment.body}</p>
@@ -402,7 +402,7 @@ function resetMessages() {
 										}}
 									>
 										<Icon icon="material-symbols:reply-rounded" />
-										Trả lời
+										Reply
 									</button>
 								</div>
 							</div>
@@ -411,10 +411,10 @@ function resetMessages() {
 						{#if replyingTo === comment.id}
 							<div class="reply-form">
 								<textarea
-									aria-label="Trả lời bình luận"
+									aria-label="Reply to comment"
 									bind:value={replyBody}
 									maxlength={maxLength}
-									placeholder={`Trả lời ${authorName(comment)}...`}
+									placeholder={`Reply to ${authorName(comment)}...`}
 									oninput={resetMessages}
 								></textarea>
 								<div class="comment-actions">
@@ -430,7 +430,7 @@ function resetMessages() {
 												replyBody = "";
 											}}
 										>
-											Hủy
+											Cancel
 										</button>
 										<button
 											type="button"
@@ -438,7 +438,7 @@ function resetMessages() {
 											onclick={() => requestComment(comment.id)}
 										>
 											<Icon icon="material-symbols:send-rounded" />
-											{submittingReplyFor === comment.id ? "Đang gửi..." : "Gửi trả lời"}
+											{submittingReplyFor === comment.id ? "Submitting..." : "Submit reply"}
 										</button>
 									</div>
 								</div>
@@ -456,7 +456,7 @@ function resetMessages() {
 		<button
 			class="identity-backdrop"
 			type="button"
-			aria-label="Đóng hộp thoại"
+			aria-label="Close dialog"
 			onclick={closeIdentityDialog}
 		></button>
 		<div
@@ -471,15 +471,15 @@ function resetMessages() {
 					<Icon icon="material-symbols:mark-email-unread-outline-rounded" />
 				</span>
 				<div>
-					<h2 id="identity-dialog-title">Bạn muốn để lại thông tin?</h2>
+					<h2 id="identity-dialog-title">Would you like to add your details?</h2>
 					<p id="identity-dialog-description">
-						Hoàn toàn không bắt buộc. Bạn vẫn có thể gửi bình luận ẩn danh.
+						This is completely optional. You can still comment anonymously.
 					</p>
 				</div>
 				<button
 					class="identity-close"
 					type="button"
-					aria-label="Đóng"
+					aria-label="Close"
 					onclick={closeIdentityDialog}
 				>
 					<Icon icon="material-symbols:close-rounded" />
@@ -488,23 +488,23 @@ function resetMessages() {
 
 			<div class="identity-fields">
 				<label>
-					<span>Họ tên <small>Không bắt buộc</small></span>
+					<span>Name <small>Optional</small></span>
 					<input
 						type="text"
 						bind:value={identityName}
 						maxlength="60"
 						autocomplete="name"
-						placeholder="Tên sẽ hiển thị cùng bình luận"
+						placeholder="Displayed alongside your comment"
 					/>
 				</label>
 				<label>
-					<span>Email <small>Không bắt buộc</small></span>
+					<span>Email <small>Optional</small></span>
 					<input
 						type="email"
 						bind:value={identityEmail}
 						maxlength="254"
 						autocomplete="email"
-						placeholder="Nhận mail khi có người phản hồi"
+						placeholder="Receive an email when someone replies"
 						oninput={() => (identityError = "")}
 					/>
 				</label>
@@ -512,7 +512,7 @@ function resetMessages() {
 
 			<div class="identity-privacy">
 				<Icon icon="material-symbols:lock-outline-rounded" />
-				<span>Email chỉ dùng để báo phản hồi và không hiển thị công khai.</span>
+				<span>Your email is used only for reply notifications and is never displayed publicly.</span>
 			</div>
 			{#if identityError}<p class="identity-error" role="alert">{identityError}</p>{/if}
 
@@ -524,7 +524,7 @@ function resetMessages() {
 					onclick={() => submitComment(false)}
 				>
 					<Icon icon="material-symbols:person-off-outline-rounded" />
-					Gửi ẩn danh
+					Submit anonymously
 				</button>
 				<button
 					type="button"
@@ -532,7 +532,7 @@ function resetMessages() {
 					onclick={() => submitComment(true)}
 				>
 					<Icon icon="material-symbols:send-rounded" />
-					{pendingParentId ? "Gửi trả lời" : "Gửi bình luận"}
+					{pendingParentId ? "Submit reply" : "Submit comment"}
 				</button>
 			</div>
 		</div>

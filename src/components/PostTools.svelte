@@ -37,9 +37,9 @@ const widthOptions: Array<{
 	content: string;
 	shell: string;
 }> = [
-	{ id: "narrow", label: "Hẹp", content: "40rem", shell: "44rem" },
-	{ id: "normal", label: "Vừa", content: "46rem", shell: "50rem" },
-	{ id: "wide", label: "Rộng", content: "54rem", shell: "58rem" },
+	{ id: "narrow", label: "Narrow", content: "40rem", shell: "44rem" },
+	{ id: "normal", label: "Standard", content: "46rem", shell: "50rem" },
+	{ id: "wide", label: "Wide", content: "54rem", shell: "58rem" },
 ];
 
 let saved = $state(false);
@@ -174,27 +174,27 @@ function writeBookmarks(posts: SavedPost[]) {
 }
 </script>
 
-<div class="post-tools" aria-label="Công cụ đọc bài viết">
+<div class="post-tools" aria-label="Reading tools">
 	<button
 		type="button"
 		class:active={saved}
 		aria-pressed={saved}
-		title={saved ? "Bỏ khỏi đọc sau" : "Lưu để đọc sau"}
+		title={saved ? "Remove from saved posts" : "Save for later"}
 		onclick={toggleBookmark}
 	>
 		<Icon icon={saved ? "material-symbols:bookmark-rounded" : "material-symbols:bookmark-outline-rounded"} />
-		<span>{saved ? "Đã lưu" : "Đọc sau"}</span>
+		<span>{saved ? "Saved" : "Read later"}</span>
 	</button>
 
 	<button
 		type="button"
 		class:active={readingMode}
 		aria-pressed={readingMode}
-		title={readingMode ? "Tắt chế độ đọc" : "Bật chế độ đọc"}
+		title={readingMode ? "Exit reading mode" : "Enter reading mode"}
 		onclick={toggleReadingMode}
 	>
 		<Icon icon={readingMode ? "material-symbols:chrome-reader-mode-rounded" : "material-symbols:chrome-reader-mode-outline-rounded"} />
-		<span>{readingMode ? "Đang đọc" : "Tập trung"}</span>
+		<span>{readingMode ? "Reading" : "Focus"}</span>
 	</button>
 
 	<button
@@ -203,19 +203,19 @@ function writeBookmarks(posts: SavedPost[]) {
 		class:active={settingsOpen}
 		aria-expanded={settingsOpen}
 		aria-controls="reader-settings"
-		title="Tùy chỉnh hiển thị bài viết"
+		title="Customize article display"
 		onclick={() => (settingsOpen = !settingsOpen)}
 	>
 		<Icon icon="material-symbols:text-fields-rounded" />
-		<span>Hiển thị</span>
+		<span>Display</span>
 	</button>
 </div>
 
 {#if settingsOpen}
 	<div id="reader-settings" class="reader-settings onload-animation">
 		<div class="setting-row">
-			<span class="setting-label">Cỡ chữ</span>
-			<div class="segment" role="group" aria-label="Cỡ chữ bài viết">
+			<span class="setting-label">Text size</span>
+			<div class="segment" role="group" aria-label="Article text size">
 				{#each fontOptions as option}
 					<button
 						type="button"
@@ -227,8 +227,8 @@ function writeBookmarks(posts: SavedPost[]) {
 			</div>
 		</div>
 		<div class="setting-row">
-			<span class="setting-label">Độ rộng</span>
-			<div class="segment" role="group" aria-label="Độ rộng nội dung">
+			<span class="setting-label">Content width</span>
+			<div class="segment" role="group" aria-label="Article content width">
 				{#each widthOptions as option}
 					<button
 						type="button"
@@ -241,7 +241,7 @@ function writeBookmarks(posts: SavedPost[]) {
 		</div>
 		<button class="reset-reader" type="button" onclick={resetReaderSettings}>
 			<Icon icon="material-symbols:restart-alt-rounded" />
-			<span>Mặc định</span>
+			<span>Reset</span>
 		</button>
 	</div>
 {/if}

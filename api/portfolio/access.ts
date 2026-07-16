@@ -28,7 +28,7 @@ export default async function handler(
 	const accessSecret = env("PORTFOLIO_ACCESS_SECRET");
 	if (!password || !accessSecret) {
 		response.status(503).json({
-			error: "Hồ sơ riêng tư chưa được cấu hình.",
+			error: "The private portfolio has not been configured.",
 		});
 		return;
 	}
@@ -53,14 +53,14 @@ export default async function handler(
 	}
 
 	if (request.method !== "POST") {
-		response.status(405).json({ error: "Phương thức không được hỗ trợ." });
+		response.status(405).json({ error: "Method not allowed." });
 		return;
 	}
 
 	const submittedPassword = parsePassword(request.body);
 	if (!submittedPassword || !safeEqual(submittedPassword, password)) {
 		await delay(450);
-		response.status(401).json({ error: "Mật khẩu chưa đúng." });
+		response.status(401).json({ error: "Incorrect password." });
 		return;
 	}
 

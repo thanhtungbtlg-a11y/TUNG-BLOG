@@ -82,7 +82,7 @@ function parseTrackName(name) {
 	if (parts.length < 2) {
 		return {
 			title: toDisplayTitle(cleanName),
-			artist: "Chưa rõ kênh",
+			artist: "Unknown artist",
 		};
 	}
 

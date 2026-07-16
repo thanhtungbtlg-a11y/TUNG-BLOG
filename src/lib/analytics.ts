@@ -238,13 +238,13 @@ function buildBucketRange(from: Date, to: Date, includeHour: boolean) {
 }
 
 function getAnalyticsSection(path: string) {
-	if (path === "/") return "Trang chủ";
-	if (path.startsWith("/posts/")) return "Bài viết";
-	if (path === "/archive" || path.startsWith("/archive/")) return "Kho bài";
-	if (path === "/gallery" || path.startsWith("/gallery/")) return "Kho ảnh";
+	if (path === "/") return "Home";
+	if (path.startsWith("/posts/")) return "Posts";
+	if (path === "/archive" || path.startsWith("/archive/")) return "Archive";
+	if (path === "/gallery" || path.startsWith("/gallery/")) return "Gallery";
 	if (path === "/brain" || path.startsWith("/brain/")) return "Second Brain";
-	if (path === "/about" || path.startsWith("/about/")) return "Giới thiệu";
-	return "Trang khác";
+	if (path === "/about" || path.startsWith("/about/")) return "About";
+	return "Other pages";
 }
 
 function getVietnamBucket(value: string, includeHour: boolean) {

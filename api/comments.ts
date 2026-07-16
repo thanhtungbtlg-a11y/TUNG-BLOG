@@ -33,7 +33,7 @@ export default async function handler(
 	response: ApiResponse,
 ): Promise<void> {
 	if (request.method !== "POST") {
-		response.status(405).json({ error: "Phương thức không được hỗ trợ." });
+		response.status(405).json({ error: "Method not allowed." });
 		return;
 	}
 
@@ -57,32 +57,32 @@ export default async function handler(
 			return;
 		}
 		if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length > 180) {
-			response.status(400).json({ error: "Bài viết không hợp lệ." });
+			response.status(400).json({ error: "Invalid post." });
 			return;
 		}
 		if (parentId && !isUuid(parentId)) {
-			response.status(400).json({ error: "Bình luận gốc không hợp lệ." });
+			response.status(400).json({ error: "Invalid parent comment." });
 			return;
 		}
 		if (!content || content.length > maxLength) {
 			response.status(400).json({
-				error: `Bình luận phải có từ 1 đến ${maxLength} ký tự.`,
+				error: `Comments must contain between 1 and ${maxLength} characters.`,
 			});
 			return;
 		}
 		if (authorName.length > maxNameLength || hasControlCharacters(authorName)) {
 			response.status(400).json({
-				error: `Tên hiển thị tối đa ${maxNameLength} ký tự.`,
+				error: `Display names are limited to ${maxNameLength} characters.`,
 			});
 			return;
 		}
 		if (notificationEmail && !isValidEmail(notificationEmail)) {
-			response.status(400).json({ error: "Địa chỉ email không hợp lệ." });
+			response.status(400).json({ error: "Invalid email address." });
 			return;
 		}
 		if (looksLikeCommentSpam(content)) {
 			response.status(400).json({
-				error: "Bình luận có quá nhiều liên kết hoặc ký tự lặp.",
+				error: "The comment contains too many links or repeated characters.",
 			});
 			return;
 		}
@@ -93,7 +93,8 @@ export default async function handler(
 			env("SUPABASE_SECRET_KEY") || env("SUPABASE_SERVICE_ROLE_KEY");
 		if (!supabaseUrl || !serviceKey) {
 			response.status(503).json({
-				error: "Hệ thống bình luận đang được cấu hình. Vui lòng thử lại sau.",
+				error:
+					"The comment system is being configured. Please try again later.",
 			});
 			return;
 		}
@@ -111,7 +112,7 @@ export default async function handler(
 			p_ip_hash: ipHash,
 			p_body_hash: bodyHash,
 			p_parent_id: parentId || null,
-			p_author_name: authorName || "Ẩn danh",
+			p_author_name: authorName || "Anonymous",
 			p_notification_email: notificationEmail,
 		};
 		let submission = await supabase.rpc(
@@ -131,31 +132,33 @@ export default async function handler(
 				error.message.includes("INVALID_EMAIL")
 			) {
 				response.status(400).json({
-					error: "Tên hoặc email không hợp lệ.",
+					error: "Invalid name or email address.",
 				});
 				return;
 			}
 			if (error.message.includes("RATE_LIMIT")) {
 				response.status(429).json({
 					error:
-						"Bạn đã gửi nhiều bình luận liên tiếp. Vui lòng thử lại sau 10 phút.",
+						"You have submitted several comments in quick succession. Please try again in 10 minutes.",
 				});
 				return;
 			}
 			if (error.message.includes("DUPLICATE")) {
 				response.status(409).json({
-					error: "Bình luận này đã được gửi và đang chờ duyệt.",
+					error:
+						"This comment has already been submitted and is awaiting approval.",
 				});
 				return;
 			}
 			if (error.message.includes("INVALID_PARENT")) {
 				response.status(400).json({
-					error: "Bình luận cần trả lời không hợp lệ hoặc chưa được duyệt.",
+					error:
+						"The comment you are replying to is invalid or has not been approved.",
 				});
 				return;
 			}
 			console.error("Comment RPC error", error);
-			response.status(502).json({ error: "Chưa lưu được bình luận." });
+			response.status(502).json({ error: "The comment could not be saved." });
 			return;
 		}
 
@@ -164,14 +167,16 @@ export default async function handler(
 			content,
 			commentId: String(commentId ?? ""),
 			parentId,
-			authorName: authorName || "Ẩn danh",
+			authorName: authorName || "Anonymous",
 		}).catch((notificationError) => {
 			console.error("Comment notification error", notificationError);
 		});
 		response.status(201).json({ accepted: true });
 	} catch (error) {
 		console.error("Comment submission error", error);
-		response.status(500).json({ error: "Máy chủ chưa xử lý được bình luận." });
+		response
+			.status(500)
+			.json({ error: "The server could not process the comment." });
 	}
 }
 

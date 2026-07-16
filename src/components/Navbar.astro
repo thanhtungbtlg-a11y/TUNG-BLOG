@@ -21,28 +21,30 @@ let links: NavBarLink[] = navBarConfig.links.map(
 );
 ---
 <div id="navbar" class="z-50 onload-animation">
-    <div class="absolute h-8 left-0 right-0 -top-8 bg-[var(--card-bg)] transition"></div> <!-- used for onload animation -->
+    <div class="navbar-load-cap absolute h-8 left-0 right-0 -top-8 bg-[var(--card-bg)] transition"></div> <!-- used for onload animation -->
     <div class:list={[
         className,
-        "card-base navbar-glass !overflow-visible max-w-[var(--page-width)] h-[4.5rem] !rounded-t-none mx-auto flex items-center justify-between px-4"]}>
-        <a href={url('/')} aria-label={`Trang chủ - ${siteConfig.title}`} class="btn-plain scale-animation rounded-lg h-[3.25rem] px-3 min-[360px]:px-5 font-bold active:scale-95">
+        "navbar-surface card-base navbar-glass !overflow-visible max-w-[var(--page-width)] h-[4.5rem] !rounded-t-none mx-auto flex items-center justify-between px-4"]}>
+        <a href={url('/')} aria-label={`Home - ${siteConfig.title}`} class="navbar-brand btn-plain scale-animation rounded-lg h-[3.25rem] px-3 min-[360px]:px-5 font-bold active:scale-95">
             <div class="flex flex-row text-[var(--primary)] items-center text-md">
                 <img
                     src={url('/favicon/favicon-dark-32.png')}
                     alt=""
                     width="32"
                     height="32"
-                    class="h-8 w-8 rounded-lg object-cover mr-2 shadow-sm"
+                    class="navbar-brand-image h-8 w-8 rounded-lg object-cover mr-2 shadow-sm"
                 />
-                <span class="hidden min-[360px]:inline whitespace-nowrap">{siteConfig.title}</span>
+                <span class="navbar-brand-title hidden min-[360px]:inline whitespace-nowrap">{siteConfig.title}</span>
+                <span class="navbar-hero-mark hidden select-none" aria-hidden="true">✳︎</span>
             </div>
         </a>
-        <div class="hidden md:flex">
+        <div class="navbar-links hidden md:flex">
             {links.map((l) => {
                 return <a aria-label={l.name} href={l.external ? l.url : url(l.url)} target={l.external ? "_blank" : null}
 						  rel={l.external ? "noopener noreferrer" : null}
                           data-no-swup={l.native ? true : undefined} data-astro-reload={l.native ? true : undefined}
-                          class="btn-plain scale-animation rounded-lg h-11 font-bold px-5 active:scale-95"
+                          data-nav-url={l.url}
+                          class="navbar-link btn-plain scale-animation rounded-lg h-11 font-bold px-5 active:scale-95"
                 >
                     <div class="flex items-center">
                         {l.name}
@@ -51,19 +53,24 @@ let links: NavBarLink[] = navBarConfig.links.map(
                 </a>;
             })}
         </div>
-        <div class="flex">
+        <div class="navbar-actions flex">
             <Search client:load></Search>
             {!siteConfig.themeColor.fixed && (
                     <div id="display-settings-wrapper" class="relative z-40">
-						<button type="button" aria-label="Tùy chỉnh màu giao diện" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90" id="display-settings-switch">
+						<button type="button" aria-label="Customize theme colors" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90" id="display-settings-switch">
                             <Icon name="material-symbols:palette-outline" class="text-[1.25rem]"></Icon>
                         </button>
                         <DisplaySettings client:load></DisplaySettings>
                     </div>
             )}
             <LightDarkSwitch client:load></LightDarkSwitch>
-			<button type="button" aria-label="Mở menu điều hướng" name="Nav Menu" class="btn-plain scale-animation rounded-lg w-11 h-11 active:scale-90 md:!hidden" id="nav-menu-switch">
-                <Icon name="material-symbols:menu-rounded" class="text-[1.25rem]"></Icon>
+			<button type="button" aria-label="Open navigation menu" aria-expanded="false" name="Nav Menu" class="navbar-menu-button btn-plain scale-animation rounded-lg w-11 h-11 active:scale-90 md:!hidden" id="nav-menu-switch">
+                <Icon name="material-symbols:menu-rounded" class="navbar-menu-icon text-[1.25rem]"></Icon>
+                <span class="navbar-menu-bars hidden" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </span>
             </button>
         </div>
         <NavMenuPanel links={links}></NavMenuPanel>
@@ -72,55 +79,62 @@ let links: NavBarLink[] = navBarConfig.links.map(
 
 <script is:inline>
 (() => {
-    if (window.__blogSearchBootstrapBound) return;
-    window.__blogSearchBootstrapBound = true;
+    if (window.__blogNavbarBootstrapBound) return;
+    window.__blogNavbarBootstrapBound = true;
 
     const requestSearchOpen = () => {
         window.__pendingBlogSearchOpen = true;
         window.dispatchEvent(new CustomEvent("blog:open-search"));
     };
 
+    const setMenuOpen = (open) => {
+        const menuBtn = document.getElementById("nav-menu-switch");
+        const menuPanel = document.getElementById("nav-menu-panel");
+        if (!menuBtn || !menuPanel) return;
+
+		menuPanel.classList.toggle("float-panel-closed", !open);
+		menuBtn.classList.toggle("is-open", open);
+		menuBtn.setAttribute("aria-expanded", String(open));
+	};
+
     document.addEventListener("keydown", (event) => {
         if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
             event.preventDefault();
             requestSearchOpen();
         }
+        if (event.key === "Escape") setMenuOpen(false);
     }, true);
 
     document.addEventListener("click", (event) => {
-        const target = event.target instanceof Element
-            ? event.target.closest("#search-bar, #search-switch")
-            : null;
-        if (!target) return;
-        event.preventDefault();
-        requestSearchOpen();
+        if (!(event.target instanceof Element)) return;
+
+        const searchTarget = event.target.closest("#search-bar, #search-switch");
+        if (searchTarget) {
+            event.preventDefault();
+            requestSearchOpen();
+            return;
+        }
+
+        const menuButton = event.target.closest("#nav-menu-switch");
+        if (menuButton) {
+            event.preventDefault();
+            const menuPanel = document.getElementById("nav-menu-panel");
+            setMenuOpen(Boolean(menuPanel?.classList.contains("float-panel-closed")));
+            return;
+        }
+
+        if (event.target.closest("#nav-menu-panel a")) {
+            setMenuOpen(false);
+            return;
+        }
+
+        const settingsButton = event.target.closest("#display-settings-switch");
+        if (settingsButton) {
+            event.preventDefault();
+            document.getElementById("display-setting")?.classList.toggle("float-panel-closed");
+        }
     }, true);
 })();
-</script>
-
-<script>
-function loadButtonScript() {
-    let settingBtn = document.getElementById("display-settings-switch");
-    let settingWrapper = document.getElementById("display-settings-wrapper");
-    let settingPanel = document.getElementById("display-setting");
-    if (settingBtn && settingWrapper && settingPanel) {
-        settingBtn.onclick = function () {
-            settingPanel.classList.toggle("float-panel-closed");
-        };
-    }
-
-    let menuBtn = document.getElementById("nav-menu-switch");
-    if (menuBtn) {
-        menuBtn.onclick = function () {
-            let menuPanel = document.getElementById("nav-menu-panel");
-            if (menuPanel) {
-                menuPanel.classList.toggle("float-panel-closed");
-            }
-        };
-    }
-}
-
-loadButtonScript();
 </script>
 
 <style is:global>

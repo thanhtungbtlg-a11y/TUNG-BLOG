@@ -30,14 +30,14 @@ export async function sendAdminCommentNotification({
 	const postUrl = `${siteUrl}/posts/${encodeURIComponent(slug)}/`;
 	const safeContent = multilineHtml(content);
 	const title = parentId
-		? "Bình luận trả lời mới đang chờ duyệt"
-		: "Bình luận mới đang chờ duyệt";
+		? "New reply awaiting approval"
+		: "New comment awaiting approval";
 
 	await sendEmail({
 		to: env("COMMENT_NOTIFICATION_TO") || ownerEmail,
 		subject: `${title}: ${slug}`,
-		text: `${authorName}: ${content}\n\nDuyệt: ${adminUrl}\nXem bài: ${postUrl}`,
-		html: `<h2>${title}</h2><p><strong>Bài viết:</strong> ${escapeHtml(slug)}</p><p><strong>Người gửi:</strong> ${escapeHtml(authorName)}</p>${parentId ? `<p><strong>Trả lời cho:</strong> ${escapeHtml(parentId)}</p>` : ""}<blockquote>${safeContent}</blockquote><p><a href="${adminUrl}">Mở trang quản trị</a> · <a href="${postUrl}">Xem bài viết</a></p><small>ID: ${escapeHtml(commentId)}</small>`,
+		text: `${authorName}: ${content}\n\nReview: ${adminUrl}\nView post: ${postUrl}`,
+		html: `<h2>${title}</h2><p><strong>Post:</strong> ${escapeHtml(slug)}</p><p><strong>Submitted by:</strong> ${escapeHtml(authorName)}</p>${parentId ? `<p><strong>Replying to:</strong> ${escapeHtml(parentId)}</p>` : ""}<blockquote>${safeContent}</blockquote><p><a href="${adminUrl}">Open admin</a> · <a href="${postUrl}">View post</a></p><small>ID: ${escapeHtml(commentId)}</small>`,
 	});
 }
 
@@ -51,9 +51,9 @@ export async function sendCommentReplyNotification({
 	const postUrl = `${getPublicSiteUrl()}/posts/${encodeURIComponent(slug)}/#comments`;
 	await sendEmail({
 		to,
-		subject: "Có phản hồi mới cho bình luận của bạn",
-		text: `Bình luận của bạn:\n${originalBody}\n\n${replierName} đã phản hồi:\n${replyBody}\n\nXem phản hồi: ${postUrl}\n\nEmail này được gửi vì bạn đã chọn nhận thông báo phản hồi.`,
-		html: `<h2>Có phản hồi mới</h2><p><strong>Bình luận của bạn:</strong></p><blockquote>${multilineHtml(originalBody)}</blockquote><p><strong>${escapeHtml(replierName)} đã phản hồi:</strong></p><blockquote>${multilineHtml(replyBody)}</blockquote><p><a href="${postUrl}">Xem phản hồi trên blog</a></p><small>Email này được gửi vì bạn đã chọn nhận thông báo phản hồi. Email của bạn không hiển thị công khai.</small>`,
+		subject: "A new reply to your comment",
+		text: `Your comment:\n${originalBody}\n\n${replierName} replied:\n${replyBody}\n\nView the reply: ${postUrl}\n\nYou received this email because you opted in to reply notifications.`,
+		html: `<h2>You have a new reply</h2><p><strong>Your comment:</strong></p><blockquote>${multilineHtml(originalBody)}</blockquote><p><strong>${escapeHtml(replierName)} replied:</strong></p><blockquote>${multilineHtml(replyBody)}</blockquote><p><a href="${postUrl}">View the reply on the blog</a></p><small>You received this email because you opted in to reply notifications. Your email address is never displayed publicly.</small>`,
 	});
 }
 
@@ -61,9 +61,9 @@ export async function sendCommentEmailTest() {
 	const siteUrl = getPublicSiteUrl();
 	await sendEmail({
 		to: env("COMMENT_NOTIFICATION_TO") || ownerEmail,
-		subject: "Kiểm tra thông báo bình luận - Thanh Tung Blog",
-		text: `Email thông báo bình luận đang hoạt động.\n\nWebsite: ${siteUrl}`,
-		html: `<h2>Email thông báo đang hoạt động</h2><p>Resend đã gửi email kiểm tra thành công từ blog.</p><p><a href="${siteUrl}">Mở website</a></p>`,
+		subject: "Comment notification test - Thanh Tung Blog",
+		text: `Comment notification email is working.\n\nWebsite: ${siteUrl}`,
+		html: `<h2>Email notifications are working</h2><p>Resend successfully delivered this test message from the blog.</p><p><a href="${siteUrl}">Open website</a></p>`,
 	});
 }
 

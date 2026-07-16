@@ -21,7 +21,7 @@ export default async function handler(
 ) {
 	try {
 		if (request.method !== "POST") {
-			response.status(405).json({ error: "Phương thức không được hỗ trợ." });
+			response.status(405).json({ error: "Method not allowed." });
 			return;
 		}
 

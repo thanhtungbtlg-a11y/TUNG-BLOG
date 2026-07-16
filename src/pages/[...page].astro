@@ -1,7 +1,6 @@
 ---
 import type { GetStaticPaths } from "astro";
 import Pagination from "../components/control/Pagination.astro";
-import HomeHero from "../components/HomeHero.astro";
 import PostPage from "../components/PostPage.astro";
 import { PAGE_SIZE } from "../constants/constants";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
@@ -19,24 +18,15 @@ const len = page.data.length;
 const isHome = page.currentPage === 1;
 ---
 
-{
-	isHome ? (
-		<MainGridLayout
-			title="Trang chủ"
-			description="Trang chủ của Nguyễn Thanh Tùng"
-			wide
-			immediateContent
-		>
-			<HomeHero></HomeHero>
-		</MainGridLayout>
-	) : (
-		<MainGridLayout title="Kho bài">
-			<PostPage page={page}></PostPage>
-			<Pagination
-				class="mx-auto onload-animation"
-				page={page}
-				style={`animation-delay: calc(var(--content-delay) + ${len * 50}ms)`}
-			></Pagination>
-		</MainGridLayout>
-	)
-}
+<MainGridLayout
+	title={isHome ? "Home" : "Archive"}
+	description={isHome ? "The personal website of Nguyễn Thanh Tùng" : undefined}
+	immediateContent={isHome}
+>
+	<PostPage page={page}></PostPage>
+	<Pagination
+		class="mx-auto onload-animation"
+		page={page}
+		style={`animation-delay: calc(var(--content-delay) + ${len * 50}ms)`}
+	></Pagination>
+</MainGridLayout>

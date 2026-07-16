@@ -60,20 +60,20 @@ async function copyLink() {
 }
 </script>
 
-<section class="share-panel card-base onload-animation" aria-label="Chia sẻ bài viết">
+<section class="share-panel card-base onload-animation" aria-label="Share this post">
 	<div class="share-copy">
-		<div class="share-title">Chia sẻ bài viết</div>
+		<div class="share-title">Share this post</div>
 		<div class="share-url">{currentUrl}</div>
 	</div>
 
 	<div class="share-actions">
-		<button type="button" title="Chia sẻ" aria-label="Chia sẻ" onclick={shareNative}>
+		<button type="button" title="Share" aria-label="Share" onclick={shareNative}>
 			<Icon icon="material-symbols:ios-share-rounded" />
 		</button>
 		<button
 			type="button"
-			title="Sao chép link"
-			aria-label="Sao chép link"
+			title="Copy link"
+			aria-label="Copy link"
 			class:copied
 			onclick={copyLink}
 		>

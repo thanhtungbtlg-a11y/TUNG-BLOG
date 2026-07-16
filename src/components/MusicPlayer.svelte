@@ -709,7 +709,7 @@ function formatTime(seconds: number) {
 			onclick={toggleExpanded}
 			onkeydown={handleMiniKeydown}
 		>
-			<span class="sr-only">{expanded ? "Thu gọn trình phát nhạc" : "Mở trình phát nhạc"}</span>
+			<span class="sr-only">{expanded ? "Collapse music player" : "Open music player"}</span>
 			<div class="cover-shell">
 				<img src={currentTrack.coverThumb || currentTrack.cover} alt={currentTrack.title} class="cover-mini" onerror={useFallbackCover} />
 				<div class="pulse"></div>

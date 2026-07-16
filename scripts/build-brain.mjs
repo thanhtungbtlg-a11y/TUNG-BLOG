@@ -115,7 +115,7 @@ function createLegacyRedirects(sourceDirectory, destinationDirectory) {
 		mkdirSync(dirname(redirectFile), { recursive: true });
 		writeFileSync(
 			redirectFile,
-			`<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0;url=${target}"><link rel="canonical" href="${target}"><title>Chuyển đến kho LEED</title></head><body><a href="${target}">Mở kho LEED</a></body></html>`,
+			`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0;url=${target}"><link rel="canonical" href="${target}"><title>Continue to the LEED vault</title></head><body><a href="${target}">Open the LEED vault</a></body></html>`,
 		);
 	}
 }

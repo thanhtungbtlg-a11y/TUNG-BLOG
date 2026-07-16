@@ -19,7 +19,7 @@ const { Content } = await render(aboutPost);
 
 <MainGridLayout
 	title={i18n(I18nKey.about)}
-	description="Về Nguyễn Thanh Tùng và góc lưu giữ những bài viết, ảnh chụp, ghi chú."
+	description="About Nguyễn Thanh Tùng and this personal collection of writing, photographs, and notes."
 	wide
 >
 	<section class="about-shell card-base onload-animation">
@@ -27,19 +27,19 @@ const { Content } = await render(aboutPost);
 			<a
 				href="#about-content"
 				class="about-avatar"
-				aria-label="Chuyển đến phần giới thiệu"
+				aria-label="Skip to the introduction"
 			>
 				<ImageWrapper
 					src={profileConfig.avatar || ""}
-					alt={`Ảnh đại diện của ${profileConfig.name}`}
+					alt={`Portrait of ${profileConfig.name}`}
 					class="h-full w-full"
 				></ImageWrapper>
 			</a>
 			<div class="about-intro">
-				<p class="about-kicker">Giới thiệu</p>
+				<p class="about-kicker">About</p>
 				<h1>{profileConfig.name}</h1>
 				{profileConfig.bio && <blockquote>{profileConfig.bio}</blockquote>}
-				<div class="about-links" aria-label="Liên kết cá nhân">
+				<div class="about-links" aria-label="Personal links">
 					{
 						profileConfig.links.map((item) => (
 							<a

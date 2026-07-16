@@ -23,12 +23,12 @@ const reactionIds: ReactionId[] = [
 	"angry",
 ];
 const reactions: Array<{ id: ReactionId; label: string; emoji: string }> = [
-	{ id: "like", label: "Thích", emoji: "👍" },
-	{ id: "love", label: "Yêu thích", emoji: "❤️" },
+	{ id: "like", label: "Like", emoji: "👍" },
+	{ id: "love", label: "Love", emoji: "❤️" },
 	{ id: "haha", label: "Haha", emoji: "😂" },
 	{ id: "wow", label: "Wow", emoji: "😮" },
-	{ id: "sad", label: "Buồn", emoji: "😢" },
-	{ id: "angry", label: "Phẫn nộ", emoji: "😡" },
+	{ id: "sad", label: "Sad", emoji: "😢" },
+	{ id: "angry", label: "Angry", emoji: "😡" },
 ];
 const voterStorageKey = "blog-comment-reaction-voter";
 
@@ -84,7 +84,7 @@ async function toggleReaction(id: ReactionId) {
 		active = previous;
 		counts = previousCounts;
 		persistReaction(previous);
-		error = "Chưa lưu được cảm xúc.";
+		error = "Your reaction could not be saved.";
 	} finally {
 		saving = false;
 	}
@@ -142,7 +142,7 @@ function isReactionId(value: unknown): value is ReactionId {
 </script>
 
 <div class="comment-reactions" class:picker-open={pickerOpen}>
-	<div class="reaction-summary" aria-label="Cảm xúc của bình luận">
+	<div class="reaction-summary" aria-label="Comment reactions">
 		{#each reactions as reaction}
 			{#if counts[reaction.id] > 0}
 				<span title={`${reaction.label}: ${counts[reaction.id]}`}>
@@ -157,9 +157,9 @@ function isReactionId(value: unknown): value is ReactionId {
 		class="reaction-trigger"
 		class:active={Boolean(active)}
 		type="button"
-		aria-label="Thả cảm xúc"
+		aria-label="React"
 		aria-expanded={pickerOpen}
-		title="Thả cảm xúc"
+		title="React"
 		disabled={saving}
 		onclick={togglePicker}
 	>
@@ -170,7 +170,7 @@ function isReactionId(value: unknown): value is ReactionId {
 		{/if}
 	</button>
 
-	<div class="reaction-picker" aria-label="Chọn cảm xúc">
+	<div class="reaction-picker" aria-label="Choose a reaction">
 		{#each reactions as reaction}
 			<button
 				type="button"

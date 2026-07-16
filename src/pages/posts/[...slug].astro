@@ -134,14 +134,14 @@ const jsonLd = {
             <!-- always show cover as long as it has one -->
 
             {entry.data.image &&
-                <ImageWrapper id="post-cover" src={entry.data.image} alt={`Ảnh bìa: ${entry.data.title}`} basePath={path.join("content/posts/", getDir(entry.id))} widths={[640, 960, 1280]} sizes="(max-width: 1024px) calc(100vw - 2rem), 768px" class="mb-8 rounded-xl cover-zoom"/>
+                <ImageWrapper id="post-cover" src={entry.data.image} alt={`Cover image: ${entry.data.title}`} basePath={path.join("content/posts/", getDir(entry.id))} widths={[640, 960, 1280]} sizes="(max-width: 1024px) calc(100vw - 2rem), 768px" class="mb-8 rounded-xl cover-zoom"/>
             }
 
             <div class="mb-7 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.18em] text-[var(--meta-color)]">
                 <div class="h-px flex-1 border-t border-dashed border-[var(--line-divider)]"></div>
                 <div class="inline-flex items-center gap-2 rounded-full bg-black/5 px-3 py-1.5 dark:bg-white/10">
                     <Icon name="material-symbols:menu-book-outline-rounded" class="text-base text-[var(--primary)]" />
-                    Nội dung bài viết
+                    Article
                 </div>
                 <div class="h-px flex-1 border-t border-dashed border-[var(--line-divider)]"></div>
             </div>
@@ -162,7 +162,7 @@ const jsonLd = {
     <RelatedPosts posts={relatedPosts} />
 
     <div class="flex flex-col md:flex-row justify-between mb-4 gap-4 overflow-hidden w-full">
-		{entry.data.nextSlug && <a href={getPostUrlBySlug(entry.data.nextSlug)} aria-label={`Bài tiếp theo: ${entry.data.nextTitle}`} class="w-full font-bold overflow-hidden active:scale-95">
+		{entry.data.nextSlug && <a href={getPostUrlBySlug(entry.data.nextSlug)} aria-label={`Next post: ${entry.data.nextTitle}`} class="w-full font-bold overflow-hidden active:scale-95">
 			<div class="btn-card rounded-2xl w-full h-[3.75rem] max-w-full px-4 flex items-center !justify-start gap-4" >
                 <Icon name="material-symbols:chevron-left-rounded" class="text-[2rem] text-[var(--primary)]" />
                 <div class="overflow-hidden transition overflow-ellipsis whitespace-nowrap max-w-[calc(100%_-_3rem)] text-black/75 dark:text-white/75">
@@ -171,7 +171,7 @@ const jsonLd = {
 			</div>
 		</a>}
 
-		{entry.data.prevSlug && <a href={getPostUrlBySlug(entry.data.prevSlug)} aria-label={`Bài trước: ${entry.data.prevTitle}`} class="w-full font-bold overflow-hidden active:scale-95">
+		{entry.data.prevSlug && <a href={getPostUrlBySlug(entry.data.prevSlug)} aria-label={`Previous post: ${entry.data.prevTitle}`} class="w-full font-bold overflow-hidden active:scale-95">
 			<div class="btn-card rounded-2xl w-full h-[3.75rem] max-w-full px-4 flex items-center !justify-end gap-4">
                 <div class="overflow-hidden transition overflow-ellipsis whitespace-nowrap max-w-[calc(100%_-_3rem)] text-black/75 dark:text-white/75">
                     {entry.data.prevTitle}

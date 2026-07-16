@@ -131,12 +131,15 @@ async function submitPassword() {
 		});
 		const result = await response.json().catch(() => ({}));
 		if (!response.ok || result.unlocked !== true) {
-			throw new Error(result.error || "Chưa thể mở hồ sơ.");
+			throw new Error(result.error || "The portfolio could not be opened.");
 		}
 		sessionStorage.setItem("portfolio-unlocked", "1");
 		window.location.assign(pendingHref);
 	} catch (cause) {
-		error = cause instanceof Error ? cause.message : "Chưa thể mở hồ sơ.";
+		error =
+			cause instanceof Error
+				? cause.message
+				: "The portfolio could not be opened.";
 		password = "";
 		await tick();
 		passwordInput?.focus();
@@ -173,7 +176,7 @@ function isPortfolioPath(pathname: string) {
 		<button
 			class="portfolio-dialog-backdrop"
 			type="button"
-			aria-label="Đóng"
+			aria-label="Close"
 			onclick={closeDialog}
 		></button>
 		<section
@@ -186,16 +189,16 @@ function isPortfolioPath(pathname: string) {
 			<header>
 				<span class="lock-icon"><Icon icon="material-symbols:lock-outline-rounded" /></span>
 				<div>
-					<h2 id="portfolio-dialog-title">Hồ sơ được bảo vệ</h2>
-					<p id="portfolio-dialog-description">Nhập mật khẩu để tiếp tục.</p>
+					<h2 id="portfolio-dialog-title">Protected portfolio</h2>
+					<p id="portfolio-dialog-description">Enter the password to continue.</p>
 				</div>
-				<button class="close-button" type="button" onclick={closeDialog} aria-label="Đóng" title="Đóng">
+				<button class="close-button" type="button" onclick={closeDialog} aria-label="Close" title="Close">
 					<Icon icon="material-symbols:close-rounded" />
 				</button>
 			</header>
 
 			<form onsubmit={(event) => { event.preventDefault(); void submitPassword(); }}>
-				<label for="portfolio-password">Mật khẩu</label>
+				<label for="portfolio-password">Password</label>
 				<div class="password-control">
 					<input
 						bind:this={passwordInput}
@@ -209,8 +212,8 @@ function isPortfolioPath(pathname: string) {
 					<button
 						type="button"
 						onclick={() => { showPassword = !showPassword; }}
-						aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-						title={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+						aria-label={showPassword ? "Hide password" : "Show password"}
+						title={showPassword ? "Hide password" : "Show password"}
 					>
 						<Icon icon={showPassword ? "material-symbols:visibility-off-outline-rounded" : "material-symbols:visibility-outline-rounded"} />
 					</button>
@@ -218,7 +221,7 @@ function isPortfolioPath(pathname: string) {
 				{#if error}<p class="error-message" role="alert">{error}</p>{/if}
 				<button class="unlock-button" type="submit" disabled={!password || loading}>
 					<Icon icon={loading ? "material-symbols:progress-activity" : "material-symbols:lock-open-outline-rounded"} />
-					{loading ? "Đang kiểm tra..." : "Mở hồ sơ"}
+					{loading ? "Checking..." : "Open portfolio"}
 				</button>
 			</form>
 		</section>

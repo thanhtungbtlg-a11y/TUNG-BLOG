@@ -32,7 +32,7 @@ export default async function handler(
 ) {
 	try {
 		if (request.method !== "GET") {
-			throw new AdminRequestError("Phương thức không được hỗ trợ.", 405);
+			throw new AdminRequestError("Method not allowed.", 405);
 		}
 
 		const authorization = request.headers.authorization;
@@ -46,13 +46,12 @@ export default async function handler(
 			parseDate(queryValue(request.query?.from)) ??
 			new Date(to.getTime() - 7 * 24 * 60 * 60 * 1000);
 		if (from >= to || to.getTime() - from.getTime() > maxRangeMs) {
-			throw new AdminRequestError("Khoảng thời gian thống kê không hợp lệ.");
+			throw new AdminRequestError("Invalid analytics date range.");
 		}
 
 		const rawPath = queryValue(request.query?.path).trim();
 		const path = rawPath ? normalizeAnalyticsPath(rawPath) : "";
-		if (rawPath && !path)
-			throw new AdminRequestError("Đường dẫn lọc không hợp lệ.");
+		if (rawPath && !path) throw new AdminRequestError("Invalid path filter.");
 
 		const supabaseUrl =
 			env("PUBLIC_SUPABASE_URL") || env("NEXT_PUBLIC_SUPABASE_URL");
@@ -60,7 +59,7 @@ export default async function handler(
 			env("SUPABASE_SECRET_KEY") || env("SUPABASE_SERVICE_ROLE_KEY");
 		if (!supabaseUrl || !serviceKey) {
 			throw new AdminRequestError(
-				"Supabase chưa được cấu hình trên server.",
+				"Supabase has not been configured on the server.",
 				503,
 			);
 		}
@@ -130,7 +129,7 @@ async function loadAnalyticsRows(
 		if (error) {
 			if (error.code === "42P01" || error.code === "PGRST205") {
 				throw new AdminRequestError(
-					"Analytics chưa được khởi tạo. Hãy chạy supabase/analytics.sql một lần.",
+					"Analytics has not been initialized. Run supabase/analytics.sql once.",
 					503,
 				);
 			}

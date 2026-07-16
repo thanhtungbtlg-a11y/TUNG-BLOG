@@ -65,7 +65,7 @@ export default async function handler(
 			return;
 		}
 
-		response.status(405).json({ error: "Phương thức không được hỗ trợ." });
+		response.status(405).json({ error: "Method not allowed." });
 	} catch (error) {
 		const result = normaliseAdminError(error);
 		response.status(result.status).json({ error: result.message });
@@ -77,7 +77,7 @@ async function createMedia(body: Record<string, unknown>) {
 	const source = Buffer.from(String(body.contentBase64 ?? ""), "base64");
 	if (source.length === 0 || source.length > 4_000_000) {
 		throw new AdminRequestError(
-			"Ảnh tải lên không hợp lệ hoặc vượt quá 4 MB sau khi nén.",
+			"The uploaded image is invalid or exceeds 4 MB after compression.",
 		);
 	}
 
@@ -114,11 +114,14 @@ async function updateMedia(body: Record<string, unknown>) {
 	const items = await readMediaItems();
 	const index = items.findIndex((item) => item.id === String(body.id ?? ""));
 	if (index < 0)
-		throw new AdminRequestError("Không tìm thấy ảnh trong thư viện.", 404);
+		throw new AdminRequestError(
+			"The image was not found in the media library.",
+			404,
+		);
 
 	const current = items[index];
 	const requestedName = safeName(String(body.name ?? current.name));
-	if (!requestedName) throw new AdminRequestError("Tên ảnh không hợp lệ.");
+	if (!requestedName) throw new AdminRequestError("Invalid image name.");
 	const name = uniqueName(requestedName, items, current.id);
 	const updated: MediaItem = {
 		...current,
@@ -163,7 +166,10 @@ async function deleteMedia(body: Record<string, unknown>) {
 	const items = await readMediaItems();
 	const item = items.find((entry) => entry.id === String(body.id ?? ""));
 	if (!item)
-		throw new AdminRequestError("Không tìm thấy ảnh trong thư viện.", 404);
+		throw new AdminRequestError(
+			"The image was not found in the media library.",
+			404,
+		);
 	const names = [...new Set([item.name, ...(item.aliases ?? [])])];
 	await commitRepositoryFiles(
 		[
@@ -187,7 +193,7 @@ async function readMediaItems(): Promise<MediaItem[]> {
 		return JSON.parse(file.content) as MediaItem[];
 	} catch (error) {
 		if (error instanceof SyntaxError)
-			throw new AdminRequestError("Metadata ảnh không hợp lệ.", 500);
+			throw new AdminRequestError("The image metadata is invalid.", 500);
 		if (error instanceof AdminRequestError && error.status === 404) return [];
 		throw error;
 	}

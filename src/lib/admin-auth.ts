@@ -20,7 +20,7 @@ export async function requireAdminToken(
 		? authorization.slice(7)
 		: "";
 
-	if (!token) throw new AdminRequestError("Bạn chưa đăng nhập.", 401);
+	if (!token) throw new AdminRequestError("You are not signed in.", 401);
 
 	const supabaseUrl =
 		env("PUBLIC_SUPABASE_URL") || env("NEXT_PUBLIC_SUPABASE_URL");
@@ -32,7 +32,7 @@ export async function requireAdminToken(
 
 	if (!supabaseUrl || !supabaseKey) {
 		throw new AdminRequestError(
-			"Supabase chưa được cấu hình trên server.",
+			"Supabase has not been configured on the server.",
 			503,
 		);
 	}
@@ -49,10 +49,10 @@ export async function requireAdminToken(
 		},
 	});
 	if (!userResponse.ok) {
-		throw new AdminRequestError("Phiên đăng nhập đã hết hạn.", 401);
+		throw new AdminRequestError("Your session has expired.", 401);
 	}
 	const user = (await userResponse.json()) as AuthUser;
-	if (!user.id) throw new AdminRequestError("Phiên đăng nhập đã hết hạn.", 401);
+	if (!user.id) throw new AdminRequestError("Your session has expired.", 401);
 
 	const { data: admin, error: adminError } = await supabase
 		.from("comment_admins")
@@ -61,7 +61,10 @@ export async function requireAdminToken(
 		.maybeSingle();
 
 	if (adminError || !admin) {
-		throw new AdminRequestError("Tài khoản này không có quyền quản trị.", 403);
+		throw new AdminRequestError(
+			"This account does not have administrator access.",
+			403,
+		);
 	}
 
 	return user;
@@ -72,5 +75,5 @@ export function normaliseAdminError(error: unknown) {
 		return { status: error.status, message: error.message };
 	}
 	console.error(error);
-	return { status: 500, message: "Máy chủ chưa xử lý được yêu cầu." };
+	return { status: 500, message: "The server could not process the request." };
 }

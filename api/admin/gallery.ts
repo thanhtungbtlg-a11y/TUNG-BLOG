@@ -70,7 +70,7 @@ export default async function handler(
 			return;
 		}
 
-		response.status(405).json({ error: "Phương thức không được hỗ trợ." });
+		response.status(405).json({ error: "Method not allowed." });
 	} catch (error) {
 		const result = normaliseAdminError(error);
 		response.status(result.status).json({ error: result.message });
@@ -82,13 +82,13 @@ async function createGalleryItem(body: Record<string, unknown>) {
 	const source = Buffer.from(String(body.contentBase64 ?? ""), "base64");
 	if (source.length === 0 || source.length > 4_000_000) {
 		throw new AdminRequestError(
-			"Ảnh tải lên không hợp lệ hoặc vượt quá 4 MB sau khi nén.",
+			"The uploaded image is invalid or exceeds 4 MB after compression.",
 		);
 	}
 
 	const date = cleanDate(body.date);
-	const album = cleanText(body.album, 100) || "Ảnh chọn lọc";
-	const title = cleanText(body.title, 140) || "Khoảnh khắc không tên";
+	const album = cleanText(body.album, 100) || "Selected photos";
+	const title = cleanText(body.title, 140) || "Untitled moment";
 	const originalName = cleanText(body.name, 140) || title;
 	const baseName = uniqueBaseName(
 		`${date}-${slugify(album)}-${slugify(originalName) || "photo"}`,
@@ -135,14 +135,17 @@ async function updateGalleryItems(body: Record<string, unknown>) {
 		? body.items.filter(isRecord)
 		: [body];
 	if (updates.length === 0)
-		throw new AdminRequestError("Không có thay đổi ảnh để lưu.");
+		throw new AdminRequestError("There are no photo changes to save.");
 
 	const updatedItems: GalleryItem[] = [];
 	for (const update of updates) {
 		const filename = String(update.filename ?? "");
 		const index = items.findIndex((item) => item.filename === filename);
 		if (index < 0)
-			throw new AdminRequestError("Không tìm thấy ảnh trong Kho ảnh.", 404);
+			throw new AdminRequestError(
+				"The photo was not found in the gallery.",
+				404,
+			);
 
 		const current = items[index];
 		const updated: GalleryItem = {
@@ -185,7 +188,7 @@ async function deleteGalleryItem(body: Record<string, unknown>) {
 	const filename = String(body.filename ?? "");
 	const item = items.find((entry) => entry.filename === filename);
 	if (!item)
-		throw new AdminRequestError("Không tìm thấy ảnh trong Kho ảnh.", 404);
+		throw new AdminRequestError("The photo was not found in the gallery.", 404);
 
 	const files = new Set(
 		[item.filename, item.thumbnail].filter((value): value is string =>
@@ -216,7 +219,7 @@ async function readGalleryItems(): Promise<GalleryItem[]> {
 		return sortGalleryItems(normaliseMissingOrders(items));
 	} catch (error) {
 		if (error instanceof SyntaxError)
-			throw new AdminRequestError("Metadata Kho ảnh không hợp lệ.", 500);
+			throw new AdminRequestError("The gallery metadata is invalid.", 500);
 		if (error instanceof AdminRequestError && error.status === 404) return [];
 		throw error;
 	}
@@ -322,7 +325,10 @@ async function optimiseGalleryImage(source: Buffer) {
 		};
 	} catch (error) {
 		console.error("Gallery image optimisation failed", error);
-		throw new AdminRequestError("Không tối ưu được ảnh tải lên.", 500);
+		throw new AdminRequestError(
+			"The uploaded image could not be optimized.",
+			500,
+		);
 	}
 }
 
@@ -344,7 +350,9 @@ function cleanDate(value: unknown) {
 		Number.isNaN(parsed.getTime()) ||
 		parsed.toISOString().slice(0, 10) !== date
 	) {
-		throw new AdminRequestError("Ngày chụp phải có định dạng YYYY-MM-DD.");
+		throw new AdminRequestError(
+			"The capture date must use the YYYY-MM-DD format.",
+		);
 	}
 	return date;
 }
