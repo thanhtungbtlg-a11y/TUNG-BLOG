@@ -10,10 +10,11 @@ Chào mừng bạn đến với khu vườn ghi chú công khai của Nguyễn T
 
 ## Bắt đầu khám phá
 
-- [[🏠 LEED Core Concepts - INDEX|Mở bản đồ kiến thức LEED]]
+- [[00_Index|Mở mục lục LEED Core Concepts & Strategies]]
+- [[pages/Page 001|Bắt đầu đọc từ trang 1]]
 - Dùng ô **Tìm kiếm** để tìm trong toàn bộ ghi chú.
 - Mở **Graph View** để xem các ý tưởng liên kết với nhau như thế nào.
 
-> Kho LEED hiện có 38 ghi chú được đồng bộ từ vault công khai.
+> Kho LEED hiện có 108 ghi chú được đồng bộ từ vault công khai.
 
 [Xem các vault khác](https://www.thanhtung0209.com/brain/) · [Quay về blog](https://www.thanhtung0209.com/)
