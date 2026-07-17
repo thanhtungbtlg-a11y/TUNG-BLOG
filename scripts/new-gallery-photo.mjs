@@ -7,6 +7,12 @@ import sharp from "sharp";
 const rootDirectory = process.cwd();
 const galleryDirectory = path.join(rootDirectory, "public", "gallery");
 const metadataFile = path.join(rootDirectory, "src", "data", "gallery.json");
+const statusFile = path.join(
+	rootDirectory,
+	"src",
+	"data",
+	"gallery-status.json",
+);
 const supportedExtensions = new Set([
 	".jpg",
 	".jpeg",
@@ -76,6 +82,7 @@ try {
 		`${JSON.stringify(metadata, null, "\t")}\n`,
 		"utf8",
 	);
+	await writeGalleryStatus();
 
 	console.log(`Đã thêm ảnh: public/gallery/${filename}`);
 	console.log(`Kích thước: ${imageInfo.width}x${imageInfo.height}`);
@@ -102,6 +109,14 @@ async function readMetadata() {
 		if (error && error.code === "ENOENT") return [];
 		throw error;
 	}
+}
+
+async function writeGalleryStatus() {
+	await fs.writeFile(
+		statusFile,
+		`${JSON.stringify({ lastUpdatedAt: new Date().toISOString() }, null, "\t")}\n`,
+		"utf8",
+	);
 }
 
 async function getAvailableFilename(baseName) {

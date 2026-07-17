@@ -33,6 +33,7 @@ type GalleryItem = {
 };
 
 const metadataPath = "src/data/gallery.json";
+const statusPath = "src/data/gallery-status.json";
 const galleryDirectory = "public/gallery";
 
 export default async function handler(
@@ -122,6 +123,7 @@ async function createGalleryItem(body: Record<string, unknown>) {
 				content: optimised.thumbnail,
 			},
 			{ path: metadataPath, content: encodeItems(nextItems) },
+			{ path: statusPath, content: encodeGalleryStatus() },
 		],
 		`Add gallery photo: ${title}`,
 	);
@@ -173,7 +175,10 @@ async function updateGalleryItems(body: Record<string, unknown>) {
 	}
 
 	await commitRepositoryFiles(
-		[{ path: metadataPath, content: encodeItems(sortGalleryItems(items)) }],
+		[
+			{ path: metadataPath, content: encodeItems(sortGalleryItems(items)) },
+			{ path: statusPath, content: encodeGalleryStatus() },
+		],
 		updates.length === 1
 			? `Update gallery photo: ${updatedItems[0].title}`
 			: `Reorder gallery album: ${updatedItems[0].album}`,
@@ -206,6 +211,7 @@ async function deleteGalleryItem(body: Record<string, unknown>) {
 					items.filter((entry) => entry.filename !== item.filename),
 				),
 			},
+			{ path: statusPath, content: encodeGalleryStatus() },
 		],
 		`Delete gallery photo: ${item.title}`,
 	);
@@ -334,6 +340,13 @@ async function optimiseGalleryImage(source: Buffer) {
 
 function encodeItems(items: GalleryItem[]) {
 	return Buffer.from(`${JSON.stringify(items, null, "\t")}\n`, "utf8");
+}
+
+function encodeGalleryStatus() {
+	return Buffer.from(
+		`${JSON.stringify({ lastUpdatedAt: new Date().toISOString() }, null, "\t")}\n`,
+		"utf8",
+	);
 }
 
 function parseBody(value: unknown) {

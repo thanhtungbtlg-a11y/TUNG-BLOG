@@ -9,6 +9,12 @@ const galleryDirectory = path.join(rootDirectory, "public", "gallery");
 const fullDirectory = path.join(galleryDirectory, "photos");
 const thumbnailDirectory = path.join(galleryDirectory, "thumbs");
 const metadataFile = path.join(rootDirectory, "src", "data", "gallery.json");
+const statusFile = path.join(
+	rootDirectory,
+	"src",
+	"data",
+	"gallery-status.json",
+);
 const supportedExtensions = new Set([
 	".jpg",
 	".jpeg",
@@ -88,6 +94,11 @@ const metadata = [...preserved, ...uniqueImported].sort((a, b) => {
 await fs.writeFile(
 	metadataFile,
 	`${JSON.stringify(metadata, null, "\t")}\n`,
+	"utf8",
+);
+await fs.writeFile(
+	statusFile,
+	`${JSON.stringify({ lastUpdatedAt: new Date().toISOString() }, null, "\t")}\n`,
 	"utf8",
 );
 
