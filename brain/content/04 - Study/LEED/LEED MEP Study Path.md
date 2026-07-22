@@ -10,7 +10,7 @@ session_duration: 20-30 minutes
 sessions: 8
 total_cards: 16
 status: pilot
-publish: false
+publish: true
 created: 2026-07-22
 updated: 2026-07-22
 ---

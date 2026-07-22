@@ -31,7 +31,7 @@ ocr_version: 3.7.0
 ocr_warning: "Initial auto-mode batch used text fallback on page 1 because OCR readiness output included an advisory before JSON."
 processed_date: 2026-07-21
 needs_review: true
-publish: false
+publish: true
 ---
 
 # LEED v5 O+M Rating System_February 2026 - Source Note

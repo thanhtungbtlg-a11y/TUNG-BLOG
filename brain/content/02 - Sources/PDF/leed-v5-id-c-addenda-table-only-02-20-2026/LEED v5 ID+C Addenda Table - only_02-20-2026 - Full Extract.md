@@ -3,7 +3,7 @@ type: source-extract
 source_document: "[[LEED v5 ID+C Addenda Table - only_02-20-2026 - Source Note]]"
 page_count: 2
 needs_review: true
-publish: false
+publish: true
 ---
 
 # LEED v5 ID+C Addenda Table - only_02-20-2026 - Full Extract

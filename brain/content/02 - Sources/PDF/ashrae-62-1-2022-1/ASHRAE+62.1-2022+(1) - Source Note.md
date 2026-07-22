@@ -12,7 +12,7 @@ extraction_methods:
   - text
 processed_date: 2026-07-22
 needs_review: true
-publish: false
+publish: true
 ---
 
 # ASHRAE+62.1-2022+(1) - Source Note

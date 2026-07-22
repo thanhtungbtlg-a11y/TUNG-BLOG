@@ -5,7 +5,7 @@ page: 1
 extraction_method: text
 page_classification: text
 needs_review: true
-publish: false
+publish: true
 ---
 
 # 897003948-BD-C-Impact-Area-View - Page 001

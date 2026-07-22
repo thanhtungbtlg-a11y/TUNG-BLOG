@@ -20,7 +20,7 @@ source_pages:
 aliases:
   - Building-related greenhouse gas sources
 status: reviewed
-publish: false
+publish: true
 created: 2026-07-21
 updated: 2026-07-21
 ---

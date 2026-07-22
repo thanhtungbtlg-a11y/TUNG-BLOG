@@ -3,7 +3,7 @@ type: source-extract
 source_document: "[[Foundations of LEED 1_2023 - Source Note]]"
 page_count: 23
 needs_review: true
-publish: false
+publish: true
 ---
 
 # Foundations of LEED 1_2023 - Full Extract

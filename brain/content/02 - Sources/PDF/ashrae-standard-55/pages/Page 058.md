@@ -5,7 +5,7 @@ page: 58
 extraction_method: text
 page_classification: mixed
 needs_review: true
-publish: false
+publish: true
 ---
 
 # ASHRAE-Standard-55 - Page 058

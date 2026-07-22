@@ -5,7 +5,7 @@ page: 1
 extraction_method: text
 page_classification: scanned
 needs_review: true
-publish: false
+publish: true
 ---
 
 # leed_checklist-1 (1) - Page 001

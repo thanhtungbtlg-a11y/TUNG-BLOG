@@ -14,6 +14,6 @@ Welcome to Nguyễn Thanh Tùng's public knowledge vault. These notes are writte
 - Use **Search** to find anything across the vault.
 - Open **Graph View** to explore how ideas connect.
 
-> This LEED vault currently contains 2685 synced notes. Only notes explicitly marked for publication in Obsidian are visible here.
+> This LEED vault currently contains 2685 synced notes available for public exploration.
 
 [View other vaults](https://www.thanhtung0209.com/brain/) · [Return to the main site](https://www.thanhtung0209.com/)

@@ -12,7 +12,7 @@ extraction_methods:
   - ocr
 processed_date: 2026-07-20
 needs_review: true
-publish: false
+publish: true
 ---
 
 # OCR Test - LEED Pages 001-003 - Source Note

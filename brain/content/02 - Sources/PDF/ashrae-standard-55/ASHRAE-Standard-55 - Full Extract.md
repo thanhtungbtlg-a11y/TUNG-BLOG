@@ -3,7 +3,7 @@ type: source-extract
 source_document: "[[ASHRAE-Standard-55 - Source Note]]"
 page_count: 76
 needs_review: true
-publish: false
+publish: true
 ---
 
 # ASHRAE-Standard-55 - Full Extract

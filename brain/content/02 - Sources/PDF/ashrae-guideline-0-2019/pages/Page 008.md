@@ -5,7 +5,7 @@ page: 8
 extraction_method: text
 page_classification: text
 needs_review: true
-publish: false
+publish: true
 ---
 
 # ASHRAE_Guideline_0-2019_ - Page 008

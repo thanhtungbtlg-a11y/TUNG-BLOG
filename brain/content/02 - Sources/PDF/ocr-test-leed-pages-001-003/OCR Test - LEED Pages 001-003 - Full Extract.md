@@ -3,7 +3,7 @@ type: source-extract
 source_document: "[[OCR Test - LEED Pages 001-003 - Source Note]]"
 page_count: 3
 needs_review: true
-publish: false
+publish: true
 ---
 
 # OCR Test - LEED Pages 001-003 - Full Extract

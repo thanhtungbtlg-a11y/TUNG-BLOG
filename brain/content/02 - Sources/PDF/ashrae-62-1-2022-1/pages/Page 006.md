@@ -5,7 +5,7 @@ page: 6
 extraction_method: text
 page_classification: mixed
 needs_review: true
-publish: false
+publish: true
 ---
 
 # ASHRAE+62.1-2022+(1) - Page 006

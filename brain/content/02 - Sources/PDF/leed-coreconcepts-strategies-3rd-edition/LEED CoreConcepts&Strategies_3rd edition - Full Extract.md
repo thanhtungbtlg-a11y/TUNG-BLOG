@@ -3,7 +3,7 @@ type: source-extract
 source_document: "[[LEED CoreConcepts&Strategies_3rd edition - Source Note]]"
 page_count: 106
 needs_review: true
-publish: false
+publish: true
 ---
 
 # LEED CoreConcepts&Strategies_3rd edition - Full Extract

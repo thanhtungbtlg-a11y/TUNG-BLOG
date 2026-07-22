@@ -3,7 +3,7 @@ type: source-extract
 source_document: "[[ASHRAE_Guideline_0-2019_ - Source Note]]"
 page_count: 66
 needs_review: true
-publish: false
+publish: true
 ---
 
 # ASHRAE_Guideline_0-2019_ - Full Extract

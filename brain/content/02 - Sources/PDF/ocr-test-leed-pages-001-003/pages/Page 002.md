@@ -5,7 +5,7 @@ page: 2
 extraction_method: ocr
 page_classification: scanned
 needs_review: true
-publish: false
+publish: true
 ---
 
 # OCR Test - LEED Pages 001-003 - Page 002

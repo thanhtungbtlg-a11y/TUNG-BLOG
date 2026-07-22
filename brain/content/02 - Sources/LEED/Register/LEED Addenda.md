@@ -31,7 +31,7 @@ last_checked: 2026-07-22
 created: 2026-07-21
 updated: 2026-07-22
 review_on: 2026-08-20
-publish: false
+publish: true
 ---
 
 # LEED Addenda

@@ -24,7 +24,7 @@ extraction_methods:
   - text
 processed_date: 2026-07-21
 needs_review: true
-publish: false
+publish: true
 ---
 
 # 855773644-LEED-v5-BD-C-Reference-Guide-Launch-Edition - Source Note

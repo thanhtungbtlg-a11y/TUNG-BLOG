@@ -5,7 +5,7 @@ page: 21
 extraction_method: text
 page_classification: text
 needs_review: true
-publish: false
+publish: true
 ---
 
 # Foundations of LEED 1_2023 - Page 021

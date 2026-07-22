@@ -52,7 +52,7 @@ related_concepts:
   - "[[03 - Concepts/LEED/MEP/Integrative Design Process]]"
   - "[[03 - Concepts/LEED/MEP/Building Commissioning]]"
   - "[[03 - Concepts/LEED/MEP/Climate Resilience for MEP Systems]]"
-publish: false
+publish: true
 created: 2026-07-22
 updated: 2026-07-22
 ---

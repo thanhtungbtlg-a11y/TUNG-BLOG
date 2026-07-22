@@ -5,7 +5,7 @@ page: 53
 extraction_method: text
 page_classification: text
 needs_review: true
-publish: false
+publish: true
 ---
 
 # LEED CoreConcepts&Strategies_3rd edition - Page 053

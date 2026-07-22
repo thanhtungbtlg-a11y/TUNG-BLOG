@@ -15,7 +15,7 @@ source_url:
 created: 2026-07-21
 updated: 2026-07-21
 review_on:
-publish: false
+publish: true
 ---
 
 # LEED Source Chapter Map

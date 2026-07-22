@@ -3,7 +3,7 @@ type: source-extract
 source_document: "[[LEED v5 O+M Rating System_February 2026 - Source Note]]"
 page_count: 93
 needs_review: true
-publish: false
+publish: true
 ---
 
 # LEED v5 O+M Rating System_February 2026 - Full Extract

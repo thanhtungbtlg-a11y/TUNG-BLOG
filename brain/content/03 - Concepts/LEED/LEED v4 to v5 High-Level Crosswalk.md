@@ -12,7 +12,7 @@ current_requirements_verified: false
 created: 2026-07-21
 updated: 2026-07-22
 review_on:
-publish: false
+publish: true
 ---
 
 # LEED v4 to v5 High-Level Crosswalk

@@ -5,7 +5,7 @@ page: 11
 extraction_method: text
 page_classification: text
 needs_review: true
-publish: false
+publish: true
 ---
 
 # ASHRAE-Standard-55 - Page 011

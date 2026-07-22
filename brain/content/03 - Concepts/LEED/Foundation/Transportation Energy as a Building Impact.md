@@ -17,7 +17,7 @@ source_pages:
 aliases:
   - Building-associated transportation energy
 status: reviewed
-publish: false
+publish: true
 created: 2026-07-21
 updated: 2026-07-21
 ---

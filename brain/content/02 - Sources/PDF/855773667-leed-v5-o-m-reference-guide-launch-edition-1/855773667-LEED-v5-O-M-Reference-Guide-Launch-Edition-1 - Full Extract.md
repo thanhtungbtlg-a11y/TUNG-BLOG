@@ -3,7 +3,7 @@ type: source-extract
 source_document: "[[855773667-LEED-v5-O-M-Reference-Guide-Launch-Edition-1 - Source Note]]"
 page_count: 284
 needs_review: true
-publish: false
+publish: true
 ---
 
 # 855773667-LEED-v5-O-M-Reference-Guide-Launch-Edition-1 - Full Extract

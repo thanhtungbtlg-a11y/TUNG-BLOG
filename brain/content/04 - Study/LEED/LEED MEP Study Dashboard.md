@@ -15,7 +15,7 @@ source_gated_concepts: 8
 manual_review_status: after-source-acquisition
 last_manual_review: 2026-07-22
 status: active
-publish: false
+publish: true
 created: 2026-07-22
 updated: 2026-07-22
 ---

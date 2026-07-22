@@ -9,7 +9,7 @@ source_url:
 created: 2026-07-19
 updated: 2026-07-19
 review_on:
-publish: false
+publish: true
 ---
 
 # Automation and Tools

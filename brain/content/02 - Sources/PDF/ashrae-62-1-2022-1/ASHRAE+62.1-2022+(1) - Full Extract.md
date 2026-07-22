@@ -3,7 +3,7 @@ type: source-extract
 source_document: "[[ASHRAE+62.1-2022+(1) - Source Note]]"
 page_count: 90
 needs_review: true
-publish: false
+publish: true
 ---
 
 # ASHRAE+62.1-2022+(1) - Full Extract

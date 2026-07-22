@@ -11,7 +11,7 @@ ocr_version: 3.7.0
 ocr_review_status: accepted
 repaired: 2026-07-21
 needs_review: true
-publish: false
+publish: true
 ---
 
 # LEED v5 O+M Rating System_February 2026 - Page 001

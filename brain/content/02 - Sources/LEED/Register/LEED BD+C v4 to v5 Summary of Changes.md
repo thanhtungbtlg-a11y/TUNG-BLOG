@@ -44,7 +44,7 @@ last_reviewed: 2026-07-22
 created: 2026-07-22
 updated: 2026-07-22
 review_on:
-publish: false
+publish: true
 ---
 
 # LEED BD+C v4 to v5 Summary of Changes

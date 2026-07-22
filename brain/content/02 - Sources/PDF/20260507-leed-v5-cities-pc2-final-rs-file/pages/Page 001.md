@@ -5,7 +5,7 @@ page: 1
 extraction_method: text
 page_classification: mixed
 needs_review: true
-publish: false
+publish: true
 ---
 
 # 20260507_LEED v5 Cities_PC2 Final RS File - Page 001

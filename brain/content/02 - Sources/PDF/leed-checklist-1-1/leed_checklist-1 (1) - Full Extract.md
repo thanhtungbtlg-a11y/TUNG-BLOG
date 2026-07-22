@@ -3,7 +3,7 @@ type: source-extract
 source_document: "[[leed_checklist-1 (1) - Source Note]]"
 page_count: 3
 needs_review: true
-publish: false
+publish: true
 ---
 
 # leed_checklist-1 (1) - Full Extract

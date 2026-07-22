@@ -58,7 +58,7 @@ last_reviewed: 2026-07-22
 created: 2026-07-22
 updated: 2026-07-22
 review_on: 2027-07-22
-publish: false
+publish: true
 ---
 
 # ASHRAE Standard 55-2023

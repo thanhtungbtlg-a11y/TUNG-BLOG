@@ -13,7 +13,7 @@ current_requirements_verified: partial
 created: 2026-07-21
 updated: 2026-07-22
 review_on:
-publish: false
+publish: true
 ---
 
 # LEED v5 Concept Candidate Register

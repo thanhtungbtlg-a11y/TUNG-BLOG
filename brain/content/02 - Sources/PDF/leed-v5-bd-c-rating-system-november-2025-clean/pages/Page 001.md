@@ -11,7 +11,7 @@ ocr_version: 3.7.0
 ocr_review_status: accepted
 repaired: 2026-07-21
 needs_review: true
-publish: false
+publish: true
 ---
 
 # LEED v5 BD+C Rating System_November 2025_clean - Page 001

@@ -27,7 +27,7 @@ engineering_application_card_count: 1
 study_status: ready
 tags:
   - flashcards/leed/mep
-publish: false
+publish: true
 created: 2026-07-22
 updated: 2026-07-22
 ---

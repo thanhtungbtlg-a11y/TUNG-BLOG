@@ -19,7 +19,7 @@ source_pages:
 aliases:
   - Continual improvement in green building
 status: reviewed
-publish: false
+publish: true
 created: 2026-07-21
 updated: 2026-07-21
 ---

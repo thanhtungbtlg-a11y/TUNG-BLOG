@@ -3,7 +3,7 @@ type: source-extract
 source_document: "[[LEED-BDC-v4-v5-Summary-of-Changes - Source Note]]"
 page_count: 16
 needs_review: true
-publish: false
+publish: true
 ---
 
 # LEED-BDC-v4-v5-Summary-of-Changes - Full Extract

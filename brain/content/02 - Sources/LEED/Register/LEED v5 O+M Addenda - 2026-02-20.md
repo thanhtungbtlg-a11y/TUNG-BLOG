@@ -50,7 +50,7 @@ last_reviewed: 2026-07-22
 created: 2026-07-22
 updated: 2026-07-22
 review_on: 2026-08-20
-publish: false
+publish: true
 ---
 
 # LEED v5 O+M Addenda - 2026-02-20

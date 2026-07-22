@@ -5,7 +5,7 @@ page: 90
 extraction_method: text
 page_classification: mixed
 needs_review: false
-publish: false
+publish: true
 ---
 
 # LEED CoreConcepts&Strategies_3rd edition - Page 090

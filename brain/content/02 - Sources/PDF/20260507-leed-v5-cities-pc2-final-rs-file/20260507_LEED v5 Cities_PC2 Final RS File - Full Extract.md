@@ -3,7 +3,7 @@ type: source-extract
 source_document: "[[20260507_LEED v5 Cities_PC2 Final RS File - Source Note]]"
 page_count: 111
 needs_review: true
-publish: false
+publish: true
 ---
 
 # 20260507_LEED v5 Cities_PC2 Final RS File - Full Extract

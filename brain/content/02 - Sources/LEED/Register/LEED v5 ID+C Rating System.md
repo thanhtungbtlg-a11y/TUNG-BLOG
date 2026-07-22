@@ -38,7 +38,7 @@ last_checked: 2026-07-22
 created: 2026-07-22
 updated: 2026-07-22
 review_on: 2026-08-20
-publish: false
+publish: true
 ---
 
 # LEED v5 ID+C Rating System

@@ -12,7 +12,7 @@ extraction_methods:
   - text
 processed_date: 2026-07-20
 needs_review: true
-publish: false
+publish: true
 ---
 
 # LEED CoreConcepts&Strategies_3rd edition - Source Note

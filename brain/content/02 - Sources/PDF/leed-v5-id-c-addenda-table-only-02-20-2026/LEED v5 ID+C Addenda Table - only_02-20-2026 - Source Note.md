@@ -12,7 +12,7 @@ extraction_methods:
   - text
 processed_date: 2026-07-22
 needs_review: true
-publish: false
+publish: true
 ---
 
 # LEED v5 ID+C Addenda Table - only_02-20-2026 - Source Note

@@ -48,7 +48,7 @@ related_concepts:
   - "[[03 - Concepts/LEED/MEP/Building Commissioning]]"
   - "[[03 - Concepts/LEED/MEP/Energy Metering and Reporting]]"
   - "[[03 - Concepts/LEED/MEP/Climate Resilience for MEP Systems]]"
-publish: false
+publish: true
 created: 2026-07-22
 updated: 2026-07-22
 ---

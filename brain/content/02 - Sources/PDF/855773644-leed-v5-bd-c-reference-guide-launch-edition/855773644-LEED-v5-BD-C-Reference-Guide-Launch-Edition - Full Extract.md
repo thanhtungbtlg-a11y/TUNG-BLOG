@@ -3,7 +3,7 @@ type: source-extract
 source_document: "[[855773644-LEED-v5-BD-C-Reference-Guide-Launch-Edition - Source Note]]"
 page_count: 548
 needs_review: true
-publish: false
+publish: true
 ---
 
 # 855773644-LEED-v5-BD-C-Reference-Guide-Launch-Edition - Full Extract

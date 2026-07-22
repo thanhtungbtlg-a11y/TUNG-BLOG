@@ -5,7 +5,7 @@ page: 142
 extraction_method: text
 page_classification: text
 needs_review: true
-publish: false
+publish: true
 ---
 
 # 855773644-LEED-v5-BD-C-Reference-Guide-Launch-Edition - Page 142

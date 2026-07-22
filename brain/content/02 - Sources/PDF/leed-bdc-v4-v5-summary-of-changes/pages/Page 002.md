@@ -5,7 +5,7 @@ page: 2
 extraction_method: text
 page_classification: text
 needs_review: true
-publish: false
+publish: true
 ---
 
 # LEED-BDC-v4-v5-Summary-of-Changes - Page 002

@@ -5,7 +5,7 @@ page: 110
 extraction_method: text
 page_classification: text
 needs_review: true
-publish: false
+publish: true
 ---
 
 # LEED v5 BD+C Rating System_November 2025_clean - Page 110

@@ -42,7 +42,7 @@ last_reviewed: 2026-07-21
 created: 2026-07-21
 updated: 2026-07-21
 review_on:
-publish: false
+publish: true
 ---
 
 # LEED v5 BD+C Rating System

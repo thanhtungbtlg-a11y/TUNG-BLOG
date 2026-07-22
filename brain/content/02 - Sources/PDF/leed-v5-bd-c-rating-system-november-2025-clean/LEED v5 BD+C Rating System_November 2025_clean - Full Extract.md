@@ -3,7 +3,7 @@ type: source-extract
 source_document: "[[LEED v5 BD+C Rating System_November 2025_clean - Source Note]]"
 page_count: 185
 needs_review: true
-publish: false
+publish: true
 ---
 
 # LEED v5 BD+C Rating System_November 2025_clean - Full Extract

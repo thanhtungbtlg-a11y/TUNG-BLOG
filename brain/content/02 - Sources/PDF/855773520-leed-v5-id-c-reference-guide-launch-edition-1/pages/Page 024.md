@@ -5,7 +5,7 @@ page: 24
 extraction_method: text
 page_classification: text
 needs_review: true
-publish: false
+publish: true
 ---
 
 # 855773520-LEED-v5-ID-C-Reference-Guide-Launch-Edition-1 - Page 024

@@ -5,7 +5,7 @@ page: 5
 extraction_method: text
 page_classification: text
 needs_review: true
-publish: false
+publish: true
 ---
 
 # LEED v5 BD+C Addenda Table - only_02-20-2026 - Page 005

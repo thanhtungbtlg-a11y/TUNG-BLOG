@@ -24,7 +24,7 @@ extraction_methods:
   - text
 processed_date: 2026-07-21
 needs_review: true
-publish: false
+publish: true
 ---
 
 # 855773667-LEED-v5-O-M-Reference-Guide-Launch-Edition-1 - Source Note

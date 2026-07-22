@@ -92,7 +92,13 @@ async function markMarkdownForPublishing(directory) {
 				frontmatterEnd === -1
 					? nextContent.slice(openingLineEnd)
 					: nextContent.slice(openingLineEnd, frontmatterEnd);
-			if (!/^publish\s*:/m.test(frontmatter)) {
+			if (/^publish\s*:/m.test(frontmatter)) {
+				const publicFrontmatter = frontmatter.replace(
+					/^publish\s*:.*$/m,
+					"publish: true",
+				);
+				nextContent = `${nextContent.slice(0, openingLineEnd)}${publicFrontmatter}${nextContent.slice(frontmatterEnd)}`;
+			} else {
 				nextContent = `${nextContent.slice(0, openingLineEnd)}publish: true\n${nextContent.slice(openingLineEnd)}`;
 			}
 		}
@@ -169,7 +175,7 @@ Welcome to Nguyễn Thanh Tùng's public knowledge vault. These notes are writte
 - Use **Search** to find anything across the vault.
 - Open **Graph View** to explore how ideas connect.
 
-> This LEED vault currently contains ${noteCount} synced notes. Only notes explicitly marked for publication in Obsidian are visible here.
+> This LEED vault currently contains ${noteCount} synced notes available for public exploration.
 
 [View other vaults](https://www.thanhtung0209.com/brain/) · [Return to the main site](https://www.thanhtung0209.com/)
 `;

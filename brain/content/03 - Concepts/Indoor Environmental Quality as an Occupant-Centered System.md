@@ -15,7 +15,7 @@ source_url:
 created: 2026-07-19
 updated: 2026-07-22
 review_on:
-publish: false
+publish: true
 ---
 
 # Indoor Environmental Quality as an Occupant-Centered System

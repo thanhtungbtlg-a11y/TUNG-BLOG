@@ -5,7 +5,7 @@ page: 53
 extraction_method: text
 page_classification: text
 needs_review: true
-publish: false
+publish: true
 ---
 
 # 855773667-LEED-v5-O-M-Reference-Guide-Launch-Edition-1 - Page 053

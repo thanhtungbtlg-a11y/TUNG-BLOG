@@ -3,7 +3,7 @@ type: source-extract
 source_document: "[[897003948-BD-C-Impact-Area-View - Source Note]]"
 page_count: 1
 needs_review: true
-publish: false
+publish: true
 ---
 
 # 897003948-BD-C-Impact-Area-View - Full Extract

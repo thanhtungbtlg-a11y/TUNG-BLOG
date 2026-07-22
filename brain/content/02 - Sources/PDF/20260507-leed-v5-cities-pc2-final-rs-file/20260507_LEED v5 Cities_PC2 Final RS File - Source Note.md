@@ -23,7 +23,7 @@ extraction_methods:
   - text
 processed_date: 2026-07-21
 needs_review: true
-publish: false
+publish: true
 ---
 
 # 20260507_LEED v5 Cities_PC2 Final RS File - Source Note

@@ -5,7 +5,7 @@ page: 57
 extraction_method: text
 page_classification: text
 needs_review: true
-publish: false
+publish: true
 ---
 
 # LEED v5 O+M Rating System_February 2026 - Page 057
