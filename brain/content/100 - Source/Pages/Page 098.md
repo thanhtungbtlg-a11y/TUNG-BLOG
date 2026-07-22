@@ -1,0 +1,106 @@
+---
+publish: true
+title: "Page 098"
+source_document: "LEED Core Concepts Guide - Third Edition (image-only PDF)"
+pdf_page: 98
+guide_page: 91
+section: "Section 5 - About USGBC and LEED"
+ocr_word_count: 429
+ocr_quality: "high"
+tags:
+  - leed/source
+  - ocr/page
+  - leed/section-5-about-usgbc-and-leed
+---
+
+# Page 098 - » PROJECT REGISTRATION
+
+**Source section:** [[Section 5 - About USGBC and LEED]]
+**PDF page:** 98
+**Guide page:** 91
+**OCR quality:** high (429 words)
+
+![[page-098.jpg]]
+
+## OCR Text
+
+>» PROJECT REGISTRATION
+
+The LEED process begins with registration. The project team submits a registration form and a fee to GBCI.
+
+Itis helpful if the project administrator—the team member who registers the project—has previous green
+
+building and LEED project experience; ideally, he or she is a LEED Accredited Professional. Once registered,
+
+the team receives information, tools, and communications that will help guide the certification process. All
+
+project activity, including registration and credit compliance documentation, is completed in LEED Online,
+
+a data collection portal through which the team uploads information about the project. This site provides
+
+credit templates to be completed and signed by a specified member of the team.
+
+>» APPLICATION PREPARATION
+
+Each LEED credit and prerequisite has documentation requirements that must be completed as part of the
+
+application process. The project team selects the credits it has chosen to pursue and when the necessary
+
+documentation, including required information and calculations, has been assembled, the project team
+
+uploads the materials to LEED Online.
+
+>» SUBMISSION
+
+When the team is ready for its application to be reviewed, the project administrator submits the appropriate
+
+fee and documentation. For LEED BD+C and ID+C projects, the team can wait to submit documentation
+
+until the building project is complete, or the team can seek review of its design-related prerequisites and
+
+credits before completion, and then apply for construction-related credits after the project is finished.
+
+>» APPLICATION REVIEW
+
+Whether the design and construction credits are submitted together or separately, each credit undergoes
+
+one preliminary review. The certification reviewer may request additional information or clarification. The
+
+team then submits final documentation. After the final review, a team may appeal any adverse decisions on
+
+individual credits for an additional fee.
+
+> CERTIFICATION
+
+Certification is the final step in the LEED review process. Once the final application review is complete,
+
+the project team can either accept or appeal the final decision. LEED-certified projects receive formal
+
+certificates of recognition, a plaque, and tips for marketing the achievement. Projects may be included in
+
+USGBC’s online LEED Project Directory of registered and certified projects.
+
+PROJECT CREDIT INTERPRETATION RULINGS AND
+
+LEED INTERPRETATIONS
+
+The LEED rating systems are intended to be flexible, voluntary tools to improve the performance of
+
+buildings and promote market transformation. At times a project team may want clarification, further
+
+guidance, or additional ways to comply with the rating system’s requirements. Project teams therefore have
+
+several options in engaging with USGBC and GBCI during the certification submittal process.
+
+Project credit interpretation rulings (Project CIRs), administered by GBCI, allow teams to obtain technical                              af
+
+guidance on how LEED requirements pertain to their projects. Project CIRs do not guarantee credit award;                              2
+rf
+un
+91
+
+## Study Links
+
+- [[Source Page Index]]
+- [[LEED Core Concepts MOC]]
+- [[Section 5 - About USGBC and LEED]]

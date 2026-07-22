@@ -11,7 +11,7 @@ const vaultStatusFile = join(
 	"brain-vault-status.json",
 );
 const defaultVault =
-	"C:\\Users\\NITRO 5\\Downloads\\LEED CoreConcepts&Strategies_3rd edition";
+	"C:\\Users\\NITRO 5\\Downloads\\LEED_Obsidian_Vault_Complete_EN";
 const vaultDir = resolve(
 	process.argv[2] || process.env.OBSIDIAN_VAULT_PATH || defaultVault,
 );
@@ -19,10 +19,14 @@ const ignoredDirectories = new Set([
 	".obsidian",
 	".smart-env",
 	".trash",
+	"98 - codex reports",
 	"_metadata",
+	"docs",
 	"private",
 	"templates",
+	"tools",
 ]);
+const ignoredFiles = new Set(["agents.md"]);
 const ignoredExtensions = new Set([".base"]);
 const publicCanvasDirectory = "public-canvas";
 
@@ -38,8 +42,12 @@ if (!isInside(repoRoot, contentDir)) {
 async function shouldCopy(source) {
 	const rel = relative(vaultDir, source);
 	const parts = rel.split(sep);
-	if (parts.some((part) => ignoredDirectories.has(part))) return false;
+	if (parts.some((part) => ignoredDirectories.has(part.toLowerCase())))
+		return false;
 	if (parts.some((part) => part.startsWith(".") && part !== ".")) return false;
+	if (parts.length === 1 && ignoredFiles.has(parts[0].toLowerCase()))
+		return false;
+	if (parts.some((part) => /(?:^| - )templates?$/i.test(part))) return false;
 	const extension = extname(source).toLowerCase();
 	if (ignoredExtensions.has(extension)) return false;
 	if (extension === ".canvas") {
@@ -157,12 +165,11 @@ Welcome to Nguyễn Thanh Tùng's public knowledge vault. These notes are writte
 
 ## Start exploring
 
-- [[00_Index|Open the LEED Core Concepts & Strategies index]]
-- [[pages/Page 001|Start reading from page 1]]
+- [[100 - Source/Pages/Page 001|Start reading the published LEED source notes]]
 - Use **Search** to find anything across the vault.
 - Open **Graph View** to explore how ideas connect.
 
-> This LEED vault currently contains ${noteCount} notes synced from the public vault.
+> This LEED vault currently contains ${noteCount} synced notes. Only notes explicitly marked for publication in Obsidian are visible here.
 
 [View other vaults](https://www.thanhtung0209.com/brain/) · [Return to the main site](https://www.thanhtung0209.com/)
 `;
