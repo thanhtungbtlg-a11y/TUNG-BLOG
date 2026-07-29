@@ -484,10 +484,12 @@ function handleInputKeydown(event: KeyboardEvent) {
 	type="button"
 	id="search-bar"
 	aria-label={i18n(I18nKey.search)}
-	class="hidden lg:flex transition-all items-center h-11 mr-2 rounded-lg px-3 gap-2 bg-black/[0.04] hover:bg-black/[0.06] focus-visible:bg-black/[0.06] dark:bg-white/5 dark:hover:bg-white/10 dark:focus-visible:bg-white/10 text-black/50 dark:text-white/50"
+	aria-keyshortcuts="Control+K Meta+K"
+	class="search-trigger hidden lg:flex transition-all items-center h-11 mr-2 rounded-lg px-3 gap-2 bg-black/[0.04] hover:bg-black/[0.06] focus-visible:bg-black/[0.06] dark:bg-white/5 dark:hover:bg-white/10 dark:focus-visible:bg-white/10 text-black/50 dark:text-white/50"
 >
 	<Icon icon="material-symbols:search" class="text-[1.25rem] text-black/30 dark:text-white/30" />
-	<span class="text-sm min-w-36 text-left">{i18n(I18nKey.search)}</span>
+	<span class="search-trigger-label text-sm text-left">{i18n(I18nKey.search)}</span>
+	<kbd>Ctrl K</kbd>
 </button>
 
 <button
@@ -598,7 +600,7 @@ function handleInputKeydown(event: KeyboardEvent) {
 		width: min(42rem, 100%);
 		overflow: hidden;
 		border: 1px solid var(--card-border);
-		border-radius: 1.25rem;
+		border-radius: var(--radius-large);
 		background: var(--float-panel-bg);
 		box-shadow: var(--card-shadow-hover);
 		backdrop-filter: blur(22px) saturate(1.12);
@@ -687,7 +689,7 @@ function handleInputKeydown(event: KeyboardEvent) {
 		width: 100%;
 		padding: 0.7rem;
 		border: 1px solid transparent;
-		border-radius: 0.95rem;
+		border-radius: 0.5rem;
 		background: transparent;
 		color: inherit;
 		text-align: left;
@@ -708,7 +710,7 @@ function handleInputKeydown(event: KeyboardEvent) {
 		justify-content: center;
 		width: 2.5rem;
 		height: 2.5rem;
-		border-radius: 0.85rem;
+		border-radius: 0.5rem;
 		background: var(--btn-regular-bg);
 		color: var(--btn-content);
 		font-size: 1.25rem;
@@ -798,7 +800,44 @@ function handleInputKeydown(event: KeyboardEvent) {
 
 	@media (max-width: 768px) {
 		.command-shell {
-			padding-top: 5rem;
+			padding: 4.75rem 0.65rem 0.65rem;
+		}
+
+		.command-results {
+			max-height: calc(100svh - 11rem);
+		}
+	}
+
+	.search-trigger {
+		min-width: 12rem;
+	}
+
+	.search-trigger-label {
+		min-width: 4.5rem;
+		flex: 1;
+	}
+
+	kbd {
+		display: inline-flex;
+		align-items: center;
+		min-height: 1.45rem;
+		padding: 0 0.45rem;
+		border: 1px solid var(--card-border);
+		border-radius: 0.35rem;
+		background: var(--card-bg);
+		color: var(--meta-color);
+		font: inherit;
+		font-size: 0.66rem;
+		font-weight: 750;
+	}
+
+	@media (max-width: 1180px) {
+		.search-trigger {
+			min-width: 9rem;
+		}
+
+		kbd {
+			display: none;
 		}
 	}
 </style>

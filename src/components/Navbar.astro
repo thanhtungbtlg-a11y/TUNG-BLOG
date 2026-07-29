@@ -10,6 +10,7 @@ import DisplaySettings from "./widget/DisplaySettings.svelte";
 import NavMenuPanel from "./widget/NavMenuPanel.astro";
 
 const className = Astro.props.class;
+const currentPath = Astro.url.pathname;
 
 let links: NavBarLink[] = navBarConfig.links.map(
 	(item: NavBarLink | LinkPreset): NavBarLink => {
@@ -19,12 +20,21 @@ let links: NavBarLink[] = navBarConfig.links.map(
 		return item;
 	},
 );
+
+function isCurrentLink(link: NavBarLink) {
+	if (link.external) return false;
+	const linkPath = link.url.replace(/\/+$/, "") || "/";
+	const pagePath = currentPath.replace(/\/+$/, "") || "/";
+	return linkPath === "/"
+		? pagePath === "/"
+		: pagePath === linkPath || pagePath.startsWith(`${linkPath}/`);
+}
 ---
 <div id="navbar" class="z-50 onload-animation">
     <div class="navbar-load-cap absolute h-8 left-0 right-0 -top-8 bg-[var(--card-bg)] transition"></div> <!-- used for onload animation -->
     <div class:list={[
         className,
-        "navbar-surface card-base navbar-glass !overflow-visible max-w-[var(--page-width)] h-[4.5rem] !rounded-t-none mx-auto flex items-center justify-between px-4"]}>
+        "navbar-surface card-base navbar-glass !overflow-visible max-w-[var(--page-width)] h-[4.25rem] !rounded-t-none mx-auto flex items-center justify-between px-3 md:px-4"]}>
         <a href={url('/')} aria-label={`Home - ${siteConfig.title}`} class="navbar-brand btn-plain scale-animation rounded-lg h-[3.25rem] px-3 min-[360px]:px-5 font-bold active:scale-95">
             <div class="flex flex-row text-[var(--primary)] items-center text-md">
                 <img
@@ -44,7 +54,8 @@ let links: NavBarLink[] = navBarConfig.links.map(
 						  rel={l.external ? "noopener noreferrer" : null}
                           data-no-swup={l.native ? true : undefined} data-astro-reload={l.native ? true : undefined}
                           data-nav-url={l.url}
-                          class="navbar-link btn-plain scale-animation rounded-lg h-11 font-bold px-5 active:scale-95"
+						  aria-current={isCurrentLink(l) ? "page" : undefined}
+                          class:list={["navbar-link btn-plain rounded-lg h-11 font-bold px-4 active:scale-95", {"is-active": isCurrentLink(l)}]}
                 >
                     <div class="flex items-center">
                         {l.name}
@@ -95,6 +106,7 @@ let links: NavBarLink[] = navBarConfig.links.map(
 		menuPanel.classList.toggle("float-panel-closed", !open);
 		menuBtn.classList.toggle("is-open", open);
 		menuBtn.setAttribute("aria-expanded", String(open));
+		menuPanel.setAttribute("aria-hidden", String(!open));
 	};
 
     document.addEventListener("keydown", (event) => {
@@ -138,11 +150,52 @@ let links: NavBarLink[] = navBarConfig.links.map(
 </script>
 
 <style is:global>
+.navbar-links {
+	align-items: center;
+	gap: 0.15rem;
+}
+
+.navbar-link {
+	position: relative;
+	font-size: 0.9rem;
+}
+
+.navbar-link::after {
+	position: absolute;
+	right: 0.8rem;
+	bottom: 0.25rem;
+	left: 0.8rem;
+	height: 2px;
+	border-radius: 2px;
+	background: var(--primary);
+	content: "";
+	opacity: 0;
+	transform: scaleX(0.45);
+	transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.navbar-link:hover::after,
+.navbar-link.is-active::after {
+	opacity: 1;
+	transform: scaleX(1);
+}
+
+.navbar-link.is-active {
+	color: var(--primary);
+	background: color-mix(in oklch, var(--primary), transparent 91%);
+}
+
 @media (hover: hover) and (pointer: fine) {
     #display-settings-wrapper:hover #display-setting {
         transform: translateY(0);
         opacity: 1;
         pointer-events: auto;
     }
+}
+
+@media (max-width: 1100px) {
+	.navbar-link {
+		padding-inline: 0.7rem;
+	}
 }
 </style>

@@ -117,7 +117,7 @@ function formatVaultUpdate(value: string) {
 		grid-template-columns: auto minmax(0, 1fr);
 		gap: clamp(1rem, 3vw, 1.75rem);
 		align-items: center;
-		padding: clamp(1.4rem, 4vw, 2.75rem) clamp(1.1rem, 4vw, 3rem);
+		padding: clamp(1.25rem, 3vw, 2.25rem) 0.25rem clamp(1.5rem, 3vw, 2.5rem);
 		border-bottom: 1px solid var(--line-divider);
 	}
 
@@ -138,7 +138,7 @@ function formatVaultUpdate(value: string) {
 		color: var(--primary);
 		font-size: 0.76rem;
 		font-weight: 900;
-		letter-spacing: 0.1em;
+		letter-spacing: 0;
 		text-transform: uppercase;
 	}
 
@@ -152,7 +152,7 @@ function formatVaultUpdate(value: string) {
 
 	.brain-header h1 {
 		color: var(--content-color);
-		font-size: clamp(2rem, 5vw, 3.25rem);
+		font-size: clamp(2rem, 5vw, 3rem);
 		font-weight: 900;
 		line-height: 1.05;
 	}
@@ -168,7 +168,7 @@ function formatVaultUpdate(value: string) {
 	}
 
 	.brain-topics {
-		padding: clamp(1.25rem, 3vw, 2rem) 0;
+		padding: clamp(1.5rem, 3vw, 2.25rem) 0;
 	}
 
 	.brain-section-heading {
@@ -200,7 +200,7 @@ function formatVaultUpdate(value: string) {
 	.brain-topic {
 		display: flex;
 		flex-direction: column;
-		min-height: 17rem;
+		min-height: 14.5rem;
 		padding: clamp(1.1rem, 3vw, 1.5rem);
 		border: 1px solid var(--line-divider);
 		border-radius: var(--radius-large);
@@ -208,32 +208,9 @@ function formatVaultUpdate(value: string) {
 	}
 
 	.brain-topic--live {
-		position: relative;
-		overflow: hidden;
-		background:
-			linear-gradient(
-				145deg,
-				color-mix(in oklch, var(--primary), transparent 90%),
-				transparent 55%
-			),
-			var(--card-bg);
+		border-top: 2px solid color-mix(in oklch, var(--primary), transparent 24%);
+		background: var(--card-bg);
 		text-decoration: none;
-	}
-
-	.brain-topic--live::after {
-		position: absolute;
-		right: -3.5rem;
-		bottom: -4.5rem;
-		width: 12rem;
-		aspect-ratio: 1;
-		border: 1px solid color-mix(in oklch, var(--primary), transparent 78%);
-		border-radius: 50%;
-		content: "";
-		transition: transform 180ms ease;
-	}
-
-	.brain-topic--live:hover::after {
-		transform: scale(1.08);
 	}
 
 	.brain-topic--soon {
@@ -294,7 +271,7 @@ function formatVaultUpdate(value: string) {
 	}
 
 	.brain-topic h3 {
-		font-size: clamp(1.45rem, 3vw, 2rem);
+		font-size: clamp(1.4rem, 3vw, 1.75rem);
 		font-weight: 900;
 		line-height: 1.15;
 	}
@@ -366,13 +343,13 @@ function formatVaultUpdate(value: string) {
 		}
 
 		.brain-topic {
-			min-height: 15rem;
+			min-height: 13.5rem;
 		}
 	}
 
 	@media (max-width: 460px) {
 		.brain-header {
-			padding-inline: 0.35rem;
+			padding-inline: 0.25rem;
 		}
 
 		.brain-section-heading {

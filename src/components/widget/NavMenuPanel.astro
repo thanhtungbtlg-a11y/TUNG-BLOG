@@ -8,12 +8,22 @@ interface Props {
 }
 
 const links = Astro.props.links;
+const currentPath = Astro.url.pathname;
+
+function isCurrentLink(link: NavBarLink) {
+	if (link.external) return false;
+	const linkPath = link.url.replace(/\/+$/, "") || "/";
+	const pagePath = currentPath.replace(/\/+$/, "") || "/";
+	return linkPath === "/"
+		? pagePath === "/"
+		: pagePath === linkPath || pagePath.startsWith(`${linkPath}/`);
+}
 ---
-<div id="nav-menu-panel" class:list={["float-panel float-panel-closed absolute transition-all fixed right-4 px-2 py-2"]}>
+<nav id="nav-menu-panel" aria-label="Mobile navigation" aria-hidden="true" class:list={["float-panel float-panel-closed absolute transition-all fixed right-3 px-2 py-2"]}>
     {links.map((link) => (
-        <a href={link.external ? link.url : url(link.url)} class="group flex justify-between items-center py-2 pl-3 pr-1 rounded-lg gap-8
-            hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)] transition
-        "
+        <a href={link.external ? link.url : url(link.url)}
+		   aria-current={isCurrentLink(link) ? "page" : undefined}
+		   class:list={["mobile-nav-link group flex justify-between items-center py-2.5 pl-3 pr-2 rounded-lg gap-8 hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)] transition", {"is-active": isCurrentLink(link)}]}
            target={link.external ? "_blank" : null}
 		   rel={link.external ? "noopener noreferrer" : null}
            data-no-swup={link.native ? true : undefined}
@@ -32,4 +42,22 @@ const links = Astro.props.links;
             </Icon>}
         </a>
     ))}
-</div>
+</nav>
+
+<style>
+	#nav-menu-panel {
+		width: min(19rem, calc(100vw - 1.5rem));
+	}
+
+	.mobile-nav-link {
+		min-height: 2.75rem;
+	}
+
+	.mobile-nav-link.is-active {
+		background: color-mix(in oklch, var(--primary), transparent 90%);
+	}
+
+	.mobile-nav-link.is-active > div {
+		color: var(--primary);
+	}
+</style>

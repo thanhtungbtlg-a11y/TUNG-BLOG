@@ -13,5 +13,5 @@ const sortedPostsList = await getChronologicalPostsList();
 	description="The complete writing archive of Nguyễn Thanh Tùng"
 	wide
 >
-	<ArchivePanel sortedPosts={sortedPostsList} client:idle></ArchivePanel>
+	<ArchivePanel sortedPosts={sortedPostsList} client:load></ArchivePanel>
 </MainGridLayout>

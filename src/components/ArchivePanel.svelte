@@ -432,7 +432,7 @@ function setViewMode(mode: ViewMode) {
 <style>
 	.archive-shell {
 		display: grid;
-		gap: 1rem;
+		gap: 1.35rem;
 	}
 
 	.archive-header,
@@ -447,11 +447,8 @@ function setViewMode(mode: ViewMode) {
 	.archive-header {
 		justify-content: space-between;
 		gap: 1rem;
-		padding: 1.1rem 1.25rem;
-		border: 1px solid var(--card-border);
-		border-radius: 8px;
-		background: var(--card-bg);
-		box-shadow: var(--card-shadow);
+		padding: 0.45rem 0.25rem 1.25rem;
+		border-bottom: 1px solid var(--line-divider);
 	}
 
 	.archive-header p,
@@ -464,13 +461,15 @@ function setViewMode(mode: ViewMode) {
 		color: var(--meta-color);
 		font-size: 0.82rem;
 		font-weight: 800;
+		letter-spacing: 0;
 		text-transform: uppercase;
 	}
 
 	.archive-header h1 {
 		margin-top: 0.15rem;
 		color: var(--content-color);
-		font-size: 1.65rem;
+		font-size: clamp(1.8rem, 4vw, 2.35rem);
+		line-height: 1.15;
 	}
 
 	.archive-total {
@@ -513,9 +512,9 @@ function setViewMode(mode: ViewMode) {
 		padding: 0.85rem;
 		border: 1px solid var(--card-border);
 		border-radius: 8px;
-		background: color-mix(in oklch, var(--card-bg), transparent 8%);
+		background: color-mix(in oklch, var(--float-panel-bg), transparent 3%);
 		box-shadow: var(--card-shadow);
-		backdrop-filter: blur(18px) saturate(1.08);
+		backdrop-filter: blur(14px) saturate(1.05);
 	}
 
 	.archive-filters label {
@@ -598,13 +597,15 @@ function setViewMode(mode: ViewMode) {
 	.latest-section,
 	.timeline-section {
 		display: grid;
-		gap: 0.75rem;
+		gap: 0.85rem;
 	}
 
 	.section-title {
 		gap: 0.45rem;
 		color: var(--primary);
+		font-size: 0.82rem;
 		font-weight: 900;
+		text-transform: uppercase;
 	}
 
 	.pinned-grid {
@@ -623,7 +624,7 @@ function setViewMode(mode: ViewMode) {
 		display: grid;
 		align-content: start;
 		gap: 0.45rem;
-		min-height: 8.8rem;
+		min-height: 8rem;
 		padding: 0.95rem;
 		border: 1px solid var(--card-border);
 		border-radius: 8px;
@@ -696,7 +697,7 @@ function setViewMode(mode: ViewMode) {
 	.year-group {
 		display: grid;
 		gap: 0.65rem;
-		padding: 0.9rem;
+		padding: 1rem;
 		border: 1px solid var(--card-border);
 		border-radius: 8px;
 		background: var(--card-bg);
@@ -919,8 +920,7 @@ function setViewMode(mode: ViewMode) {
 
 	@media (max-width: 768px) {
 		.archive-header {
-			align-items: flex-start;
-			flex-direction: column;
+			align-items: flex-end;
 		}
 
 		.archive-filters,
@@ -956,6 +956,22 @@ function setViewMode(mode: ViewMode) {
 		.month-label {
 			padding-top: 0;
 		}
+
+		.reset-button {
+			flex: 0 0 auto;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.archive-header {
+			align-items: flex-start;
+			flex-direction: column;
+		}
+
+		.reset-button {
+			width: 100%;
+			justify-content: center;
+		}
 	}
 
 	@media (min-width: 769px) and (max-width: 1100px) {
@@ -971,7 +987,7 @@ function setViewMode(mode: ViewMode) {
 	@media (min-width: 769px) {
 		.archive-filters {
 			position: sticky;
-			top: 5rem;
+			top: 4.75rem;
 			z-index: 20;
 		}
 	}
