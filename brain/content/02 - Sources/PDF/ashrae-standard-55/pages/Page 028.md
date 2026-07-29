@@ -4,6 +4,10 @@ source_document: "[[ASHRAE-Standard-55 - Source Note]]"
 page: 28
 extraction_method: text
 page_classification: text
+structure_repaired: true
+repair_method: embedded-text+visual-layout
+repair_review_status: accepted
+repaired: 2026-07-28
 needs_review: true
 publish: true
 ---
@@ -23,18 +27,22 @@ publish: true
 The following code is one implementation of the PMV calculation using JavaScript in SI units. This calculation does not include discomfort risk due to local discomfort factors. The input variable “clo” in the PMV
 function shall be calculated using the following equation:
 
-clo = _Icl_ × (0.6 + 0.4/ _M_ ) for _M_  1.2
+clo = _Icl_ × (0.6 + 0.4/ _M_ ) for _M_ ≥ 1.2
 
 clo = _Icl_ for _M_ < 1.2
 
 where _M_ is the metabolic rate in met units and _Icl_ is the clothing insulation.
 
-The input variable _Vel_ in the PMV function is the sum of the average air speed ( _V_ ) plus the activitygenerated air speed ( _Vag_ ) caused by motion of individual body parts (m/s). It is a function of metabolic
+The input variable _Vel_ in the PMV function is the sum of the average air speed ( _V_ ) plus the activity-generated air speed ( _Vag_ ) caused by motion of individual body parts (m/s). It is a function of metabolic
 rate and is added to the average air speed to determine convective cooling of the body. _Vag_ is assumed to
 be 0 for metabolic rates equal and lower than 1 met and otherwise equal to
 
 
-for _M_      - 1 met.
+_Vag_ = 0.3(_M_ – 1)
+
+_Vag_ = 59.1(_M_ – 1)
+
+for _M_ > 1 met.
 
 
 pmv = function(ta, tr, vel, rh, met, clo, wme) {

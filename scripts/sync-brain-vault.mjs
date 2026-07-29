@@ -19,6 +19,8 @@ const ignoredDirectories = new Set([
 	".obsidian",
 	".smart-env",
 	".trash",
+	"_page-renders",
+	"_raw",
 	"98 - codex reports",
 	"_metadata",
 	"docs",

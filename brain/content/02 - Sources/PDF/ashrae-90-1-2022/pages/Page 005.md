@@ -4,6 +4,10 @@ source_document: "[[ASHRAE-90.1-2022- - Source Note]]"
 page: 5
 extraction_method: text
 page_classification: text
+structure_repaired: true
+repair_method: embedded-text+visual-layout
+repair_review_status: accepted
+repaired: 2026-07-28
 needs_review: true
 publish: true
 ---
@@ -65,6 +69,29 @@ _**New Normative Appendix J**_
 _•_ _Contains performance curves that represent minimally compliant chiller performance for the budget and_
 _baseline building design and for proposed building designs when specific equipment performance is not_
 _known._
+
+**1. PURPOSE**
+
+**1.1** To establish the minimum _energy efficiency_ requirements of _buildings_ other than _low-rise residential buildings_, and _sites_ for
+
+a. design, _construction_, and a plan for operation and maintenance; and
+b. utilization of _on-site renewable energy_ resources.
+
+**2. SCOPE**
+
+**2.1** This standard provides
+
+a. minimum _energy-efficient_ requirements for the design and _construction_, and a plan for operation and maintenance of,
+
+1. new _buildings_ and their _systems_,
+2. new portions of _buildings_ and their _systems_,
+3. new _systems_ and _equipment_ specifically identified in this standard that are part of a _site_,
+4. new _systems_ and _equipment_ in existing _buildings_, and
+5. new _equipment_ or _building systems_ specifically identified in this standard that are part of _process applications_
+
+and
+
+b. criteria for determining compliance with these requirements.
 
 
 1. PURPOSE + 2. SCOPE:
