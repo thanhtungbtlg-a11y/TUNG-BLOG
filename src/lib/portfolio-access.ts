@@ -1,5 +1,5 @@
 export const PORTFOLIO_ACCESS_COOKIE = "__Host-portfolio_access";
-export const PORTFOLIO_ACCESS_MESSAGE = "portfolio-access-v1";
+export const PORTFOLIO_ACCESS_MESSAGE = "portfolio-access-v2";
 
 export function expirePortfolioAccessCookie() {
 	return `${PORTFOLIO_ACCESS_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`;
