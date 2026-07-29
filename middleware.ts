@@ -1,5 +1,6 @@
 import { next } from "@vercel/functions";
 import {
+	expirePortfolioAccessCookie,
 	PORTFOLIO_ACCESS_COOKIE,
 	PORTFOLIO_ACCESS_MESSAGE,
 	readCookie,
@@ -20,7 +21,12 @@ export default async function protectPortfolio(request: Request) {
 		cookie &&
 		(await tokensMatch(cookie, await createAccessToken(accessSecret)))
 	) {
-		return next();
+		return next({
+			headers: {
+				"Set-Cookie": expirePortfolioAccessCookie(),
+				"Cache-Control": "private, no-store, max-age=0",
+			},
+		});
 	}
 
 	const requestUrl = new URL(request.url);

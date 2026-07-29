@@ -77,10 +77,6 @@ onMount(() => {
 
 async function requestAccess(href: string) {
 	pendingHref = safeDestination(href);
-	if (sessionStorage.getItem("portfolio-unlocked") === "1") {
-		window.location.assign(pendingHref);
-		return;
-	}
 	try {
 		const response = await fetch("/api/portfolio/access", {
 			headers: { Accept: "application/json" },
@@ -88,7 +84,6 @@ async function requestAccess(href: string) {
 		});
 		const result = await response.json().catch(() => ({}));
 		if (response.ok && result.unlocked === true) {
-			sessionStorage.setItem("portfolio-unlocked", "1");
 			window.location.assign(pendingHref);
 			return;
 		}
@@ -133,7 +128,6 @@ async function submitPassword() {
 		if (!response.ok || result.unlocked !== true) {
 			throw new Error(result.error || "The portfolio could not be opened.");
 		}
-		sessionStorage.setItem("portfolio-unlocked", "1");
 		window.location.assign(pendingHref);
 	} catch (cause) {
 		error =

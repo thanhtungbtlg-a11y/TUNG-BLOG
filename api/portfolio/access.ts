@@ -1,5 +1,6 @@
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import {
+	expirePortfolioAccessCookie,
 	PORTFOLIO_ACCESS_COOKIE,
 	PORTFOLIO_ACCESS_MESSAGE,
 	readCookie,
@@ -44,10 +45,7 @@ export default async function handler(
 	}
 
 	if (request.method === "DELETE") {
-		response.setHeader(
-			"Set-Cookie",
-			`${PORTFOLIO_ACCESS_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`,
-		);
+		response.setHeader("Set-Cookie", expirePortfolioAccessCookie());
 		response.status(200).json({ unlocked: false });
 		return;
 	}
