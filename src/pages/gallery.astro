@@ -106,19 +106,19 @@ function formatDate(value: string) {
 					<span>Search</span>
 					<span class="gallery-search">
 						<Icon name="fa6-solid:magnifying-glass" aria-hidden="true" />
-						<input id="gallery-search" type="search" placeholder="Title, description, or collection" autocomplete="off" />
+						<input id="gallery-search" name="q" type="search" placeholder="Title, description, or collection…" autocomplete="off" aria-controls="gallery-groups" />
 					</span>
 				</label>
 				<label>
 					<span>Year</span>
-					<select id="gallery-year">
+					<select id="gallery-year" name="year" aria-controls="gallery-groups">
 						<option value="">All</option>
 						{years.map((year) => <option value={year}>{year}</option>)}
 					</select>
 				</label>
 				<label>
 					<span>Collection</span>
-					<select id="gallery-album">
+					<select id="gallery-album" name="album" aria-controls="gallery-groups">
 						<option value="">All</option>
 						{albums.map((album) => <option value={album}>{album}</option>)}
 					</select>
@@ -199,15 +199,34 @@ function formatDate(value: string) {
 		const summary = document.querySelector('#gallery-summary');
 		const empty = document.querySelector('#gallery-empty');
 		if (!(search instanceof HTMLInputElement) || !(year instanceof HTMLSelectElement) || !(album instanceof HTMLSelectElement) || !(reset instanceof HTMLButtonElement)) return;
-		if (search.dataset.bound === 'true') return;
-		search.dataset.bound = 'true';
+		window.__galleryFilterController?.abort();
+		const controller = new AbortController();
+		window.__galleryFilterController = controller;
+		const listenerOptions = { signal: controller.signal };
 
 		const normalizeRestoredValue = (value) => value === 'null' || value === 'undefined' ? '' : value;
-		search.value = normalizeRestoredValue(search.value);
-		year.value = normalizeRestoredValue(year.value);
-		album.value = normalizeRestoredValue(album.value);
+		const restoreFromUrl = () => {
+			const params = new URLSearchParams(window.location.search);
+			search.value = normalizeRestoredValue(params.get('q') ?? search.value);
+			year.value = normalizeRestoredValue(params.get('year') ?? year.value);
+			album.value = normalizeRestoredValue(params.get('album') ?? album.value);
+		};
 
-		const apply = () => {
+		const syncUrl = () => {
+			const nextUrl = new URL(window.location.href);
+			const values = {
+				q: search.value.trim(),
+				year: year.value,
+				album: album.value,
+			};
+			Object.entries(values).forEach(([key, value]) => {
+				if (value) nextUrl.searchParams.set(key, value);
+				else nextUrl.searchParams.delete(key);
+			});
+			window.history.replaceState(window.history.state, '', `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
+		};
+
+		const apply = (updateUrl = true) => {
 			const query = search.value.trim().toLocaleLowerCase('en');
 			const selectedAlbum = album.value.trim().toLocaleLowerCase('en');
 			let visibleItems = 0;
@@ -234,20 +253,26 @@ function formatDate(value: string) {
 			reset.disabled = !query && !year.value && !selectedAlbum;
 			if (summary) summary.textContent = `${visibleItems} ${visibleItems === 1 ? 'photo' : 'photos'} across ${visibleGroups} ${visibleGroups === 1 ? 'collection' : 'collections'}`;
 			if (empty) empty.hidden = visibleItems !== 0;
+			if (updateUrl) syncUrl();
 		};
 
-		search.addEventListener('input', apply);
-		year.addEventListener('change', apply);
-		album.addEventListener('change', apply);
+		restoreFromUrl();
+		search.addEventListener('input', () => apply(), listenerOptions);
+		year.addEventListener('change', () => apply(), listenerOptions);
+		album.addEventListener('change', () => apply(), listenerOptions);
 		reset.addEventListener('click', () => {
 			search.value = '';
 			year.value = '';
 			album.value = '';
 			apply();
 			search.focus();
-		});
+		}, listenerOptions);
+		window.addEventListener('popstate', () => {
+			restoreFromUrl();
+			apply(false);
+		}, listenerOptions);
 
-		apply();
+		apply(false);
 	})();
 	</script>
 </MainGridLayout>
@@ -361,6 +386,12 @@ function formatDate(value: string) {
 		background: transparent;
 		color: inherit;
 		outline: none;
+	}
+
+	.gallery-search:focus-within {
+		border-color: var(--primary);
+		outline: 2px solid color-mix(in oklch, var(--primary), transparent 36%);
+		outline-offset: 2px;
 	}
 
 	.gallery-toolbar select {

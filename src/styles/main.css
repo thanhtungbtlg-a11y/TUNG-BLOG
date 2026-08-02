@@ -30,6 +30,14 @@ body {
 	text-rendering: optimizeLegibility;
 }
 
+:where([id]) {
+    scroll-margin-top: 6rem;
+}
+
+:where(a, button, [role="button"]) {
+    touch-action: manipulation;
+}
+
 .skip-link {
     position: fixed;
     top: 0.75rem;
@@ -437,7 +445,7 @@ html.reading-mode .music-player.expanded {
     left: calc(50% - 1px);
     border-left: 2px dashed var(--line-color);
     pointer-events: none;
-    transition: all 0.3s;
+    transition: transform 0.3s, border-color 0.3s;
     transform: translateY(-50%);
 }
 
@@ -446,7 +454,7 @@ html.reading-mode .music-player.expanded {
 }
 
 .custom-md spoiler {
-  @apply bg-[var(--codeblock-bg)] hover:bg-transparent px-1 py-0.5 overflow-hidden rounded-md transition-all duration-150;
+  @apply bg-[var(--codeblock-bg)] hover:bg-transparent px-1 py-0.5 overflow-hidden rounded-md transition-colors duration-150;
 
   &:not(:hover) {
     color: var(--codeblock-bg);

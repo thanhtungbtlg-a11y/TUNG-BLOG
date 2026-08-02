@@ -123,13 +123,6 @@ onDestroy(() => {
 	}
 });
 
-function handleMiniKeydown(event: KeyboardEvent) {
-	if (event.key === "Enter" || event.key === " ") {
-		event.preventDefault();
-		toggleExpanded();
-	}
-}
-
 function saveState() {
 	localStorage.setItem(
 		STORAGE_KEY,
@@ -702,31 +695,30 @@ function formatTime(seconds: number) {
 	></audio>
 
 	<div class:expanded class:is-playing={isPlaying} class="music-player">
-		<div
-			class="mini"
-			role="button"
-			tabindex="0"
-			onclick={toggleExpanded}
-			onkeydown={handleMiniKeydown}
-		>
-			<span class="sr-only">{expanded ? "Collapse music player" : "Open music player"}</span>
-			<div class="cover-shell">
-				<img src={currentTrack.coverThumb || currentTrack.cover} alt={currentTrack.title} class="cover-mini" onerror={useFallbackCover} />
-				<div class="pulse"></div>
-			</div>
+		<div class="mini">
+			<button
+				class="mini-details"
+				aria-label={expanded ? "Collapse music player" : "Open music player"}
+				onclick={toggleExpanded}
+			>
+				<div class="cover-shell">
+					<img src={currentTrack.coverThumb || currentTrack.cover} alt={currentTrack.title} width="38" height="38" decoding="async" class="cover-mini" onerror={useFallbackCover} />
+					<div class="pulse"></div>
+				</div>
 
-			<div class="mini-info">
-				<div class="eyebrow">Now playing</div>
-				<div class="title" title={currentTrack.title}>{currentTrack.title}</div>
-				<div class="artist">{currentTrack.artist}</div>
-			</div>
+				<div class="mini-info">
+					<div class="eyebrow">Now playing</div>
+					<div class="title" title={currentTrack.title}>{currentTrack.title}</div>
+					<div class="artist">{currentTrack.artist}</div>
+				</div>
 
-			<div class="mini-visualizer" aria-hidden="true">
-				<span></span>
-				<span></span>
-				<span></span>
-				<span></span>
-			</div>
+				<div class="mini-visualizer" aria-hidden="true">
+					<span></span>
+					<span></span>
+					<span></span>
+					<span></span>
+				</div>
+			</button>
 
 			<button class="icon-btn" aria-label={isPlaying ? "Pause music" : "Play music"} onclick={handlePlayClick}>
 				{#if isPlaying}
@@ -740,7 +732,7 @@ function formatTime(seconds: number) {
 		{#if expanded}
 			<div class="panel">
 				<div class="hero">
-					<img src={currentTrack.cover} alt={currentTrack.title} class="cover" onerror={useFallbackCover} />
+					<img src={currentTrack.cover} alt={currentTrack.title} width="640" height="320" decoding="async" class="cover" onerror={useFallbackCover} />
 					<div class="hero-shade"></div>
 				</div>
 
@@ -812,7 +804,7 @@ function formatTime(seconds: number) {
 							title={`${track.title} - ${track.artist}`}
 							onclick={() => changeTrack(index)}
 						>
-							<img src={track.coverThumb || track.cover} alt={track.title} onerror={useFallbackCover} />
+							<img src={track.coverThumb || track.cover} alt={track.title} width="34" height="34" loading="lazy" decoding="async" onerror={useFallbackCover} />
 							<div>
 								<div class="track-title" title={track.title}>{track.title}</div>
 								<div class="track-artist">{track.artist}</div>
@@ -869,15 +861,36 @@ function formatTime(seconds: number) {
 		min-height: 54px;
 		padding: 7px 8px;
 		border-radius: 16px;
-		cursor: pointer;
-		outline: none;
 		transition: transform 220ms ease, border-color 220ms ease, background 220ms ease;
 	}
 
 	.mini:hover,
-	.mini:focus-visible {
+	.mini:focus-within {
 		transform: translateY(-2px);
 		border-color: color-mix(in oklch, var(--music-accent), white 20%);
+	}
+
+	.mini-details {
+		display: flex;
+		min-width: 0;
+		flex: 1;
+		align-items: center;
+		gap: 8px;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: inherit;
+		text-align: left;
+		cursor: pointer;
+	}
+
+	.mini-details:focus-visible,
+	.icon-btn:focus-visible,
+	.controls button:focus-visible,
+	.track:focus-visible,
+	input[type="range"]:focus-visible {
+		outline: 2px solid var(--music-accent);
+		outline-offset: 2px;
 	}
 
 	.cover-shell {
@@ -1022,7 +1035,6 @@ function formatTime(seconds: number) {
 		background: rgba(255, 255, 255, 0.18);
 		border-color: rgba(255, 255, 255, 0.2);
 		transform: translateY(-1px);
-		outline: none;
 	}
 
 	.icon-btn:active,
@@ -1098,6 +1110,10 @@ function formatTime(seconds: number) {
 		background: linear-gradient(to right, var(--music-accent) 0%, var(--music-accent) var(--value), rgba(255, 255, 255, 0.16) var(--value), rgba(255, 255, 255, 0.16) 100%);
 		outline: none;
 		appearance: none;
+	}
+
+	input[type="range"]:focus-visible {
+		box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.12);
 	}
 
 	input[type="range"]::-webkit-slider-thumb {
@@ -1194,7 +1210,6 @@ function formatTime(seconds: number) {
 	.track.active {
 		background: rgba(255, 255, 255, 0.1);
 		border-color: rgba(255, 255, 255, 0.09);
-		outline: none;
 	}
 
 	.track:active {

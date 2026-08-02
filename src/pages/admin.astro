@@ -23,5 +23,9 @@ const posts = entries
 	wide={true}
 	hidePlayer={true}
 >
+	<Fragment slot="head">
+		<meta name="robots" content="noindex, nofollow, noarchive" />
+	</Fragment>
+	<h1 class="sr-only">Blog administration</h1>
 	<AdminDashboard posts={posts} client:load />
 </MainGridLayout>
