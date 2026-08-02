@@ -19,7 +19,7 @@ function isCurrentLink(link: NavBarLink) {
 		: pagePath === linkPath || pagePath.startsWith(`${linkPath}/`);
 }
 ---
-<nav id="nav-menu-panel" aria-label="Mobile navigation" aria-hidden="true" class:list={["float-panel float-panel-closed absolute transition-all fixed right-3 px-2 py-2"]}>
+<nav id="nav-menu-panel" aria-label="Mobile navigation" aria-hidden="true" inert class:list={["float-panel float-panel-closed absolute transition-all fixed right-3 px-2 py-2"]}>
     {links.map((link) => (
         <a href={link.external ? link.url : url(link.url)}
 		   aria-current={isCurrentLink(link) ? "page" : undefined}

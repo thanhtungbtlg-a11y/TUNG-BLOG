@@ -43,5 +43,11 @@ jobs:
       - name: Run API utility tests
         run: pnpm test
 
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run browser smoke and accessibility tests
+        run: pnpm test:e2e
+
       - name: Build site and Second Brain
         run: pnpm build

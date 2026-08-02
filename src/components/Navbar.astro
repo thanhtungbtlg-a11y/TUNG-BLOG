@@ -107,6 +107,7 @@ function isCurrentLink(link: NavBarLink) {
 		menuBtn.classList.toggle("is-open", open);
 		menuBtn.setAttribute("aria-expanded", String(open));
 		menuPanel.setAttribute("aria-hidden", String(!open));
+		menuPanel.toggleAttribute("inert", !open);
 	};
 
     document.addEventListener("keydown", (event) => {
