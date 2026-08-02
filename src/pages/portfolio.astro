@@ -26,15 +26,30 @@ import {
 				<h1>{portfolioProfile.name}</h1>
 				<p class="headline">{portfolioProfile.headline}</p>
 				<p class="summary">{portfolioProfile.summary}</p>
-				<a
-					class="contact-link"
-					href={portfolioProfile.email}
-					target="_blank"
-					rel="noopener noreferrer"
-				>
-					<Icon name="fa6-regular:envelope" />
-					Email
-				</a>
+				<p class="profile-location">
+					<Icon name="material-symbols:location-on-outline-rounded" />
+					{portfolioProfile.location}
+				</p>
+				<div class="contact-actions">
+					<a
+						class="contact-link"
+						href={portfolioProfile.email}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						<Icon name="fa6-regular:envelope" />
+						Email
+					</a>
+					<a
+						class="contact-link secondary"
+						href={portfolioProfile.linkedin}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						<Icon name="fa6-brands:linkedin-in" />
+						LinkedIn
+					</a>
+				</div>
 			</div>
 
 			<dl class="career-snapshot" aria-label="Career snapshot">
@@ -148,7 +163,7 @@ import {
 				</div>
 				<p>
 					Selected work is documented through context, personal role, process,
-					and outcome.
+					and deliverables.
 				</p>
 			</div>
 
@@ -156,6 +171,18 @@ import {
 				{
 					portfolioProjects.map((project) => (
 						<article class="project-card card-base interactive-card">
+							{project.image && (
+								<div class="project-visual">
+									<img
+										src={project.image}
+										alt={project.imageAlt ?? ""}
+										width={project.imageWidth}
+										height={project.imageHeight}
+										loading="lazy"
+										decoding="async"
+									/>
+								</div>
+							)}
 							<div class="project-topline">
 								<span>{project.category}</span>
 								<span class:list={["status", project.status.toLowerCase()]}>
@@ -179,8 +206,8 @@ import {
 							</div>
 
 							<div class="project-detail">
-								<strong>Outcome</strong>
-								<p>{project.outcome}</p>
+								<strong>Deliverables</strong>
+								<p>{project.deliverables}</p>
 							</div>
 
 							<ul class="tag-list" aria-label={`${project.title} skills`}>
@@ -353,12 +380,31 @@ import {
 		line-height: 1.75;
 	}
 
+	.profile-location {
+		display: flex;
+		align-items: center;
+		gap: 0.45rem;
+		margin: 1rem 0 0;
+		color: oklch(0.88 0.02 var(--hue) / 0.72);
+		font-size: 0.9rem;
+	}
+
+	.profile-location :global(svg) {
+		font-size: 1.15rem;
+	}
+
+	.contact-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.65rem;
+		margin-top: 1.5rem;
+	}
+
 	.contact-link {
 		display: inline-flex;
 		align-items: center;
 		gap: 0.55rem;
 		min-height: var(--control-height);
-		margin-top: 1.75rem;
 		padding: 0 1.1rem;
 		border: 1px solid oklch(1 0 0 / 0.18);
 		border-radius: 999px;
@@ -374,6 +420,10 @@ import {
 	.contact-link:hover {
 		background: oklch(1 0 0 / 0.14);
 		transform: translateY(-1px);
+	}
+
+	.contact-link.secondary {
+		background: transparent;
 	}
 
 	.career-snapshot {
@@ -645,9 +695,32 @@ import {
 	}
 
 	.project-card {
+		--project-card-padding: clamp(1.25rem, 3vw, 2rem);
+
 		display: flex;
 		flex-direction: column;
-		padding: clamp(1.25rem, 3vw, 2rem);
+		padding: var(--project-card-padding);
+		overflow: hidden;
+	}
+
+	.project-visual {
+		position: relative;
+		aspect-ratio: 16 / 9;
+		margin: calc(0px - var(--project-card-padding))
+			calc(0px - var(--project-card-padding)) 1.35rem;
+		overflow: hidden;
+		background: var(--btn-regular-bg);
+	}
+
+	.project-visual img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: transform 320ms ease;
+	}
+
+	.project-card:hover .project-visual img {
+		transform: scale(1.025);
 	}
 
 	.project-topline {
@@ -859,6 +932,15 @@ import {
 
 		.hero-copy h1 {
 			font-size: clamp(2.55rem, 11vw, 3rem);
+		}
+
+		.contact-actions,
+		.contact-link {
+			width: 100%;
+		}
+
+		.contact-link {
+			justify-content: center;
 		}
 
 		.career-snapshot {
