@@ -1,0 +1,7 @@
+html {
+	scroll-behavior: auto;
+}
+
+.music-player {
+	visibility: hidden;
+}
