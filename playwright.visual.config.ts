@@ -17,7 +17,8 @@ export default defineConfig({
 		toHaveScreenshot: {
 			animations: "disabled",
 			caret: "hide",
-			maxDiffPixelRatio: 0.02,
+			// Linux and Windows rasterize the same bundled fonts differently.
+			maxDiffPixelRatio: process.env.CI ? 0.035 : 0.02,
 			threshold: 0.25,
 		},
 	},
