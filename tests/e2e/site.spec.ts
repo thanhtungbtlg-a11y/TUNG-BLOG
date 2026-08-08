@@ -31,6 +31,9 @@ test("home presents engineering work and personal discovery without horizontal o
 	await expect(
 		page.getByRole("link", { name: "View engineering work" }),
 	).toBeVisible();
+	await expect(
+		page.getByRole("link", { name: "About Nguyễn Thanh Tùng" }),
+	).toBeVisible();
 	await expect(page.locator("main")).toBeVisible();
 	await expectNoHorizontalOverflow(page);
 });
