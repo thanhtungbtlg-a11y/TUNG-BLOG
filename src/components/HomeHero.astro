@@ -1,315 +1,411 @@
 ---
 import { Image } from "astro:assets";
-import { getSortedPostsList } from "@utils/content-utils";
-import { getPostUrlBySlug } from "@utils/url-utils";
 import { Icon } from "astro-icon/components";
-import heroImage from "../assets/images/home-hero-wallhaven.webp";
-import { brainTopics } from "../data/brain-topics";
-import galleryMetadata from "../data/gallery.json";
-import galleryStatus from "../data/gallery-status.json";
+import heroImage from "../assets/images/home-engineering-workspace.png";
+import type { HomepageData } from "../utils/homepage-data";
 
-const posts = await getSortedPostsList();
-const latestPost = posts.reduce<(typeof posts)[number] | undefined>(
-	(latest, post) => {
-		if (!latest) return post;
-		const postDate = post.data.updated ?? post.data.published;
-		const latestDate = latest.data.updated ?? latest.data.published;
-		return postDate.getTime() > latestDate.getTime() ? post : latest;
-	},
-	undefined,
-);
-
-type GalleryItem = (typeof galleryMetadata)[number];
-const latestGalleryItem = galleryMetadata.reduce<GalleryItem | undefined>(
-	(latest, item) => {
-		if (!latest) return item;
-		return new Date(item.date).getTime() > new Date(latest.date).getTime()
-			? item
-			: latest;
-	},
-	undefined,
-);
-
-const latestVault = brainTopics
-	.filter((topic) => topic.status === "live" && topic.href && topic.lastUpdated)
-	.sort(
-		(a, b) =>
-			new Date(b.lastUpdated ?? 0).getTime() -
-			new Date(a.lastUpdated ?? 0).getTime(),
-	)[0];
-
-type HeroUpdate = {
-	section: string;
-	title: string;
-	date: Date;
-	href: string;
-	icon: string;
-	noSwup?: boolean;
-};
-
-const updates: HeroUpdate[] = [];
-if (latestPost) {
-	updates.push({
-		section: "Journal",
-		title: latestPost.data.title,
-		date: latestPost.data.updated ?? latestPost.data.published,
-		href: getPostUrlBySlug(latestPost.slug),
-		icon: "material-symbols:article-outline-rounded",
-	});
+interface Props {
+	data: HomepageData;
 }
-if (latestGalleryItem) {
-	updates.push({
-		section: "Gallery",
-		title: latestGalleryItem.title,
-		date: new Date(galleryStatus.lastUpdatedAt),
-		href: "/gallery/",
-		icon: "material-symbols:photo-library-outline-rounded",
-	});
-}
-if (latestVault?.href && latestVault.lastUpdated) {
-	updates.push({
-		section: "Second Brain",
-		title: latestVault.title,
-		date: new Date(latestVault.lastUpdated),
-		href: latestVault.href,
-		icon: latestVault.icon,
-		noSwup: true,
-	});
-}
-updates.sort((a, b) => b.date.getTime() - a.date.getTime());
 
-const dateFormatter = new Intl.DateTimeFormat("en-GB", {
-	day: "2-digit",
-	month: "short",
-	year: "numeric",
-	timeZone: "Asia/Ho_Chi_Minh",
-});
+const { data } = Astro.props;
+const buildDate = new Date();
+const revision = `${String(buildDate.getMonth() + 1).padStart(2, "0")}.${String(buildDate.getFullYear()).slice(-2)}`;
 ---
 
-<section class="home-hero onload-animation" aria-label="Home cover image">
-	<h1 class="sr-only">Nguyễn Thanh Tùng</h1>
-	<Image
-		src={heroImage}
-		alt="A warm workspace with books, vintage computers, and sunlight through the window"
-		class="home-hero__image"
-		widths={[640, 960, 1280, 1600, 1920]}
-		sizes="(max-width: 768px) 100vw, 1280px"
-		loading="eager"
-		decoding="async"
-		fetchpriority="high"
-		quality={84}
-	/>
-	<div class="home-hero__updates" aria-label="Recent updates">
-		<p>Recent updates</p>
-		<div class="home-hero__update-list">
-			{
-				updates.map((update) => (
-					<a
-						class="home-hero__update"
-						href={update.href}
-						aria-label={`Open ${update.section}: ${update.title}`}
-						data-no-swup={update.noSwup ? true : undefined}
-					>
-						<span class="home-hero__update-icon" aria-hidden="true">
-							<Icon name={update.icon} />
-						</span>
-						<span class="home-hero__update-content">
-							<small>
-								{update.section}
-								<time datetime={update.date.toISOString()}>
-									{dateFormatter.format(update.date)}
-								</time>
-							</small>
-							<strong>{update.title}</strong>
-						</span>
-						<Icon
-							class="home-hero__update-arrow"
-							name="material-symbols:arrow-outward-rounded"
-						/>
-					</a>
-				))
-			}
+<section class="home-hero onload-animation" data-home-hero aria-labelledby="home-title">
+	<div class="home-hero__media">
+		<Image
+			src={heroImage}
+			alt="A quiet desk beside a sunlit window with a chair, a cup, and two plants"
+			class="home-hero__image"
+			widths={[480, 718]}
+			sizes="(max-width: 760px) 100vw, 1200px"
+			loading="eager"
+			decoding="async"
+			fetchpriority="high"
+			quality={88}
+		/>
+		<div class="home-hero__shade" aria-hidden="true"></div>
+
+		<dl class="home-hero__metadata" aria-label="Homepage document metadata">
+			<div>
+				<dt>Document</dt>
+				<dd>Home</dd>
+			</div>
+			<div>
+				<dt>Revision</dt>
+				<dd>{revision}</dd>
+			</div>
+			<div>
+				<dt>Status</dt>
+				<dd><span aria-hidden="true"></span>Active</dd>
+			</div>
+		</dl>
+
+		<div class="home-hero__content">
+			<p class="home-hero__kicker">MEP / Piping / Knowledge systems</p>
+			<h1 id="home-title">Nguyễn Thanh Tùng</h1>
+			<p class="home-hero__intro">
+				I design building services and industrial piping systems, then
+				document what I learn through projects, notes, and photographs.
+			</p>
+			<div class="home-hero__actions">
+				<a class="home-hero__primary" href="/portfolio/">
+					View engineering work
+					<Icon name="material-symbols:arrow-outward-rounded" aria-hidden="true" />
+				</a>
+				<a class="home-hero__secondary" href="/archive/">Read the journal</a>
+			</div>
 		</div>
+	</div>
+
+	<div class="document-register" data-document-register aria-label="Website document register">
+		<p>
+			<span>Register</span>
+			<strong>Current record</strong>
+		</p>
+		<dl>
+			<div>
+				<dt>Journal</dt>
+				<dd>{data.counts.journal}<span> entries</span></dd>
+			</div>
+			<div>
+				<dt>Gallery</dt>
+				<dd>{data.counts.gallery}<span> photographs</span></dd>
+			</div>
+			<div>
+				<dt>Knowledge</dt>
+				<dd>{data.counts.liveVaults}<span> live vault</span></dd>
+			</div>
+		</dl>
 	</div>
 </section>
 
 <style>
 	.home-hero {
+		display: grid;
+		gap: 0;
+		color: #fff;
+	}
+
+	.home-hero__media {
 		position: relative;
+		isolation: isolate;
+		min-height: 40rem;
 		overflow: hidden;
-		min-height: min(42rem, calc(100svh - 7rem));
-		border: 1px solid color-mix(in oklch, var(--primary), transparent 72%);
-		border-radius: var(--radius-large);
-		background: var(--card-bg-solid);
+		border: 1px solid color-mix(in oklch, var(--primary), transparent 64%);
+		border-radius: var(--radius-large) var(--radius-large) 0 0;
+		background: #1c211f;
 		box-shadow: var(--card-shadow);
 	}
 
-	.home-hero__image {
+	.home-hero__image,
+	.home-hero__shade {
 		position: absolute;
 		inset: 0;
 		width: 100%;
 		height: 100%;
+	}
+
+	.home-hero__image {
+		z-index: -2;
 		object-fit: cover;
 		object-position: center;
-		filter: saturate(0.96) contrast(1.02);
+		filter: saturate(0.92) contrast(1.03);
 	}
 
-	.home-hero__updates {
+	.home-hero__shade {
+		z-index: -1;
+		background: rgb(5 9 8 / 38%);
+	}
+
+	.home-hero__metadata {
 		position: absolute;
-		right: 1rem;
-		bottom: 0.85rem;
-		left: 1rem;
-		border: 1px solid rgb(255 255 255 / 18%);
-		border-radius: var(--radius-large);
-		background: rgb(8 10 12 / 78%);
-		color: #fff;
-		box-shadow: 0 16px 42px rgb(0 0 0 / 26%);
-		backdrop-filter: blur(12px) saturate(1.05);
-		-webkit-backdrop-filter: blur(12px) saturate(1.05);
+		top: 1.5rem;
+		right: 1.5rem;
+		display: grid;
+		grid-template-columns: repeat(3, auto);
+		margin: 0;
+		border-top: 1px solid rgb(255 255 255 / 42%);
+		border-bottom: 1px solid rgb(255 255 255 / 24%);
+		font-family: "JetBrains Mono Variable", ui-monospace, monospace;
+		font-size: 0.67rem;
+		line-height: 1.25;
+		text-transform: uppercase;
 	}
 
-	.home-hero__updates > p {
+	.home-hero__metadata div {
+		display: grid;
+		gap: 0.2rem;
+		min-width: 6.3rem;
+		padding: 0.55rem 0.7rem;
+	}
+
+	.home-hero__metadata div + div {
+		border-left: 1px solid rgb(255 255 255 / 24%);
+	}
+
+	.home-hero__metadata dt {
+		color: rgb(255 255 255 / 64%);
+	}
+
+	.home-hero__metadata dd {
+		display: flex;
+		align-items: center;
+		gap: 0.35rem;
 		margin: 0;
-		padding: 0.65rem 1rem 0.55rem;
-		border-bottom: 1px solid rgb(255 255 255 / 12%);
-		font-size: 0.68rem;
-		font-weight: 750;
+		font-weight: 700;
+	}
+
+	.home-hero__metadata dd span {
+		width: 0.42rem;
+		aspect-ratio: 1;
+		border-radius: 50%;
+		background: var(--primary);
+		box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary), transparent 72%);
+	}
+
+	.home-hero__content {
+		position: absolute;
+		right: 2rem;
+		bottom: 2.2rem;
+		left: 2rem;
+		max-width: 42rem;
+	}
+
+	.home-hero__kicker {
+		margin: 0 0 0.75rem;
+		font-family: "JetBrains Mono Variable", ui-monospace, monospace;
+		font-size: 0.72rem;
+		font-weight: 700;
 		letter-spacing: 0;
 		text-transform: uppercase;
-		color: rgb(255 255 255 / 62%);
+		color: color-mix(in srgb, var(--primary), white 34%);
 	}
 
-	.home-hero__update-list {
-		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
+	.home-hero h1 {
+		max-width: 10ch;
+		margin: 0;
+		font-family: ui-serif, Georgia, Cambria, "Times New Roman", serif;
+		font-size: 4.8rem;
+		font-weight: 500;
+		line-height: 0.96;
+		letter-spacing: 0;
+		text-wrap: balance;
 	}
 
-	.home-hero__update {
-		display: grid;
-		grid-template-columns: auto minmax(0, 1fr) auto;
-		align-items: center;
+	.home-hero__intro {
+		max-width: 38rem;
+		margin: 1.25rem 0 0;
+		font-size: 1.05rem;
+		font-weight: 450;
+		line-height: 1.65;
+		color: rgb(255 255 255 / 84%);
+	}
+
+	.home-hero__actions {
+		display: flex;
+		flex-wrap: wrap;
 		gap: 0.7rem;
-		min-width: 0;
-		min-height: 4.45rem;
-		padding: 0.7rem 0.85rem;
-		color: #fff;
-		transition: background-color 180ms ease;
+		margin-top: 1.65rem;
 	}
 
-	.home-hero__update + .home-hero__update {
-		border-left: 1px solid rgb(255 255 255 / 12%);
-	}
-
-	.home-hero__update:hover,
-	.home-hero__update:focus-visible {
-		background: rgb(255 255 255 / 9%);
-	}
-
-	.home-hero__update:focus-visible {
-		outline: 2px solid var(--primary);
-		outline-offset: -2px;
-	}
-
-	.home-hero__update-icon {
-		display: grid;
-		width: 2.25rem;
-		aspect-ratio: 1;
-		place-items: center;
-		border-radius: 50%;
-		background: rgb(255 255 255 / 10%);
-		font-size: 1.15rem;
-	}
-
-	.home-hero__update-content {
-		display: flex;
-		min-width: 0;
-		flex-direction: column;
-		gap: 0.1rem;
-	}
-
-	.home-hero__update-content small {
-		display: flex;
+	.home-hero__actions a {
+		display: inline-flex;
+		min-height: 2.75rem;
 		align-items: center;
+		justify-content: center;
 		gap: 0.45rem;
+		padding: 0.7rem 1rem;
+		border: 1px solid rgb(255 255 255 / 34%);
+		border-radius: var(--radius-large);
+		font-size: 0.88rem;
+		font-weight: 700;
+		color: #fff;
+		transition:
+			background-color 180ms ease,
+			border-color 180ms ease,
+			color 180ms ease;
+	}
+
+	.home-hero__actions a:focus-visible {
+		outline: 3px solid var(--primary);
+		outline-offset: 3px;
+	}
+
+	.home-hero__primary {
+		background: rgb(7 17 16 / 82%);
+	}
+
+	.home-hero__secondary {
+		background: rgb(255 255 255 / 8%);
+	}
+
+	.home-hero__actions a:hover {
+		border-color: rgb(255 255 255 / 68%);
+		background: #fff;
+		color: #101716;
+	}
+
+	.document-register {
+		display: grid;
+		grid-template-columns: minmax(10rem, 0.75fr) minmax(0, 2fr);
+		align-items: stretch;
+		border: 1px solid color-mix(in oklch, var(--primary), transparent 64%);
+		border-top: 0;
+		border-radius: 0 0 var(--radius-large) var(--radius-large);
+		background: var(--card-bg-solid);
+		color: var(--content-color);
+		box-shadow: var(--card-shadow);
+	}
+
+	.document-register > p {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		gap: 0.25rem;
+		margin: 0;
+		padding: 1rem 1.2rem;
+		border-right: 1px solid var(--line-color);
+	}
+
+	.document-register > p span,
+	.document-register dt {
+		font-family: "JetBrains Mono Variable", ui-monospace, monospace;
 		font-size: 0.66rem;
 		font-weight: 700;
-		color: rgb(255 255 255 / 58%);
+		line-height: 1.35;
+		text-transform: uppercase;
+		color: var(--meta-color);
 	}
 
-	.home-hero__update-content time::before {
-		margin-right: 0.45rem;
-		content: "·";
+	.document-register > p strong {
+		font-size: 0.92rem;
 	}
 
-	.home-hero__update-content strong {
-		overflow: hidden;
-		font-size: 0.9rem;
-		font-weight: 650;
-		text-overflow: ellipsis;
-		white-space: nowrap;
+	.document-register dl {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		margin: 0;
 	}
 
-	.home-hero__update-arrow {
-		font-size: 1.15rem;
-		opacity: 0.7;
-		transition: transform 180ms ease;
+	.document-register dl div {
+		display: grid;
+		align-content: center;
+		gap: 0.25rem;
+		min-width: 0;
+		padding: 0.9rem 1rem;
 	}
 
-	.home-hero__update:hover .home-hero__update-arrow {
-		transform: translate(2px, -2px);
+	.document-register dl div + div {
+		border-left: 1px solid var(--line-color);
 	}
 
-	@media (max-width: 900px) {
-		.home-hero {
-			min-height: min(36rem, calc(100svh - 5.75rem));
+	.document-register dd {
+		margin: 0;
+		font-family: "JetBrains Mono Variable", ui-monospace, monospace;
+		font-size: 1rem;
+		font-weight: 750;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.document-register dd span {
+		font-family: "Roboto Variable", Roboto, system-ui, sans-serif;
+		font-size: 0.76rem;
+		font-weight: 500;
+		color: var(--meta-color);
+	}
+
+	@media (max-width: 800px) {
+		.home-hero__media {
+			min-height: 36rem;
 		}
-	}
 
-	@media (max-width: 760px) {
-		.home-hero__update-list {
-			display: flex;
-			overflow-x: auto;
-			scroll-snap-type: x mandatory;
-			scrollbar-width: none;
-			overscroll-behavior-inline: contain;
+		.home-hero__metadata {
+			top: 1rem;
+			right: 1rem;
+			left: 1rem;
+			grid-template-columns: repeat(3, minmax(0, 1fr));
 		}
 
-		.home-hero__update-list::-webkit-scrollbar {
-			display: none;
+		.home-hero__metadata div {
+			min-width: 0;
 		}
 
-		.home-hero__update {
-			flex: 0 0 min(17rem, 82vw);
-			scroll-snap-align: start;
+		.home-hero__content {
+			right: 1.25rem;
+			bottom: 1.5rem;
+			left: 1.25rem;
+		}
+
+		.home-hero h1 {
+			font-size: 3.45rem;
+		}
+
+		.document-register {
+			grid-template-columns: 1fr;
+		}
+
+		.document-register > p {
+			border-right: 0;
+			border-bottom: 1px solid var(--line-color);
 		}
 	}
 
 	@media (max-width: 520px) {
-		.home-hero {
-			min-height: 30rem;
+		.home-hero__media {
+			min-height: 38rem;
 		}
 
 		.home-hero__image {
-			object-position: 61% center;
+			object-position: 52% center;
 		}
 
-		.home-hero__updates {
-			right: 0.75rem;
-			bottom: 0.65rem;
-			left: 0.75rem;
+		.home-hero__shade {
+			background: rgb(5 9 8 / 48%);
 		}
 
-		.home-hero__updates > p {
-			padding: 0.55rem 0.75rem 0.45rem;
+		.home-hero__metadata {
+			font-size: 0.6rem;
 		}
 
-		.home-hero__update {
-			flex-basis: min(16.5rem, 84vw);
-			min-height: 4.1rem;
+		.home-hero__metadata div {
+			padding: 0.5rem;
 		}
 
-		.home-hero__update + .home-hero__update {
-			border-left: 1px solid rgb(255 255 255 / 12%);
+		.home-hero h1 {
+			max-width: 9ch;
+			font-size: 2.85rem;
+		}
+
+		.home-hero__intro {
+			font-size: 0.95rem;
+		}
+
+		.home-hero__actions {
+			display: grid;
+			grid-template-columns: 1fr;
+		}
+
+		.document-register dl div {
+			padding: 0.75rem 0.55rem;
+		}
+
+		.document-register dd {
+			display: flex;
+			flex-direction: column;
+			font-size: 0.9rem;
+		}
+
+		.document-register dd span {
+			font-size: 0.66rem;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.home-hero__actions a {
+			transition: none;
 		}
 	}
 </style>

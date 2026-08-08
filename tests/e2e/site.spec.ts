@@ -8,7 +8,7 @@ async function expectNoHorizontalOverflow(page: Page) {
 	expect(hasOverflow).toBe(false);
 }
 
-test("home renders its primary content without horizontal overflow", async ({
+test("home presents engineering work and personal discovery without horizontal overflow", async ({
 	page,
 }) => {
 	await page.goto("/");
@@ -17,6 +17,20 @@ test("home renders its primary content without horizontal overflow", async ({
 	await expect(page.getByRole("heading", { level: 1 })).toContainText(
 		"Nguyễn Thanh Tùng",
 	);
+	await expect(page.locator("[data-home-hero]")).toBeVisible();
+	await expect(page.locator("[data-document-register]")).toBeVisible();
+	for (const heading of [
+		"Selected engineering work",
+		"Latest from the journal",
+		"Knowledge system",
+		"Recent photographs",
+		"About this space",
+	]) {
+		await expect(page.getByRole("heading", { name: heading })).toBeVisible();
+	}
+	await expect(
+		page.getByRole("link", { name: "View engineering work" }),
+	).toBeVisible();
 	await expect(page.locator("main")).toBeVisible();
 	await expectNoHorizontalOverflow(page);
 });

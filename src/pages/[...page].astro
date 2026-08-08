@@ -1,11 +1,17 @@
 ---
 import type { GetStaticPaths } from "astro";
 import Pagination from "../components/control/Pagination.astro";
+import HomeDiscovery from "../components/HomeDiscovery.astro";
 import HomeHero from "../components/HomeHero.astro";
 import PostPage from "../components/PostPage.astro";
 import { PAGE_SIZE } from "../constants/constants";
+import { brainTopics } from "../data/brain-topics";
+import galleryMetadata from "../data/gallery.json";
+import galleryStatus from "../data/gallery-status.json";
+import { portfolioProjects } from "../data/portfolio";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
-import { getSortedPosts } from "../utils/content-utils";
+import { getSortedPosts, getSortedPostsList } from "../utils/content-utils";
+import { buildHomepageData } from "../utils/homepage-data";
 
 export const getStaticPaths = (async ({ paginate }) => {
 	const allBlogPosts = await getSortedPosts();
@@ -17,17 +23,27 @@ const { page } = Astro.props;
 
 const len = page.data.length;
 const isHome = page.currentPage === 1;
+const homepageData = isHome
+	? buildHomepageData({
+			posts: await getSortedPostsList(),
+			gallery: galleryMetadata,
+			galleryLastUpdatedAt: galleryStatus.lastUpdatedAt,
+			brainTopics,
+			projects: portfolioProjects,
+		})
+	: undefined;
 ---
 
 {
 	isHome ? (
 		<MainGridLayout
 			title="Home"
-			description="The personal website of Nguyễn Thanh Tùng"
+			description="Engineering work, technical knowledge, personal writing, and photography by Nguyễn Thanh Tùng."
 			wide
 			immediateContent
 		>
-			<HomeHero></HomeHero>
+			<HomeHero data={homepageData!} />
+			<HomeDiscovery data={homepageData!} />
 		</MainGridLayout>
 	) : (
 		<MainGridLayout title="Archive">

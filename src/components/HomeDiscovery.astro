@@ -1,0 +1,820 @@
+---
+import { Icon } from "astro-icon/components";
+import { profileConfig } from "../config";
+import type { HomepageData, HomepageGalleryItem } from "../utils/homepage-data";
+
+interface Props {
+	data: HomepageData;
+}
+
+const { data } = Astro.props;
+const [leadProject, ...compactProjects] = data.selectedProjects;
+const [latestPost, ...olderPosts] = data.latestPosts;
+const liveTopic = data.liveTopics[0];
+
+const dateFormatter = new Intl.DateTimeFormat("en-GB", {
+	day: "2-digit",
+	month: "short",
+	year: "numeric",
+	timeZone: "Asia/Ho_Chi_Minh",
+});
+
+function formatDate(value: Date | string | undefined) {
+	if (!value) return "";
+	const date = new Date(value);
+	return Number.isNaN(date.getTime()) ? "" : dateFormatter.format(date);
+}
+
+function galleryPath(item: HomepageGalleryItem) {
+	const path = item.thumbnail || item.filename;
+	return `/gallery/${path.split("/").map(encodeURIComponent).join("/")}`;
+}
+---
+
+<div class="home-discovery">
+	<section class="home-section home-practice" aria-labelledby="practice-title">
+		<header class="section-heading">
+			<p><span>01</span> Practice</p>
+			<div>
+				<h2 id="practice-title">Selected engineering work</h2>
+				<p>Building systems, process piping, and engineering software workflows.</p>
+			</div>
+			<a href="/portfolio/">Open portfolio <Icon name="material-symbols:arrow-outward-rounded" /></a>
+		</header>
+
+		<div class="project-layout">
+			{
+				leadProject && (
+					<article class="project-lead">
+						{leadProject.image && (
+							<img
+								src={leadProject.image}
+								alt={leadProject.imageAlt ?? ""}
+								width={leadProject.imageWidth}
+								height={leadProject.imageHeight}
+								loading="lazy"
+								decoding="async"
+							/>
+						)}
+						<div class="project-lead__content">
+							<p class="project-meta">
+								<span>{leadProject.category}</span>
+								<span>{leadProject.period}</span>
+							</p>
+							<h3>{leadProject.title}</h3>
+							<p>{leadProject.summary}</p>
+							<a href="/portfolio/" aria-label={`View ${leadProject.title} in the portfolio`}>
+								View project record
+								<Icon name="material-symbols:arrow-forward-rounded" />
+							</a>
+						</div>
+					</article>
+				)
+			}
+
+			<div class="project-list">
+				{
+					compactProjects.map((project, index) => (
+						<article>
+							<p class="project-index">0{index + 2}</p>
+							<div>
+								<p class="project-meta">
+									<span>{project.category}</span>
+									<span>{project.period}</span>
+								</p>
+								<h3>{project.title}</h3>
+								<p>{project.summary}</p>
+								<ul aria-label={`${project.title} skills`}>
+									{project.skills.slice(0, 3).map((skill) => (
+										<li>{skill}</li>
+									))}
+								</ul>
+							</div>
+						</article>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<section class="home-section home-latest" aria-labelledby="latest-title">
+		<header class="section-heading">
+			<p><span>02</span> Latest</p>
+			<div>
+				<h2 id="latest-title">Latest from the journal</h2>
+				<p>Personal notes kept alongside the technical record.</p>
+			</div>
+			<a href="/archive/">Browse all writing <Icon name="material-symbols:arrow-outward-rounded" /></a>
+		</header>
+
+		<div class="latest-layout">
+			{
+				latestPost && (
+					<article class="latest-lead">
+						<p class="latest-lead__date">
+							Journal / <time datetime={new Date(latestPost.data.published).toISOString()}>{formatDate(latestPost.data.published)}</time>
+						</p>
+						<h3><a href={`/posts/${latestPost.slug}/`}>{latestPost.data.title}</a></h3>
+						{latestPost.data.description && <p>{latestPost.data.description}</p>}
+						<a class="text-link" href={`/posts/${latestPost.slug}/`}>
+							Read entry <Icon name="material-symbols:arrow-forward-rounded" />
+						</a>
+					</article>
+				)
+			}
+
+			<div class="latest-register">
+				<p class="latest-register__title">Update register</p>
+				<ul>
+					{
+						data.latestUpdates.map((update) => (
+							<li>
+								<a href={update.href} data-no-swup={update.type === "knowledge" ? true : undefined}>
+									<span>{update.label}</span>
+									<strong>{update.title}</strong>
+									<time datetime={update.date}>{formatDate(update.date)}</time>
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</div>
+		</div>
+
+		{
+			olderPosts.length > 0 && (
+				<ul class="journal-list" aria-label="More recent journal entries">
+					{olderPosts.map((post) => (
+						<li>
+							<time datetime={new Date(post.data.published).toISOString()}>{formatDate(post.data.published)}</time>
+							<a href={`/posts/${post.slug}/`}>{post.data.title}</a>
+							<Icon name="material-symbols:arrow-outward-rounded" aria-hidden="true" />
+						</li>
+					))}
+				</ul>
+			)
+		}
+	</section>
+
+	<div class="knowledge-gallery-layout">
+		<section class="home-section home-knowledge" aria-labelledby="knowledge-title">
+			<header class="section-heading section-heading--compact">
+				<p><span>03</span> Knowledge</p>
+				<div>
+					<h2 id="knowledge-title">Knowledge system</h2>
+					<p>A public research layer built from linked notes.</p>
+				</div>
+			</header>
+
+			{
+				liveTopic && (
+					<a class="knowledge-record" href={liveTopic.href} data-no-swup>
+						<span class="knowledge-record__icon" aria-hidden="true">
+							<Icon name={liveTopic.icon} />
+						</span>
+						<span>
+							<small>Live vault</small>
+							<strong>{liveTopic.title}</strong>
+							<span>{liveTopic.description}</span>
+							{liveTopic.lastUpdated && <time datetime={liveTopic.lastUpdated}>Updated {formatDate(liveTopic.lastUpdated)}</time>}
+						</span>
+						<Icon class="record-arrow" name="material-symbols:arrow-outward-rounded" />
+					</a>
+				)
+			}
+		</section>
+
+		<section class="home-section home-gallery" aria-labelledby="gallery-title">
+			<header class="section-heading section-heading--compact">
+				<p><span>04</span> Gallery</p>
+				<div>
+					<h2 id="gallery-title">Recent photographs</h2>
+					<p>Places, light, and ordinary moments worth keeping.</p>
+				</div>
+			</header>
+
+			<div class="gallery-strip">
+				{
+					data.recentGallery.map((photo) => (
+						<a href="/gallery/" aria-label={`Open Gallery at ${photo.title}`}>
+							<img
+								src={galleryPath(photo)}
+								alt={photo.description || photo.title}
+								width={photo.width}
+								height={photo.height}
+								loading="lazy"
+								decoding="async"
+							/>
+							<span>{photo.title}</span>
+						</a>
+					))
+				}
+			</div>
+			<a class="text-link gallery-link" href="/gallery/">
+				Open the Gallery <Icon name="material-symbols:arrow-forward-rounded" />
+			</a>
+		</section>
+	</div>
+
+	<section class="home-section home-about" aria-labelledby="about-title">
+		<header class="section-heading section-heading--compact">
+			<p><span>05</span> About</p>
+			<div>
+				<h2 id="about-title">About this space</h2>
+			</div>
+		</header>
+		<div class="about-layout">
+			<p>
+				This website brings together engineering practice, a growing knowledge
+				base, personal writing, and photographs. It is both a working record and
+				a quieter place to keep what matters over time.
+			</p>
+			<nav aria-label="About and contact links">
+				<a href="/about/">Read more <Icon name="material-symbols:arrow-forward-rounded" /></a>
+				<a href={profileConfig.links.find((link) => link.name === "Email")?.url ?? "mailto:thanhtungbtlg@gmail.com"} target="_blank" rel="noreferrer">
+					Email <Icon name="material-symbols:mail-outline-rounded" />
+				</a>
+			</nav>
+		</div>
+	</section>
+</div>
+
+<style>
+	.home-discovery {
+		display: grid;
+		gap: 5rem;
+		padding: 5rem 0 1.5rem;
+		color: var(--content-color);
+	}
+
+	.home-section {
+		min-width: 0;
+	}
+
+	.section-heading {
+		display: grid;
+		grid-template-columns: 8.5rem minmax(0, 1fr) auto;
+		gap: 1.25rem;
+		align-items: end;
+		padding-bottom: 1.15rem;
+		border-bottom: 1px solid var(--line-color);
+	}
+
+	.section-heading > p {
+		display: flex;
+		gap: 0.55rem;
+		align-items: center;
+		margin: 0 0 0.25rem;
+		font-family: "JetBrains Mono Variable", ui-monospace, monospace;
+		font-size: 0.7rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		color: var(--meta-color);
+	}
+
+	.section-heading > p span {
+		color: var(--primary);
+	}
+
+	.section-heading h2 {
+		margin: 0;
+		font-family: ui-serif, Georgia, Cambria, "Times New Roman", serif;
+		font-size: 2.35rem;
+		font-weight: 550;
+		line-height: 1.1;
+		letter-spacing: 0;
+	}
+
+	.section-heading div > p {
+		max-width: 42rem;
+		margin: 0.45rem 0 0;
+		font-size: 0.9rem;
+		line-height: 1.55;
+		color: var(--meta-color);
+	}
+
+	.section-heading > a,
+	.text-link,
+	.about-layout a {
+		display: inline-flex;
+		min-height: 2.75rem;
+		align-items: center;
+		gap: 0.35rem;
+		font-size: 0.82rem;
+		font-weight: 750;
+		color: var(--primary);
+	}
+
+	.section-heading > a:hover,
+	.text-link:hover,
+	.about-layout a:hover {
+		color: var(--accent);
+	}
+
+	.section-heading > a:focus-visible,
+	.text-link:focus-visible,
+	.about-layout a:focus-visible,
+	.project-lead a:focus-visible,
+	.latest-register a:focus-visible,
+	.journal-list a:focus-visible,
+	.knowledge-record:focus-visible,
+	.gallery-strip a:focus-visible {
+		outline: 3px solid var(--primary);
+		outline-offset: 3px;
+	}
+
+	.section-heading svg,
+	.text-link svg,
+	.about-layout svg {
+		font-size: 1.05rem;
+	}
+
+	.project-layout {
+		display: grid;
+		grid-template-columns: minmax(0, 1.35fr) minmax(20rem, 0.9fr);
+		gap: 1rem;
+		margin-top: 1.25rem;
+	}
+
+	.project-lead {
+		display: grid;
+		grid-template-columns: minmax(15rem, 1fr) minmax(16rem, 0.95fr);
+		overflow: hidden;
+		border: 1px solid var(--line-color);
+		border-radius: var(--radius-large);
+		background: var(--card-bg-solid);
+	}
+
+	.project-lead > img {
+		width: 100%;
+		height: 100%;
+		min-height: 22rem;
+		object-fit: cover;
+		background: var(--codeblock-bg);
+	}
+
+	.project-lead__content {
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-end;
+		padding: 1.5rem;
+	}
+
+	.project-meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.45rem 0.8rem;
+		margin: 0;
+		font-family: "JetBrains Mono Variable", ui-monospace, monospace;
+		font-size: 0.68rem;
+		font-weight: 650;
+		text-transform: uppercase;
+		color: var(--meta-color);
+	}
+
+	.project-meta span + span::before {
+		margin-right: 0.8rem;
+		content: "/";
+		color: var(--primary);
+	}
+
+	.project-lead h3,
+	.project-list h3,
+	.latest-lead h3 {
+		margin: 0.65rem 0 0;
+		font-size: 1.35rem;
+		line-height: 1.25;
+	}
+
+	.project-lead__content > p:not(.project-meta),
+	.project-list article > div > p:not(.project-meta) {
+		margin: 0.8rem 0 0;
+		font-size: 0.9rem;
+		line-height: 1.65;
+		color: var(--meta-color);
+	}
+
+	.project-lead__content > a {
+		display: inline-flex;
+		min-height: 2.75rem;
+		align-items: center;
+		gap: 0.35rem;
+		align-self: flex-start;
+		margin-top: 1rem;
+		font-size: 0.82rem;
+		font-weight: 750;
+		color: var(--content-color);
+		text-decoration: underline;
+		text-decoration-color: var(--primary);
+		text-decoration-thickness: 2px;
+		text-underline-offset: 0.22rem;
+	}
+
+	.project-lead__content > a:hover {
+		color: var(--accent);
+	}
+
+	.project-list {
+		display: grid;
+		border-top: 1px solid var(--line-color);
+	}
+
+	.project-list article {
+		display: grid;
+		grid-template-columns: 2.4rem minmax(0, 1fr);
+		gap: 0.8rem;
+		padding: 1.15rem 0.25rem;
+		border-bottom: 1px solid var(--line-color);
+	}
+
+	.project-index {
+		margin: 0;
+		font-family: "JetBrains Mono Variable", ui-monospace, monospace;
+		font-size: 0.72rem;
+		color: var(--primary);
+	}
+
+	.project-list h3 {
+		font-size: 1.05rem;
+	}
+
+	.project-list ul {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.35rem 0.7rem;
+		margin: 0.8rem 0 0;
+		padding: 0;
+		list-style: none;
+		font-size: 0.72rem;
+		font-weight: 650;
+		color: var(--meta-color);
+	}
+
+	.project-list li + li::before {
+		margin-right: 0.7rem;
+		content: "·";
+		color: var(--primary);
+	}
+
+	.latest-layout {
+		display: grid;
+		grid-template-columns: minmax(0, 1.4fr) minmax(20rem, 0.8fr);
+		gap: 2rem;
+		padding: 1.5rem 0 1.25rem;
+	}
+
+	.latest-lead {
+		align-self: center;
+		max-width: 45rem;
+	}
+
+	.latest-lead__date,
+	.latest-register__title {
+		margin: 0;
+		font-family: "JetBrains Mono Variable", ui-monospace, monospace;
+		font-size: 0.7rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		color: var(--meta-color);
+	}
+
+	.latest-lead h3 {
+		max-width: 18ch;
+		font-family: ui-serif, Georgia, Cambria, "Times New Roman", serif;
+		font-size: 2rem;
+		font-weight: 550;
+	}
+
+	.latest-lead h3 a:hover {
+		color: var(--primary);
+	}
+
+	.latest-lead > p:not(.latest-lead__date) {
+		max-width: 45rem;
+		margin: 0.9rem 0 0;
+		line-height: 1.7;
+		color: var(--meta-color);
+	}
+
+	.latest-register {
+		border-top: 1px solid var(--line-color);
+	}
+
+	.latest-register__title {
+		padding: 0.8rem 0;
+		border-bottom: 1px solid var(--line-color);
+	}
+
+	.latest-register ul,
+	.journal-list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.latest-register a {
+		display: grid;
+		grid-template-columns: 5.5rem minmax(0, 1fr) auto;
+		gap: 0.75rem;
+		align-items: center;
+		min-height: 3.75rem;
+		padding: 0.55rem 0;
+		border-bottom: 1px solid var(--line-color);
+	}
+
+	.latest-register a > span,
+	.latest-register time {
+		font-family: "JetBrains Mono Variable", ui-monospace, monospace;
+		font-size: 0.64rem;
+		color: var(--meta-color);
+	}
+
+	.latest-register strong {
+		overflow: hidden;
+		font-size: 0.82rem;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.journal-list {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		border-top: 1px solid var(--line-color);
+		border-bottom: 1px solid var(--line-color);
+	}
+
+	.journal-list li {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr) auto;
+		gap: 0.8rem;
+		align-items: center;
+		min-height: 3.8rem;
+		padding: 0.65rem 0.85rem;
+	}
+
+	.journal-list li + li {
+		border-left: 1px solid var(--line-color);
+	}
+
+	.journal-list time {
+		font-family: "JetBrains Mono Variable", ui-monospace, monospace;
+		font-size: 0.68rem;
+		color: var(--meta-color);
+	}
+
+	.journal-list a {
+		overflow: hidden;
+		font-size: 0.84rem;
+		font-weight: 700;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.journal-list svg {
+		color: var(--primary);
+	}
+
+	.knowledge-gallery-layout {
+		display: grid;
+		grid-template-columns: minmax(18rem, 0.8fr) minmax(0, 1.2fr);
+		gap: 3rem;
+	}
+
+	.section-heading--compact {
+		grid-template-columns: 7.5rem minmax(0, 1fr);
+	}
+
+	.knowledge-record {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr) auto;
+		gap: 1rem;
+		align-items: start;
+		min-height: 14rem;
+		padding: 1.35rem 0;
+		border-bottom: 1px solid var(--line-color);
+	}
+
+	.knowledge-record:hover strong,
+	.knowledge-record:hover .record-arrow {
+		color: var(--primary);
+	}
+
+	.knowledge-record__icon {
+		display: grid;
+		width: 2.75rem;
+		aspect-ratio: 1;
+		place-items: center;
+		border: 1px solid color-mix(in oklch, var(--primary), transparent 55%);
+		border-radius: var(--radius-large);
+		background: color-mix(in oklch, var(--primary), transparent 88%);
+		font-size: 1.35rem;
+		color: var(--primary);
+	}
+
+	.knowledge-record > span:nth-child(2) {
+		display: flex;
+		flex-direction: column;
+		gap: 0.45rem;
+	}
+
+	.knowledge-record small,
+	.knowledge-record time {
+		font-family: "JetBrains Mono Variable", ui-monospace, monospace;
+		font-size: 0.68rem;
+		text-transform: uppercase;
+		color: var(--meta-color);
+	}
+
+	.knowledge-record strong {
+		font-family: ui-serif, Georgia, Cambria, "Times New Roman", serif;
+		font-size: 2.1rem;
+		font-weight: 550;
+		transition: color 180ms ease;
+	}
+
+	.knowledge-record > span > span {
+		font-size: 0.9rem;
+		line-height: 1.65;
+		color: var(--meta-color);
+	}
+
+	.record-arrow {
+		font-size: 1.3rem;
+		color: var(--meta-color);
+		transition: color 180ms ease;
+	}
+
+	.gallery-strip {
+		display: grid;
+		grid-template-columns: 1.2fr 0.9fr 0.9fr;
+		gap: 0.65rem;
+		padding-top: 1.25rem;
+	}
+
+	.gallery-strip a {
+		position: relative;
+		display: block;
+		min-height: 14rem;
+		overflow: hidden;
+		border-radius: var(--radius-large);
+		background: var(--codeblock-bg);
+	}
+
+	.gallery-strip img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: transform 220ms ease;
+	}
+
+	.gallery-strip a:hover img {
+		transform: scale(1.025);
+	}
+
+	.gallery-strip span {
+		position: absolute;
+		right: 0.55rem;
+		bottom: 0.55rem;
+		left: 0.55rem;
+		padding: 0.4rem 0.5rem;
+		background: rgb(5 9 8 / 78%);
+		font-size: 0.7rem;
+		font-weight: 700;
+		color: #fff;
+	}
+
+	.gallery-link {
+		margin-top: 0.65rem;
+	}
+
+	.home-about {
+		padding-bottom: 1.25rem;
+	}
+
+	.about-layout {
+		display: grid;
+		grid-template-columns: minmax(0, 1.5fr) auto;
+		gap: 2rem;
+		align-items: start;
+		padding-top: 1.25rem;
+	}
+
+	.about-layout > p {
+		max-width: 55rem;
+		margin: 0;
+		font-family: ui-serif, Georgia, Cambria, "Times New Roman", serif;
+		font-size: 1.55rem;
+		line-height: 1.45;
+	}
+
+	.about-layout nav {
+		display: flex;
+		gap: 0.8rem;
+	}
+
+	@media (max-width: 980px) {
+		.project-layout,
+		.latest-layout,
+		.knowledge-gallery-layout {
+			grid-template-columns: 1fr;
+		}
+
+		.project-lead {
+			grid-template-columns: minmax(14rem, 0.9fr) minmax(16rem, 1.1fr);
+		}
+
+		.knowledge-gallery-layout {
+			gap: 5rem;
+		}
+	}
+
+	@media (max-width: 760px) {
+		.home-discovery {
+			gap: 4rem;
+			padding-top: 4rem;
+		}
+
+		.section-heading,
+		.section-heading--compact {
+			grid-template-columns: 1fr;
+			gap: 0.5rem;
+			align-items: start;
+		}
+
+		.section-heading > a {
+			justify-self: start;
+		}
+
+		.section-heading h2 {
+			font-size: 1.9rem;
+		}
+
+		.project-lead {
+			grid-template-columns: 1fr;
+		}
+
+		.project-lead > img {
+			min-height: 16rem;
+			aspect-ratio: 16 / 10;
+		}
+
+		.latest-register a {
+			grid-template-columns: 5rem minmax(0, 1fr);
+		}
+
+		.latest-register time {
+			grid-column: 2;
+		}
+
+		.journal-list {
+			grid-template-columns: 1fr;
+		}
+
+		.journal-list li + li {
+			border-top: 1px solid var(--line-color);
+			border-left: 0;
+		}
+
+		.gallery-strip {
+			grid-template-columns: 1fr 1fr;
+		}
+
+		.gallery-strip a:first-child {
+			grid-column: 1 / -1;
+		}
+
+		.about-layout {
+			grid-template-columns: 1fr;
+		}
+
+		.about-layout > p {
+			font-size: 1.3rem;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.gallery-strip {
+			grid-template-columns: 1fr;
+		}
+
+		.gallery-strip a:first-child {
+			grid-column: auto;
+		}
+
+		.gallery-strip a {
+			min-height: 12rem;
+		}
+
+		.about-layout nav {
+			flex-direction: column;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.gallery-strip img,
+		.knowledge-record strong,
+		.record-arrow {
+			transition: none;
+		}
+	}
+</style>
