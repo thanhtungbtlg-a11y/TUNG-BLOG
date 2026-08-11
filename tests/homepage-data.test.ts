@@ -117,6 +117,8 @@ test("builds homepage discovery data from repository sources", () => {
 	assert.equal(data.counts.journal, 2);
 	assert.equal(data.counts.gallery, 2);
 	assert.equal(data.counts.liveVaults, 1);
+	assert.equal(data.counts.projects, 3);
+	assert.equal(data.lastUpdated, "2026-08-01T00:00:00.000Z");
 	assert.deepEqual(
 		data.latestPosts.map((post) => post.slug),
 		["latest-note", "older-note"],

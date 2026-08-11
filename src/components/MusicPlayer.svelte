@@ -1268,16 +1268,33 @@ function formatTime(seconds: number) {
 
 	@media (max-width: 768px) {
 		.music-player {
-			right: 10px;
+			right: 6px;
 			left: auto;
-			bottom: calc(10px + env(safe-area-inset-bottom, 0px));
-			width: min(268px, calc(100vw - 20px));
+			bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+			width: 52px;
 		}
 
 		.music-player.expanded {
 			right: 10px;
 			left: 10px;
 			width: auto;
+		}
+
+		.music-player:not(.expanded) .mini {
+			min-height: 50px;
+			gap: 0;
+			padding: 6px;
+			border-radius: 12px 0 0 12px;
+		}
+
+		.music-player:not(.expanded) .mini-details {
+			flex: 0 0 38px;
+		}
+
+		.music-player:not(.expanded) .mini-info,
+		.music-player:not(.expanded) .mini-visualizer,
+		.music-player:not(.expanded) .icon-btn {
+			display: none;
 		}
 
 		.panel {

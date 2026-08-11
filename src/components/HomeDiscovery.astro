@@ -34,7 +34,7 @@ function galleryPath(item: HomepageGalleryItem) {
 <div class="home-discovery">
 	<section class="home-section home-practice" aria-labelledby="practice-title">
 		<header class="section-heading">
-			<p><span>01</span> Practice</p>
+			<p>Practice</p>
 			<div>
 				<h2 id="practice-title">Selected engineering work</h2>
 				<p>Building systems, process piping, and engineering software workflows.</p>
@@ -74,9 +74,8 @@ function galleryPath(item: HomepageGalleryItem) {
 
 			<div class="project-list">
 				{
-					compactProjects.map((project, index) => (
+					compactProjects.map((project) => (
 						<article>
-							<p class="project-index">0{index + 2}</p>
 							<div>
 								<p class="project-meta">
 									<span>{project.category}</span>
@@ -99,7 +98,7 @@ function galleryPath(item: HomepageGalleryItem) {
 
 	<section class="home-section home-latest" aria-labelledby="latest-title">
 		<header class="section-heading">
-			<p><span>02</span> Latest</p>
+			<p>Journal</p>
 			<div>
 				<h2 id="latest-title">Latest from the journal</h2>
 				<p>Personal notes kept alongside the technical record.</p>
@@ -159,7 +158,7 @@ function galleryPath(item: HomepageGalleryItem) {
 	<div class="knowledge-gallery-layout">
 		<section class="home-section home-knowledge" aria-labelledby="knowledge-title">
 			<header class="section-heading section-heading--compact">
-				<p><span>03</span> Knowledge</p>
+				<p>Second Brain</p>
 				<div>
 					<h2 id="knowledge-title">Knowledge system</h2>
 					<p>A public research layer built from linked notes.</p>
@@ -186,7 +185,7 @@ function galleryPath(item: HomepageGalleryItem) {
 
 		<section class="home-section home-gallery" aria-labelledby="gallery-title">
 			<header class="section-heading section-heading--compact">
-				<p><span>04</span> Gallery</p>
+				<p>Gallery</p>
 				<div>
 					<h2 id="gallery-title">Recent photographs</h2>
 					<p>Places, light, and ordinary moments worth keeping.</p>
@@ -218,7 +217,7 @@ function galleryPath(item: HomepageGalleryItem) {
 
 	<section class="home-section home-about" aria-labelledby="about-title">
 		<header class="section-heading section-heading--compact">
-			<p><span>05</span> About</p>
+			<p>About</p>
 			<div>
 				<h2 id="about-title">About this space</h2>
 			</div>
@@ -242,8 +241,7 @@ function galleryPath(item: HomepageGalleryItem) {
 <style>
 	.home-discovery {
 		display: grid;
-		gap: 5rem;
-		padding: 5rem 0 1.5rem;
+		padding: 4.5rem 0 1.5rem;
 		color: var(--content-color);
 	}
 
@@ -251,37 +249,42 @@ function galleryPath(item: HomepageGalleryItem) {
 		min-width: 0;
 	}
 
+	.home-practice {
+		margin-bottom: 5.5rem;
+	}
+
+	.home-latest {
+		margin-bottom: 6.5rem;
+	}
+
+	.knowledge-gallery-layout {
+		margin-bottom: 5.25rem;
+	}
+
 	.section-heading {
 		display: grid;
-		grid-template-columns: 8.5rem minmax(0, 1fr) auto;
-		gap: 1.25rem;
+		grid-template-columns: minmax(0, 1fr) auto;
+		gap: 0.35rem 1.25rem;
 		align-items: end;
 		padding-bottom: 1.15rem;
 		border-bottom: 1px solid var(--line-color);
 	}
 
 	.section-heading > p {
-		display: flex;
-		gap: 0.55rem;
-		align-items: center;
-		margin: 0 0 0.25rem;
+		grid-column: 1 / -1;
+		margin: 0;
 		font-family: "JetBrains Mono Variable", ui-monospace, monospace;
 		font-size: 0.7rem;
 		font-weight: 700;
 		text-transform: uppercase;
-		color: var(--meta-color);
-	}
-
-	.section-heading > p span {
-		color: var(--primary);
+		color: var(--homepage-meta-color, var(--meta-color));
 	}
 
 	.section-heading h2 {
 		margin: 0;
-		font-family: ui-serif, Georgia, Cambria, "Times New Roman", serif;
-		font-size: 2.35rem;
-		font-weight: 550;
-		line-height: 1.1;
+		font-size: 2.1rem;
+		font-weight: 760;
+		line-height: 1.15;
 		letter-spacing: 0;
 	}
 
@@ -290,7 +293,7 @@ function galleryPath(item: HomepageGalleryItem) {
 		margin: 0.45rem 0 0;
 		font-size: 0.9rem;
 		line-height: 1.55;
-		color: var(--meta-color);
+		color: var(--homepage-meta-color, var(--meta-color));
 	}
 
 	.section-heading > a,
@@ -302,7 +305,7 @@ function galleryPath(item: HomepageGalleryItem) {
 		gap: 0.35rem;
 		font-size: 0.82rem;
 		font-weight: 750;
-		color: var(--primary);
+		color: var(--homepage-accent-text, var(--primary));
 	}
 
 	.section-heading > a:hover,
@@ -340,9 +343,8 @@ function galleryPath(item: HomepageGalleryItem) {
 		display: grid;
 		grid-template-columns: minmax(15rem, 1fr) minmax(16rem, 0.95fr);
 		overflow: hidden;
-		border: 1px solid var(--line-color);
-		border-radius: var(--radius-large);
-		background: var(--card-bg-solid);
+		border-top: 1px solid var(--line-color);
+		border-bottom: 1px solid var(--line-color);
 	}
 
 	.project-lead > img {
@@ -358,6 +360,7 @@ function galleryPath(item: HomepageGalleryItem) {
 		flex-direction: column;
 		justify-content: flex-end;
 		padding: 1.5rem;
+		border-left: 1px solid var(--line-color);
 	}
 
 	.project-meta {
@@ -369,7 +372,7 @@ function galleryPath(item: HomepageGalleryItem) {
 		font-size: 0.68rem;
 		font-weight: 650;
 		text-transform: uppercase;
-		color: var(--meta-color);
+		color: var(--homepage-meta-color, var(--meta-color));
 	}
 
 	.project-meta span + span::before {
@@ -379,11 +382,18 @@ function galleryPath(item: HomepageGalleryItem) {
 	}
 
 	.project-lead h3,
-	.project-list h3,
 	.latest-lead h3 {
 		margin: 0.65rem 0 0;
+		font-family: ui-serif, Georgia, Cambria, "Times New Roman", serif;
 		font-size: 1.35rem;
+		font-weight: 550;
 		line-height: 1.25;
+	}
+
+	.project-list h3 {
+		margin: 0.65rem 0 0;
+		font-size: 1.05rem;
+		line-height: 1.3;
 	}
 
 	.project-lead__content > p:not(.project-meta),
@@ -391,7 +401,7 @@ function galleryPath(item: HomepageGalleryItem) {
 		margin: 0.8rem 0 0;
 		font-size: 0.9rem;
 		line-height: 1.65;
-		color: var(--meta-color);
+		color: var(--homepage-meta-color, var(--meta-color));
 	}
 
 	.project-lead__content > a {
@@ -420,22 +430,8 @@ function galleryPath(item: HomepageGalleryItem) {
 	}
 
 	.project-list article {
-		display: grid;
-		grid-template-columns: 2.4rem minmax(0, 1fr);
-		gap: 0.8rem;
 		padding: 1.15rem 0.25rem;
 		border-bottom: 1px solid var(--line-color);
-	}
-
-	.project-index {
-		margin: 0;
-		font-family: "JetBrains Mono Variable", ui-monospace, monospace;
-		font-size: 0.72rem;
-		color: var(--primary);
-	}
-
-	.project-list h3 {
-		font-size: 1.05rem;
 	}
 
 	.project-list ul {
@@ -447,7 +443,7 @@ function galleryPath(item: HomepageGalleryItem) {
 		list-style: none;
 		font-size: 0.72rem;
 		font-weight: 650;
-		color: var(--meta-color);
+		color: var(--homepage-meta-color, var(--meta-color));
 	}
 
 	.project-list li + li::before {
@@ -475,7 +471,7 @@ function galleryPath(item: HomepageGalleryItem) {
 		font-size: 0.7rem;
 		font-weight: 700;
 		text-transform: uppercase;
-		color: var(--meta-color);
+		color: var(--homepage-meta-color, var(--meta-color));
 	}
 
 	.latest-lead h3 {
@@ -486,14 +482,14 @@ function galleryPath(item: HomepageGalleryItem) {
 	}
 
 	.latest-lead h3 a:hover {
-		color: var(--primary);
+		color: var(--homepage-accent-text, var(--primary));
 	}
 
 	.latest-lead > p:not(.latest-lead__date) {
 		max-width: 45rem;
 		margin: 0.9rem 0 0;
 		line-height: 1.7;
-		color: var(--meta-color);
+		color: var(--homepage-meta-color, var(--meta-color));
 	}
 
 	.latest-register {
@@ -526,7 +522,7 @@ function galleryPath(item: HomepageGalleryItem) {
 	.latest-register time {
 		font-family: "JetBrains Mono Variable", ui-monospace, monospace;
 		font-size: 0.64rem;
-		color: var(--meta-color);
+		color: var(--homepage-meta-color, var(--meta-color));
 	}
 
 	.latest-register strong {
@@ -559,7 +555,7 @@ function galleryPath(item: HomepageGalleryItem) {
 	.journal-list time {
 		font-family: "JetBrains Mono Variable", ui-monospace, monospace;
 		font-size: 0.68rem;
-		color: var(--meta-color);
+		color: var(--homepage-meta-color, var(--meta-color));
 	}
 
 	.journal-list a {
@@ -581,7 +577,7 @@ function galleryPath(item: HomepageGalleryItem) {
 	}
 
 	.section-heading--compact {
-		grid-template-columns: 7.5rem minmax(0, 1fr);
+		grid-template-columns: 1fr;
 	}
 
 	.knowledge-record {
@@ -600,13 +596,10 @@ function galleryPath(item: HomepageGalleryItem) {
 	}
 
 	.knowledge-record__icon {
-		display: grid;
-		width: 2.75rem;
-		aspect-ratio: 1;
-		place-items: center;
-		border: 1px solid color-mix(in oklch, var(--primary), transparent 55%);
-		border-radius: var(--radius-large);
-		background: color-mix(in oklch, var(--primary), transparent 88%);
+		display: inline-flex;
+		width: 1.75rem;
+		align-items: center;
+		justify-content: flex-start;
 		font-size: 1.35rem;
 		color: var(--primary);
 	}
@@ -622,7 +615,7 @@ function galleryPath(item: HomepageGalleryItem) {
 		font-family: "JetBrains Mono Variable", ui-monospace, monospace;
 		font-size: 0.68rem;
 		text-transform: uppercase;
-		color: var(--meta-color);
+		color: var(--homepage-meta-color, var(--meta-color));
 	}
 
 	.knowledge-record strong {
@@ -635,12 +628,12 @@ function galleryPath(item: HomepageGalleryItem) {
 	.knowledge-record > span > span {
 		font-size: 0.9rem;
 		line-height: 1.65;
-		color: var(--meta-color);
+		color: var(--homepage-meta-color, var(--meta-color));
 	}
 
 	.record-arrow {
 		font-size: 1.3rem;
-		color: var(--meta-color);
+		color: var(--homepage-meta-color, var(--meta-color));
 		transition: color 180ms ease;
 	}
 
@@ -656,7 +649,6 @@ function galleryPath(item: HomepageGalleryItem) {
 		display: block;
 		min-height: 14rem;
 		overflow: hidden;
-		border-radius: var(--radius-large);
 		background: var(--codeblock-bg);
 	}
 
@@ -673,14 +665,13 @@ function galleryPath(item: HomepageGalleryItem) {
 
 	.gallery-strip span {
 		position: absolute;
-		right: 0.55rem;
+		right: 0.65rem;
 		bottom: 0.55rem;
-		left: 0.55rem;
-		padding: 0.4rem 0.5rem;
-		background: rgb(5 9 8 / 78%);
+		left: 0.65rem;
 		font-size: 0.7rem;
 		font-weight: 700;
 		color: #fff;
+		text-shadow: 0 1px 8px rgb(0 0 0 / 85%);
 	}
 
 	.gallery-link {
@@ -730,8 +721,19 @@ function galleryPath(item: HomepageGalleryItem) {
 
 	@media (max-width: 760px) {
 		.home-discovery {
-			gap: 4rem;
-			padding-top: 4rem;
+			padding-top: 3.25rem;
+		}
+
+		.home-practice {
+			margin-bottom: 4.5rem;
+		}
+
+		.home-latest {
+			margin-bottom: 5rem;
+		}
+
+		.knowledge-gallery-layout {
+			margin-bottom: 4.5rem;
 		}
 
 		.section-heading,
@@ -751,6 +753,11 @@ function galleryPath(item: HomepageGalleryItem) {
 
 		.project-lead {
 			grid-template-columns: 1fr;
+		}
+
+		.project-lead__content {
+			border-top: 1px solid var(--line-color);
+			border-left: 0;
 		}
 
 		.project-lead > img {

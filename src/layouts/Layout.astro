@@ -98,7 +98,12 @@ const ogLocale = siteLang.replace("-", "_");
 ---
 
 <!DOCTYPE html>
-<html lang={siteLang} class="bg-[var(--page-bg)] transition text-[14px] md:text-[16px] antialiased"
+<html
+	lang={siteLang}
+	class:list={[
+		"bg-[var(--page-bg)] transition text-[14px] md:text-[16px] antialiased",
+		{ "homepage-index-page": isHomePage },
+	]}
 >
 	<head>
 
@@ -198,7 +203,7 @@ const ogLocale = siteLang.replace("-", "_");
 		<link rel="alternate" type="application/rss+xml" title={profileConfig.name} href={`${Astro.site}rss.xml`}/>
 
 	</head>
-	<body class="min-h-screen transition">
+	<body class:list={["min-h-screen transition", { "homepage-index-page": isHomePage }]}>
 		<a class="skip-link" href="#swup-container">Skip to main content</a>
 		<ConfigCarrier></ConfigCarrier>
 		<template id="photoswipe-home-icon">

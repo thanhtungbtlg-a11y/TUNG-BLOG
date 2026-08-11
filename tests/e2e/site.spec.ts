@@ -19,6 +19,13 @@ test("home presents engineering work and personal discovery without horizontal o
 	);
 	await expect(page.locator("[data-home-hero]")).toBeVisible();
 	await expect(page.locator("[data-document-register]")).toBeVisible();
+	await expect(page.locator("[data-document-register]")).toContainText(
+		"Work & Knowledge Register",
+	);
+	await expect(page.locator("[data-home-hero]")).not.toContainText("Revision");
+	await expect(page.locator("[data-home-hero]")).not.toContainText(
+		"Status Active",
+	);
 	for (const heading of [
 		"Selected engineering work",
 		"Latest from the journal",

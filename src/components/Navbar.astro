@@ -182,8 +182,16 @@ function isCurrentLink(link: NavBarLink) {
 }
 
 .navbar-link.is-active {
-	color: var(--primary);
+	color: var(--homepage-accent-text, var(--primary));
 	background: color-mix(in oklch, var(--primary), transparent 91%);
+}
+
+.homepage-index-page .navbar-brand-title {
+	color: var(--homepage-accent-text, var(--primary));
+}
+
+.homepage-index-page .search-trigger-label {
+	color: var(--homepage-meta-color, var(--meta-color));
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -197,6 +205,16 @@ function isCurrentLink(link: NavBarLink) {
 @media (max-width: 1100px) {
 	.navbar-link {
 		padding-inline: 0.7rem;
+	}
+}
+
+@media (max-width: 860px) {
+	#navbar .navbar-links {
+		display: none;
+	}
+
+	#navbar .navbar-menu-button {
+		display: flex !important;
 	}
 }
 </style>

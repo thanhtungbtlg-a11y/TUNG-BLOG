@@ -30,6 +30,21 @@ body {
 	text-rendering: optimizeLegibility;
 }
 
+body.homepage-index-page {
+	background: var(--page-bg);
+}
+
+html.homepage-index-page {
+	--homepage-accent-text: var(--primary);
+	--homepage-meta-color: var(--meta-color);
+	background-image: none;
+}
+
+html.homepage-index-page:not(.dark) {
+	--homepage-accent-text: color-mix(in srgb, var(--primary) 65%, black);
+	--homepage-meta-color: color-mix(in srgb, var(--meta-color) 84%, black);
+}
+
 :where([id]) {
     scroll-margin-top: 6rem;
 }

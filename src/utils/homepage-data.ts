@@ -72,10 +72,12 @@ export type HomepageDataInput = {
 
 export type HomepageData = {
 	counts: {
+		projects: number;
 		journal: number;
 		gallery: number;
 		liveVaults: number;
 	};
+	lastUpdated: string;
 	latestPosts: HomepagePost[];
 	recentGallery: HomepageGalleryItem[];
 	liveTopics: HomepageBrainTopic[];
@@ -151,10 +153,14 @@ export function buildHomepageData(input: HomepageDataInput): HomepageData {
 
 	return {
 		counts: {
+			projects: input.projects.filter(
+				(project) => project.status !== "Archived",
+			).length,
 			journal: input.posts.length,
 			gallery: input.gallery.length,
 			liveVaults: liveTopics.length,
 		},
+		lastUpdated: latestUpdates[0]?.date ?? "",
 		latestPosts,
 		recentGallery,
 		liveTopics,

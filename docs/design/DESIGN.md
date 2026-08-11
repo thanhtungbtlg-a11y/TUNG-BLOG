@@ -1,8 +1,8 @@
-# Homepage Design: Engineering Field Notes
+# Homepage Design: Maintained Personal Engineering Index
 
 ## Subject
 
-Nguyen Thanh Tung is presented as an MEP and piping engineer who also builds knowledge systems and keeps a personal record through writing and photography.
+Nguyen Thanh Tung is presented as an MEP and piping engineer who also maintains a public knowledge system and a personal record through writing and photography.
 
 ## Audience
 
@@ -13,102 +13,132 @@ The homepage serves two audiences in balance:
 
 ## Page Job
 
-Within ten seconds, a visitor should understand who Thanh Tung is, what engineering work he does, and where to continue into Portfolio, Journal, Second Brain, or Gallery. The page must also surface the most recently updated real content.
+Within ten seconds, a visitor should understand who Thanh Tung is, what engineering work he does, and where to continue into Portfolio, Journal, Second Brain, or Gallery. The page also surfaces current, repository-derived information without pretending to be a technical drawing.
 
 ## Visual Thesis
 
-**A quiet engineering desk where work, knowledge, and personal records accumulate over time.**
+**A maintained personal engineering index.**
 
-The supplied window-and-workspace photograph provides the atmosphere. The interface adds an editorial reading rhythm and one restrained engineering-document convention. It should feel precise and personal, not like a simulated blueprint or a generic portfolio template.
+The warm workspace photograph supplies the human setting. The interface supplies precise structure, real project information, and a calm editorial reading rhythm. Engineering identity comes from how information is organized, not from blueprint decoration.
 
 ## Color
 
-| Token | Hex | Role |
-| --- | --- | --- |
-| Engineering Ink | `#0B1B1A` | Dark surfaces and strong text |
-| Draft Paper | `#F3F6F2` | Light background and quiet surfaces |
-| Signal Cyan | `#55D1D8` | Links, focus, and active state |
-| Safety Coral | `#FF9485` | Secondary emphasis |
-| Warm Brass | `#B9824B` | Connects UI details to the hero light |
-| Muted Steel | `#6F8581` | Metadata and supporting text |
+Homepage components use the existing semantic theme variables and support Ocean, Sakura, Forest, and Mono presets. No homepage-only accent was introduced.
 
-These roles map onto the existing semantic theme variables and all Ocean, Sakura, Forest, and Mono presets. Homepage components do not hardcode a separate theme.
+- `--primary` carries links, focus, and the few active signals.
+- `--content-color` carries primary text.
+- `--meta-color` carries supporting information with accessible contrast.
+- `--page-bg`, `--card-bg-solid`, and `--line-color` provide quiet structure.
+
+The warm browns in the hero image remain photographic rather than being copied into decorative UI colors.
 
 ## Type
 
-- Editorial display: a restrained system serif stack for the homepage name and major section headings.
-- Body and navigation: the existing Roboto Variable family.
-- Document metadata: the existing JetBrains Mono family with tabular figures.
-- Display text remains responsive through bounded `clamp()` values and never scales directly with viewport width.
+- Roboto Variable is the primary reading and interface face.
+- The system serif is selective: the name, the lead journal title, the lead project title, the live knowledge title, and the About statement.
+- JetBrains Mono is reserved for real categories, dates, counts, update information, and project metadata.
+- Section headings use Roboto so the serif retains editorial weight.
+- Monospace is never used to simulate technical complexity.
 
-## Layout
+## Layout And Rhythm
 
 ```text
 +--------------------------------------------------------------+
 | NAVIGATION                                                   |
 +--------------------------------------------------------------+
-| HERO IMAGE                                                   |
-|                                                              |
-| Nguyen Thanh Tung                  HOME / REV. 08.26          |
-| MEP, Piping & Knowledge Systems    STATUS / ACTIVE            |
-| Short introduction                [View engineering work]    |
+| WARM WORKSPACE HERO                                         |
+| Nguyen Thanh Tung                                            |
+| short introduction                                           |
+| [View engineering work]  Read the journal ->                 |
 +--------------------------------------------------------------+
-| DOCUMENT REGISTER                                            |
-| journal entries | photographs | live knowledge bases        |
+| WORK & KNOWLEDGE REGISTER                                    |
+| projects | journal | second brain | gallery | last updated   |
 +--------------------------------------------------------------+
-| 01 / PRACTICE        Selected Engineering Work               |
-| lead project                           two compact projects   |
+| PRACTICE                                                     |
+| engineering project record       compact supporting records  |
 +--------------------------------------------------------------+
-| 02 / LATEST          Latest writing and recent updates       |
-+--------------------------------+-----------------------------+
-| 03 / KNOWLEDGE                 | 04 / GALLERY                |
-| LEED Second Brain              | recent photographs         |
-+--------------------------------+-----------------------------+
-| ABOUT EXCERPT                            CONTACT / FOOTER      |
+| JOURNAL                                                      |
+| editorial lead entry             real update register        |
++--------------------------------------------------------------+
+| SECOND BRAIN                  | GALLERY                       |
+| live knowledge record         | recent photographs            |
++--------------------------------------------------------------+
+| ABOUT STATEMENT                                  CONTACT      |
 +--------------------------------------------------------------+
 ```
 
-Desktop uses editorial asymmetry and clear horizontal rules. Mobile becomes one column, preserves the useful part of the photograph, and moves document metadata below the main introduction. No content depends on hover or horizontal scrolling.
+The rhythm is intentionally uneven:
+
+1. hero and compact register form one opening unit;
+2. Practice receives the strongest content treatment;
+3. Journal has more breathing room and an editorial lead;
+4. Second Brain and Gallery share a quieter secondary band;
+5. About closes the page without another card.
+
+Section numbers are prohibited unless the content is a real ordered sequence.
 
 ## Signature Element
 
-The single signature convention is a factual **Document Register** using live data, for example:
+The single signature element is the **Work & Knowledge Register** attached to the hero.
 
-`HOME / REV. 08.26 / STATUS ACTIVE / 74 ENTRIES / 83 IMAGES / 1 LIVE VAULT`
+It uses only repository-derived information:
 
-Sections may inherit small numeric labels such as `01 / PRACTICE`, but no additional stamps, blueprint grids, or fake drawing annotations are introduced.
+- current non-archived project records;
+- Journal entries;
+- live Second Brain topics;
+- Gallery photographs;
+- the newest update date derived from those sources.
 
-## Content And Data
+It is an editorial index, not a dashboard. It is not repeated elsewhere on the page.
 
-- Journal cards use the existing Astro content collection and preserve original post text.
-- Engineering work uses selected entries from `src/data/portfolio.ts`; Portfolio access control remains unchanged.
-- Gallery previews use `src/data/gallery.json` and the existing optimized assets.
-- Second Brain status uses `src/data/brain-topics.ts` and `src/data/brain-vault-status.json`.
-- Counts and update dates are generated from real repository data, never manually duplicated.
+## Legitimate Engineering Metadata
 
-## Interaction And Motion
+Engineering metadata is legitimate only when it describes a real record, such as:
+
+- project discipline, period, role, or status;
+- an article category or publication date;
+- a vault update date;
+- repository-derived counts and timestamps.
+
+Fake revision numbers, decorative statuses, drawing stamps, document codes, and labels such as `Document / Home / Status Active` are prohibited.
+
+## Hero Treatment
+
+- Preserve the selected warm workspace image and its useful crop.
+- Keep one restrained dark shade for text readability; do not add decorative gradients or color effects.
+- Use one button-style primary CTA. Secondary navigation is a text link.
+- Body copy remains lighter than the name and short enough to scan.
+- Desktop preserves the broad photographic composition.
+- At 390px the media height is reduced so the register and the beginning of Practice are visible in the initial viewport.
+
+## Project Presentation
+
+The lead project is a project record rather than a generic card. Image, metadata, title, summary, and link are aligned by separators. Background fills, shadows, rounded containers, and decorative project numbers are omitted unless they communicate a real state.
+
+## Background And Containers
+
+- The homepage uses a solid semantic page background.
+- The global grid/noise treatment is disabled on the homepage.
+- Engineering character comes from alignment, typography, metadata, and separators.
+- Cards are reserved for genuinely framed tools or repeated items.
+- Radius and shadows are not added to every content block.
+
+## Mobile Player
+
+Below 768px the collapsed music player becomes a small cover control at the lower edge. Tapping it opens the complete player. Playback, playlist, volume, repeat, shuffle, and cross-tab behavior remain unchanged. The collapsed control must not cover headings, CTAs, or meaningful reading content.
+
+## Interaction And Accessibility
 
 - Use semantic links and buttons with visible focus and minimum 44px touch targets.
-- Limit motion to opacity and short vertical translation for meaningful entrance/state changes.
-- Hover changes border, color, or media scale without moving layout bounds.
-- Respect `prefers-reduced-motion` and keep all content available without JavaScript.
+- Limit motion to meaningful state changes and respect `prefers-reduced-motion`.
+- Preserve keyboard navigation, contrast, responsive behavior, and all content without client-side hydration where it is not required.
 
 ## Anti-Patterns
 
-- No bento dashboard, glassmorphism, decorative blobs, large gradients, or fake blueprint effects.
-- No four floating CTA cards over the hero.
-- No skill-tag cloud on the homepage.
-- No cards nested inside cards and no card treatment for every section.
-- No oversized name that obscures the supplied image.
-- No decorative animation or new client-side library.
-- No route, comment, Gallery, Portfolio, Admin, player, theme, or Second Brain behavior changes.
-
-## Design Critique
-
-### Does this look generic?
-
-It could become a generic editorial portfolio if the technical metadata were merely decorative. The design avoids that by deriving its register, statuses, counts, work entries, and update dates from real project data and by limiting the engineering convention to one recognizable system.
-
-### Which choices specifically come from Nguyen Thanh Tung's context?
-
-The document register and revision language come from MEP, piping, BIM, and technical documentation work. The information hierarchy reflects the actual Portfolio, 74-entry Journal, 83-image Gallery, and live LEED knowledge vault. The warm supplied workspace photograph represents the quieter personal side of the same practice.
+- No fake metadata, decorative section numbering, bento dashboard, glassmorphism, blobs, or simulated blueprint effects.
+- No continuous decorative grid on the homepage.
+- No four floating CTA cards, skill-tag cloud, or cards nested inside cards.
+- No serif for every heading and no decorative monospace.
+- No oversized mobile hero that hides the beginning of meaningful content.
+- No new client-side library for homepage presentation.
+- No unrelated route, comments, Gallery, Portfolio, Admin, theme, or Second Brain redesign.
