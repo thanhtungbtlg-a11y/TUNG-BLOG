@@ -1,5 +1,7 @@
 ---
 import "@fontsource-variable/roboto";
+import robotoLatinFont from "@fontsource-variable/roboto/files/roboto-latin-wght-normal.woff2?url";
+import robotoVietnameseFont from "@fontsource-variable/roboto/files/roboto-vietnamese-wght-normal.woff2?url";
 
 import "../styles/variables.styl";
 import "../styles/palettes.css";
@@ -106,8 +108,21 @@ const ogLocale = siteLang.replace("-", "_");
 	]}
 >
 	<head>
-
 		<title>{pageTitle}</title>
+		<link
+			rel="preload"
+			href={robotoLatinFont}
+			as="font"
+			type="font/woff2"
+			crossorigin="anonymous"
+		/>
+		<link
+			rel="preload"
+			href={robotoVietnameseFont}
+			as="font"
+			type="font/woff2"
+			crossorigin="anonymous"
+		/>
 
 		<meta charset="UTF-8" />
 		<meta name="description" content={metaDescription}>
