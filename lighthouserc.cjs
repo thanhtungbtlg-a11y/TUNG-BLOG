@@ -19,7 +19,7 @@ module.exports = {
 			},
 		},
 		assert: {
-			aggregationMethod: "median-run",
+			aggregationMethod: "median",
 			assertions: {
 				"categories:performance": ["error", { minScore: 0.7 }],
 				"categories:accessibility": ["error", { minScore: 0.95 }],
