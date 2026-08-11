@@ -27,15 +27,24 @@ for (const theme of themes) {
 		});
 
 		for (const route of routes) {
-			test(`${route.name} remains visually stable`, async ({ page }) => {
+			test(`${route.name} remains visually stable`, async ({
+				page,
+			}, testInfo) => {
 				await page.goto(route.path, { waitUntil: "networkidle" });
 				await page.evaluate(async () => {
 					await document.fonts.ready;
 				});
 				await expect(page.locator("main")).toBeVisible();
+				const usesScopedLinuxTextTolerance =
+					Boolean(process.env.CI) &&
+					testInfo.project.name === "mobile-chromium" &&
+					theme === "light" &&
+					route.name === "home";
 				await expect(page).toHaveScreenshot(`${route.name}-${theme}.png`, {
 					fullPage: false,
 					stylePath: snapshotStyle,
+					// Linux and Windows anti-alias dense light-theme text differently.
+					...(usesScopedLinuxTextTolerance ? { maxDiffPixelRatio: 0.04 } : {}),
 				});
 			});
 		}
