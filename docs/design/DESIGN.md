@@ -40,6 +40,26 @@ The warm browns in the hero image remain photographic rather than being copied i
 - Section headings use Roboto so the serif retains editorial weight.
 - Monospace is never used to simulate technical complexity.
 
+### Homepage Type Scale
+
+The homepage uses a deliberately small set of role-based tokens rather than arbitrary rem values. Metadata and interface copy use pixel-based tokens so the site's 14px mobile base does not shrink readable information into micro-text.
+
+| Role | Desktop | Mobile | Use |
+| --- | ---: | ---: | --- |
+| Display | `64-72px` | `43-48px` | Homepage name only; fluid with `clamp()` |
+| Section primary | `34px` | `29px` | Selected engineering work |
+| Section secondary | `30px` | `26px` | Journal |
+| Section compact | `23px` | `21px` | Knowledge, Gallery, About |
+| Body | `15-16px` | `15px` | Descriptions and prose |
+| Interface | `14px` | `14px` | Navigation, links, and CTAs |
+| Small | `13px` | `13px` | Register values and compact titles |
+| Metadata | `12px` | `12px` | Dates, categories, disciplines, counts, and statuses |
+
+- Information a visitor is expected to read does not fall below 12px.
+- Body copy targets a 1.5-1.65 line height and a practical 55-75 character measure.
+- Section levels remain distinct on mobile; they are not collapsed into one scaled-down heading size.
+- The About statement uses an 18px desktop / 17px mobile serif close, below the hero and project hierarchy.
+
 ## Layout And Rhythm
 
 ```text

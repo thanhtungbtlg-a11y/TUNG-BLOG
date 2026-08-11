@@ -187,11 +187,43 @@ function isCurrentLink(link: NavBarLink) {
 }
 
 .homepage-index-page .navbar-brand-title {
-	color: var(--homepage-accent-text, var(--primary));
+	color: var(--content-color);
 }
 
 .homepage-index-page .search-trigger-label {
 	color: var(--homepage-meta-color, var(--meta-color));
+}
+
+.homepage-index-page #navbar .navbar-surface {
+	border-right: 0;
+	border-left: 0;
+	border-radius: 0 !important;
+	box-shadow: none;
+	backdrop-filter: none;
+	-webkit-backdrop-filter: none;
+}
+
+.homepage-index-page:not(.dark) #navbar .navbar-surface {
+	background: color-mix(in srgb, var(--homepage-page-bg) 92%, white);
+}
+
+.homepage-index-page #navbar .navbar-link {
+	border-radius: 0;
+	font-size: var(--home-font-ui);
+	font-weight: 650;
+}
+
+.homepage-index-page #navbar .navbar-link.is-active {
+	color: var(--content-color);
+	background: transparent;
+}
+
+.homepage-index-page #navbar .navbar-link::after {
+	right: 0.95rem;
+	bottom: 0.15rem;
+	left: 0.95rem;
+	height: 1px;
+	border-radius: 0;
 }
 
 @media (hover: hover) and (pointer: fine) {

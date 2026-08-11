@@ -35,6 +35,14 @@ body.homepage-index-page {
 }
 
 html.homepage-index-page {
+	--home-font-meta: 12px;
+	--home-font-small: 13px;
+	--home-font-ui: 14px;
+	--home-font-body: 15px;
+	--home-font-display: clamp(64px, 5vw, 72px);
+	--home-font-section-primary: 34px;
+	--home-font-section-secondary: 30px;
+	--home-font-section-compact: 23px;
 	--homepage-accent-text: var(--primary);
 	--homepage-meta-color: var(--meta-color);
 	--homepage-line-color: var(--line-color);
@@ -44,15 +52,25 @@ html.homepage-index-page {
 }
 
 html.homepage-index-page:not(.dark) {
-	--homepage-accent-text: color-mix(in srgb, var(--primary) 56%, black);
-	--homepage-meta-color: color-mix(in srgb, var(--content-color) 72%, var(--page-bg));
-	--homepage-line-color: color-mix(in srgb, var(--content-color) 20%, transparent);
-	--homepage-register-bg: color-mix(in srgb, var(--card-bg-solid) 91%, var(--content-color));
-	--homepage-project-surface: color-mix(in srgb, var(--card-bg-solid) 82%, var(--page-bg));
+	--homepage-page-bg: color-mix(in srgb, var(--page-bg) 72%, #f1f2f0);
+	--homepage-accent-text: color-mix(in srgb, var(--primary) 52%, black);
+	--homepage-meta-color: color-mix(in srgb, var(--content-color) 76%, var(--homepage-page-bg));
+	--homepage-line-color: color-mix(in srgb, var(--content-color) 18%, transparent);
+	--homepage-register-bg: color-mix(in srgb, var(--homepage-page-bg) 90%, var(--card-bg-solid));
+	--homepage-project-surface: color-mix(in srgb, var(--homepage-page-bg) 94%, var(--card-bg-solid));
 }
 
 html.homepage-index-page:not(.dark) body.homepage-index-page {
-	background: color-mix(in srgb, var(--page-bg) 96%, var(--content-color));
+	background: var(--homepage-page-bg);
+}
+
+@media (max-width: 520px) {
+	html.homepage-index-page {
+		--home-font-display: clamp(43px, 11.5vw, 48px);
+		--home-font-section-primary: 29px;
+		--home-font-section-secondary: 26px;
+		--home-font-section-compact: 21px;
+	}
 }
 
 :where([id]) {
