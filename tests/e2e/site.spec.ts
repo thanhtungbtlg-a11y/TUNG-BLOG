@@ -17,6 +17,12 @@ test("home presents engineering work and personal discovery without horizontal o
 	await expect(page.getByRole("heading", { level: 1 })).toContainText(
 		"Nguyễn Thanh Tùng",
 	);
+	const nameLines = page.locator("#home-title > span");
+	await expect(nameLines).toHaveCount(2);
+	const nameLinePositions = await nameLines.evaluateAll((lines) =>
+		lines.map((line) => Math.round(line.getBoundingClientRect().top)),
+	);
+	expect(new Set(nameLinePositions).size).toBe(2);
 	await expect(page.locator("[data-home-hero]")).toBeVisible();
 	await expect(page.locator("[data-document-register]")).toBeVisible();
 	await expect(page.locator("[data-document-register]")).toContainText(

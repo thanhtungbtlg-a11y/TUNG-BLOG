@@ -19,6 +19,8 @@ const updatedLabel =
 				timeZone: "Asia/Ho_Chi_Minh",
 			}).format(updatedAt)
 		: "";
+const [updatedDay = "", updatedMonth = "", updatedYear = ""] =
+	updatedLabel.split(" ");
 ---
 
 <section class="home-hero onload-animation" data-home-hero aria-labelledby="home-title">
@@ -38,7 +40,7 @@ const updatedLabel =
 
 		<div class="home-hero__content">
 			<p class="home-hero__kicker">MEP / Piping / Knowledge systems</p>
-			<h1 id="home-title">Nguyễn Thanh Tùng</h1>
+			<h1 id="home-title"><span>Nguyễn</span>{" "}<span>Thanh Tùng</span></h1>
 			<p class="home-hero__intro">
 				I design building services and industrial piping systems, then document
 				what I learn through projects, notes, and photographs.
@@ -69,7 +71,11 @@ const updatedLabel =
 			{
 				updatedLabel && updatedAt && (
 					<p class="work-register__updated">
-						Last updated <time datetime={data.lastUpdated}>{updatedLabel}</time>
+						<span>Last updated</span>
+						<time datetime={data.lastUpdated}>
+							<span>{updatedDay} {updatedMonth}</span>
+							<span>{updatedYear}</span>
+						</time>
 					</p>
 				)
 			}
@@ -156,7 +162,6 @@ const updatedLabel =
 	}
 
 	.home-hero h1 {
-		max-width: 10ch;
 		margin: 0;
 		font-family: ui-serif, Georgia, Cambria, "Times New Roman", serif;
 		font-size: 4.8rem;
@@ -164,6 +169,13 @@ const updatedLabel =
 		line-height: 0.96;
 		letter-spacing: 0;
 		text-wrap: balance;
+	}
+
+	.home-hero h1 span {
+		display: block;
+		width: max-content;
+		max-width: 100%;
+		white-space: nowrap;
 	}
 
 	.home-hero__intro {
@@ -257,7 +269,10 @@ const updatedLabel =
 	}
 
 	.work-register__updated time {
+		display: inline-flex;
+		gap: 0.35rem;
 		color: var(--content-color);
+		white-space: nowrap;
 	}
 
 	.work-register dl {
@@ -336,7 +351,6 @@ const updatedLabel =
 		}
 
 		.home-hero h1 {
-			max-width: 9ch;
 			font-size: 2.7rem;
 		}
 
@@ -364,8 +378,14 @@ const updatedLabel =
 		}
 
 		.work-register__updated {
+			display: flex;
+			flex-direction: column;
 			max-width: 8rem;
 			text-align: right;
+		}
+
+		.work-register__updated time {
+			justify-content: flex-end;
 		}
 
 		.work-register dl {
