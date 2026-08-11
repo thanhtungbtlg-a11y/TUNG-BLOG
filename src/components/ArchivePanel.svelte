@@ -701,6 +701,8 @@ function setViewMode(mode: ViewMode) {
 		border: 1px solid var(--card-border);
 		border-radius: 8px;
 		background: var(--card-bg);
+		content-visibility: auto;
+		contain-intrinsic-size: auto 28rem;
 	}
 
 	.year-row {
