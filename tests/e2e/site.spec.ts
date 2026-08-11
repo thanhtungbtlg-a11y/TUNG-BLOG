@@ -42,7 +42,7 @@ test("home presents engineering work and personal discovery without horizontal o
 		await expect(page.getByRole("heading", { name: heading })).toBeVisible();
 	}
 	await expect(
-		page.getByRole("link", { name: "View engineering work" }),
+		page.getByRole("link", { name: "Open engineering portfolio" }),
 	).toBeVisible();
 	await expect(
 		page.getByRole("link", { name: "About Nguyễn Thanh Tùng" }),
