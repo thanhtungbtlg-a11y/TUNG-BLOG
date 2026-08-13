@@ -983,7 +983,7 @@ function formatTime(seconds: number) {
 
 	.eyebrow {
 		color: var(--music-accent);
-		font-size: 9px;
+		font-size: 12px;
 		font-weight: 700;
 		line-height: 1.1;
 		text-transform: uppercase;
@@ -1006,7 +1006,7 @@ function formatTime(seconds: number) {
 	}
 
 	.artist {
-		font-size: 10.5px;
+		font-size: 12px;
 		opacity: 0.65;
 		line-height: 1.25;
 	}
@@ -1098,7 +1098,7 @@ function formatTime(seconds: number) {
 		grid-template-columns: 40px 1fr 40px;
 		align-items: center;
 		gap: 8px;
-		font-size: 11px;
+		font-size: 12px;
 		opacity: 0.88;
 	}
 
@@ -1232,7 +1232,7 @@ function formatTime(seconds: number) {
 	}
 
 	.track-artist {
-		font-size: 10px;
+		font-size: 12px;
 		opacity: 0.6;
 	}
 
@@ -1274,6 +1274,12 @@ function formatTime(seconds: number) {
 			width: 52px;
 		}
 
+		:global(html.homepage-index-page) .music-player:not(.expanded) {
+			position: absolute;
+			top: calc(5.5rem + 32rem);
+			bottom: auto;
+		}
+
 		.music-player.expanded {
 			right: 10px;
 			left: 10px;
@@ -1301,6 +1307,12 @@ function formatTime(seconds: number) {
 			max-height: min(58vh, 32rem);
 			overflow-y: auto;
 			overscroll-behavior: contain;
+		}
+	}
+
+	@media (max-width: 520px) {
+		:global(html.homepage-index-page) .music-player:not(.expanded) {
+			top: calc(5.5rem + 23.75rem);
 		}
 	}
 

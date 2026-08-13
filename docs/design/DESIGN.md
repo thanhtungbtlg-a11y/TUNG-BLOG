@@ -40,25 +40,38 @@ The warm browns in the hero image remain photographic rather than being copied i
 - Section headings use Roboto so the serif retains editorial weight.
 - Monospace is never used to simulate technical complexity.
 
-### Homepage Type Scale
+### Homepage Type Roles And Scale
 
-The homepage uses a deliberately small set of role-based tokens rather than arbitrary rem values. Metadata and interface copy use pixel-based tokens so the site's 14px mobile base does not shrink readable information into micro-text.
+The homepage uses a deliberately small set of role-based tokens rather than arbitrary rem values. Metadata and interface copy use pixel-based tokens so the site's 14px mobile base does not shrink readable information into micro-text. These roles are reusable in the Journal, Article, Portfolio, Gallery, and Second Brain interfaces.
 
-| Role | Desktop | Mobile | Use |
-| --- | ---: | ---: | --- |
-| Display | `64-72px` | `43-48px` | Homepage name only; fluid with `clamp()` |
-| Section primary | `34px` | `29px` | Selected engineering work |
-| Section secondary | `30px` | `26px` | Journal |
-| Section compact | `23px` | `21px` | Knowledge, Gallery, About |
-| Body | `15-16px` | `15px` | Descriptions and prose |
-| Interface | `14px` | `14px` | Navigation, links, and CTAs |
-| Small | `13px` | `13px` | Register values and compact titles |
-| Metadata | `12px` | `12px` | Dates, categories, disciplines, counts, and statuses |
+| Role | Family | Size | Weight | Line height | Letter spacing | Homepage examples |
+| --- | --- | --- | --- | --- | --- | --- |
+| Display | system editorial serif | `64-72px` desktop, `43-48px` mobile | 500 | 0.96 | 0 | Nguyen Thanh Tung only |
+| Primary section heading | Roboto Variable | `34px` desktop, `29px` mobile | 760 | 1.15 | 0 | Selected engineering work |
+| Secondary section heading | Roboto Variable | `30px` desktop, `26px` mobile | 760 | 1.15 | 0 | Latest from the journal |
+| Compact section heading | Roboto Variable | `23px` desktop, `21px` mobile | 760 | 1.15 | 0 | Knowledge system, Recent photographs, About this space |
+| Featured content title | system editorial serif | `30-32px` | 550 | 1.25 | 0 | Lead journal and live knowledge titles |
+| Content title | serif when editorial; otherwise Roboto Variable | `17-23px` | 550-700 | 1.25-1.3 | 0 | Project and compact record titles |
+| Body | Roboto Variable | `15-16px` | 400 | 1.55-1.7 | 0 | Descriptions, summaries, and prose |
+| Small body | Roboto Variable | `13px` | 500-700 | 1.45 | 0 | Register scope and compact values |
+| Metadata | JetBrains Mono Variable | `12px` | 650-700 | 1.35-1.5 | 0 | Dates, disciplines, categories, counts, periods, and status |
+| Eyebrow | JetBrains Mono Variable | `12px` | 700 | 1.35 | 0 | Practice, Journal, Second Brain, Gallery, About |
+| Navigation | Roboto Variable | `14px` | 650 | 1.4 | 0 | Navbar destinations |
+| Action | Roboto Variable | `14px` | 700-750 | 1.4 | CTAs and text links |
+
+#### Hierarchy Rules
+
+The visual order is `Display > Primary section heading > Secondary/compact section heading or featured content title > Content title > Body > Metadata/eyebrow`. Semantic heading levels remain independent from their visual token: an `h2` may use the compact section role when its section is intentionally quieter.
 
 - Information a visitor is expected to read does not fall below 12px.
-- Body copy targets a 1.5-1.65 line height and a practical 55-75 character measure.
+- Body copy targets a 1.55-1.7 line height and a practical 55-75 character measure.
+- Dense mobile project descriptions keep the 15px body token and use 1.72 line height instead of becoming visibly larger.
 - Section levels remain distinct on mobile; they are not collapsed into one scaled-down heading size.
 - The About statement uses an 18px desktop / 17px mobile serif close, below the hero and project hierarchy.
+- JetBrains Mono is used only when the text is genuine technical or record metadata. It is not a decorative engineering signal.
+- Eyebrows identify a content category; they do not compete with the heading immediately below them.
+
+Do not introduce one-off near-duplicate sizes, use display serif beyond identity, shrink readable metadata below 12px, choose heading levels for appearance, or promote ordinary content titles above their parent section heading.
 
 ## Layout And Rhythm
 
@@ -145,7 +158,7 @@ The lead project is a project record rather than a generic card. Image, metadata
 
 ## Mobile Player
 
-Below 768px the collapsed music player becomes a small cover control at the lower edge. Tapping it opens the complete player. Playback, playlist, volume, repeat, shuffle, and cross-tab behavior remain unchanged. The collapsed control must not cover headings, CTAs, or meaningful reading content.
+Below 768px the collapsed music player becomes a small cover control. On the homepage it sits at the upper edge of the hero and scrolls away with the opening composition, so it cannot cover later headings, CTAs, or reading content. Tapping it opens the complete player. Playback, playlist, volume, repeat, shuffle, and cross-tab behavior remain unchanged.
 
 ## Interaction And Accessibility
 
