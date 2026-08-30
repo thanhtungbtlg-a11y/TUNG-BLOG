@@ -322,7 +322,7 @@ import {
 		align-items: end;
 		padding: clamp(2rem, 6vw, 5rem);
 		border: 1px solid oklch(0.82 0.08 var(--hue) / 0.28);
-		border-radius: var(--radius-large);
+		border-radius: var(--public-radius-surface);
 		background:
 			linear-gradient(oklch(1 0 0 / 0.035) 1px, transparent 1px),
 			linear-gradient(90deg, oklch(1 0 0 / 0.035) 1px, transparent 1px),
@@ -343,7 +343,8 @@ import {
 	.section-index {
 		margin: 0;
 		color: oklch(0.82 0.1 var(--hue));
-		font-size: 0.78rem;
+		font-family: var(--public-font-mono);
+		font-size: var(--public-font-meta);
 		font-weight: 850;
 		text-transform: uppercase;
 	}
@@ -410,7 +411,7 @@ import {
 		min-height: var(--control-height);
 		padding: 0 1.1rem;
 		border: 1px solid oklch(1 0 0 / 0.18);
-		border-radius: 999px;
+		border-radius: var(--public-radius-control);
 		background: oklch(1 0 0 / 0.08);
 		color: white;
 		font-weight: 800;
@@ -434,7 +435,7 @@ import {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 		margin: 0;
 		border: 1px solid oklch(1 0 0 / 0.12);
-		border-radius: var(--radius-large);
+		border-radius: var(--public-radius-surface);
 		background: oklch(0.08 0.015 var(--hue) / 0.52);
 		backdrop-filter: blur(12px);
 	}
@@ -456,7 +457,8 @@ import {
 
 	.career-snapshot dt {
 		color: oklch(0.78 0.02 var(--hue) / 0.7);
-		font-size: 0.75rem;
+		font-family: var(--public-font-mono);
+		font-size: var(--public-font-meta);
 		font-weight: 750;
 		text-transform: uppercase;
 	}
@@ -481,7 +483,7 @@ import {
 		padding: 0.4rem;
 		overflow-x: auto;
 		border: 1px solid var(--card-border);
-		border-radius: 999px;
+		border-radius: var(--public-radius-surface);
 		background: var(--float-panel-bg);
 		box-shadow: var(--card-shadow);
 		backdrop-filter: blur(14px);
@@ -490,7 +492,7 @@ import {
 	.section-nav a {
 		flex: none;
 		padding: 0.55rem 0.9rem;
-		border-radius: 999px;
+		border-radius: var(--public-radius-control);
 		color: var(--meta-color);
 		font-size: 0.84rem;
 		font-weight: 800;
@@ -520,7 +522,9 @@ import {
 	.section-heading h2 {
 		margin: 0.35rem 0 0;
 		color: var(--content-color);
-		font-size: clamp(1.8rem, 4vw, 2.7rem);
+		font-family: var(--public-font-serif);
+		font-size: var(--public-font-section);
+		font-weight: 620;
 		line-height: 1.1;
 		letter-spacing: 0;
 	}
@@ -584,7 +588,7 @@ import {
 	.company-meta {
 		display: grid;
 		justify-items: end;
-		font-size: 0.86rem;
+		font-size: var(--public-font-small);
 	}
 
 	.folder-chevron {
@@ -647,7 +651,7 @@ import {
 		border-radius: 0.4rem;
 		background: var(--btn-regular-bg);
 		color: var(--btn-content);
-		font-size: 0.78rem;
+		font-size: var(--public-font-meta);
 		font-weight: 700;
 	}
 
@@ -731,7 +735,8 @@ import {
 		justify-content: space-between;
 		gap: 1rem;
 		color: var(--meta-color);
-		font-size: 0.78rem;
+		font-family: var(--public-font-mono);
+		font-size: var(--public-font-meta);
 		font-weight: 750;
 		text-transform: uppercase;
 	}
@@ -761,7 +766,8 @@ import {
 	.project-period {
 		margin: 0.2rem 0 0;
 		color: var(--meta-color);
-		font-size: 0.85rem;
+		font-family: var(--public-font-mono);
+		font-size: var(--public-font-meta);
 	}
 
 	.project-summary {
@@ -854,7 +860,7 @@ import {
 		gap: 0.55rem;
 		align-items: center;
 		color: var(--content-color);
-		font-size: 0.88rem;
+		font-size: var(--public-font-small);
 		font-weight: 700;
 	}
 

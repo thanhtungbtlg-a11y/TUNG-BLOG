@@ -124,20 +124,21 @@ function formatVaultUpdate(value: string) {
 	.brain-header__icon {
 		display: grid;
 		place-items: center;
-		width: clamp(4rem, 8vw, 5.5rem);
+		width: 4rem;
 		aspect-ratio: 1;
 		border: 1px solid color-mix(in oklch, var(--primary), transparent 58%);
-		border-radius: var(--radius-large);
+		border-radius: var(--public-radius-surface);
 		background: color-mix(in oklch, var(--primary), transparent 88%);
 		color: var(--primary);
-		font-size: clamp(2rem, 5vw, 3rem);
+		font-size: 2rem;
 	}
 
 	.brain-kicker {
 		margin: 0 0 0.35rem;
-		color: var(--primary);
-		font-size: 0.76rem;
-		font-weight: 900;
+		color: var(--btn-content);
+		font-family: var(--public-font-mono);
+		font-size: var(--public-font-meta);
+		font-weight: 700;
 		letter-spacing: 0;
 		text-transform: uppercase;
 	}
@@ -152,16 +153,18 @@ function formatVaultUpdate(value: string) {
 
 	.brain-header h1 {
 		color: var(--content-color);
-		font-size: clamp(2rem, 5vw, 3rem);
-		font-weight: 900;
+		font-family: var(--public-font-serif);
+		font-size: var(--public-font-title);
+		font-weight: 620;
 		line-height: 1.05;
 	}
 
 	.brain-intro {
-		max-width: 48rem;
+		max-width: var(--public-content-measure);
 		margin-top: 0.8rem;
 		color: var(--content-color);
-		font-size: clamp(0.98rem, 2vw, 1.08rem);
+		font-family: var(--public-font-sans);
+		font-size: var(--public-font-body);
 		font-weight: 550;
 		line-height: 1.7;
 		opacity: 0.76;
@@ -181,13 +184,15 @@ function formatVaultUpdate(value: string) {
 
 	.brain-section-heading h2 {
 		color: var(--content-color);
-		font-size: clamp(1.35rem, 3vw, 1.75rem);
-		font-weight: 900;
+		font-family: var(--public-font-serif);
+		font-size: var(--public-font-section);
+		font-weight: 620;
 	}
 
 	.brain-section-heading > span {
 		color: var(--meta-color);
-		font-size: 0.82rem;
+		font-family: var(--public-font-mono);
+		font-size: var(--public-font-meta);
 		font-weight: 750;
 	}
 
@@ -203,13 +208,14 @@ function formatVaultUpdate(value: string) {
 		min-height: 14.5rem;
 		padding: clamp(1.1rem, 3vw, 1.5rem);
 		border: 1px solid var(--line-divider);
-		border-radius: var(--radius-large);
+		border-radius: var(--public-radius-surface);
+		background: var(--card-bg-solid);
 		color: var(--content-color);
 	}
 
 	.brain-topic--live {
 		border-top: 2px solid color-mix(in oklch, var(--primary), transparent 24%);
-		background: var(--card-bg);
+		box-shadow: var(--card-shadow);
 		text-decoration: none;
 	}
 
@@ -237,7 +243,7 @@ function formatVaultUpdate(value: string) {
 		place-items: center;
 		width: 3rem;
 		aspect-ratio: 1;
-		border-radius: 0.75rem;
+		border-radius: var(--public-radius-control);
 		background: var(--btn-regular-bg);
 		color: var(--primary);
 		font-size: 1.55rem;
@@ -245,12 +251,10 @@ function formatVaultUpdate(value: string) {
 
 	.brain-status {
 		gap: 0.4rem;
-		min-height: 2rem;
-		padding: 0 0.7rem;
-		border-radius: 999px;
-		background: var(--btn-regular-bg);
+		min-height: 1.5rem;
 		color: var(--meta-color);
-		font-size: 0.73rem;
+		font-family: var(--public-font-mono);
+		font-size: var(--public-font-meta);
 		font-weight: 850;
 	}
 
@@ -271,8 +275,9 @@ function formatVaultUpdate(value: string) {
 	}
 
 	.brain-topic h3 {
-		font-size: clamp(1.4rem, 3vw, 1.75rem);
-		font-weight: 900;
+		font-family: var(--public-font-serif);
+		font-size: var(--public-font-content-title);
+		font-weight: 620;
 		line-height: 1.15;
 	}
 
@@ -280,7 +285,9 @@ function formatVaultUpdate(value: string) {
 		max-width: 34rem;
 		margin-top: 0.7rem;
 		color: var(--meta-color);
-		font-weight: 560;
+		font-family: var(--public-font-sans);
+		font-size: var(--public-font-body);
+		font-weight: 500;
 		line-height: 1.65;
 	}
 
@@ -291,7 +298,8 @@ function formatVaultUpdate(value: string) {
 		align-self: flex-start;
 		margin-top: 1rem;
 		color: var(--meta-color);
-		font-size: 0.78rem;
+		font-family: var(--public-font-mono);
+		font-size: var(--public-font-meta);
 		font-weight: 700;
 	}
 
@@ -308,7 +316,7 @@ function formatVaultUpdate(value: string) {
 		margin-top: auto;
 		padding-top: 1.25rem;
 		color: var(--primary);
-		font-size: 0.88rem;
+		font-size: var(--public-font-small);
 		font-weight: 850;
 	}
 
@@ -328,7 +336,7 @@ function formatVaultUpdate(value: string) {
 		width: 2.5rem;
 		aspect-ratio: 1;
 		margin-top: auto;
-		border-radius: 0.65rem;
+		border-radius: var(--public-radius-control);
 		background: var(--btn-regular-bg);
 		color: var(--meta-color);
 	}

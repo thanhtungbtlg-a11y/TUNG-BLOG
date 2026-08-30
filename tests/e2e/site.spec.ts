@@ -1,12 +1,26 @@
-import AxeBuilder from "@axe-core/playwright";
-import { expect, type Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import {
+	expectMinimumFontSize,
+	expectNoHorizontalOverflow,
+	expectNoSeriousAxeViolations,
+	expectReadablePublicPage,
+	PUBLIC_ROUTES,
+} from "./helpers/public-page-audit";
 
-async function expectNoHorizontalOverflow(page: Page) {
-	const hasOverflow = await page.evaluate(
-		() => document.documentElement.scrollWidth > window.innerWidth + 1,
-	);
-	expect(hasOverflow).toBe(false);
-}
+const PUBLIC_READABILITY_CASES = [
+	{
+		path: "/archive/",
+		selectors: [".archive-header p", ".archive-filters label > span"],
+	},
+	{
+		path: "/gallery/",
+		selectors: [".gallery-kicker", ".gallery-toolbar > label > span"],
+	},
+	{
+		path: "/brain/",
+		selectors: [".brain-kicker", ".brain-status", ".brain-topic__updated"],
+	},
+] as const;
 
 test("home presents engineering work and personal discovery without horizontal overflow", async ({
 	page,
@@ -121,18 +135,36 @@ test("post exposes the moderated comments area", async ({ page }) => {
 	}
 });
 
-test("accessibility: core pages have no serious or critical axe violations", async ({
+test("public pages expose one primary heading without horizontal overflow", async ({
 	page,
 }) => {
-	for (const path of ["/", "/gallery/"]) {
-		await page.goto(path);
-		const results = await new AxeBuilder({ page })
-			.withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
-			.analyze();
-		const blockingViolations = results.violations.filter(
-			(violation) =>
-				violation.impact === "serious" || violation.impact === "critical",
-		);
-		expect(blockingViolations, `axe violations on ${path}`).toEqual([]);
+	for (const route of PUBLIC_ROUTES) {
+		await page.goto(route.path);
+		await expectReadablePublicPage(page);
+	}
+});
+
+test("public metadata remains readable across page types", async ({ page }) => {
+	for (const route of PUBLIC_READABILITY_CASES) {
+		await page.goto(route.path);
+		for (const selector of route.selectors) {
+			const element = page.locator(selector).first();
+			await expect(element).toBeVisible();
+			await expectMinimumFontSize(element, 12);
+		}
+	}
+
+	await page.goto("/about/");
+	await expectMinimumFontSize(page.locator(".about-intro blockquote"), 16);
+	await expectMinimumFontSize(page.locator(".about-content"), 16);
+});
+
+test("accessibility: public pages have no serious or critical axe violations", async ({
+	page,
+}) => {
+	await page.emulateMedia({ reducedMotion: "reduce" });
+	for (const route of PUBLIC_ROUTES) {
+		await page.goto(route.path);
+		await expectNoSeriousAxeViolations(page);
 	}
 });

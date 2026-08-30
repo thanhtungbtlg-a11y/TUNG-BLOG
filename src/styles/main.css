@@ -1,5 +1,21 @@
 @tailwind components;
 
+:root {
+	--public-font-meta: 12px;
+	--public-font-small: 14px;
+	--public-font-body: 16px;
+	--public-font-title: clamp(34px, 4vw, 48px);
+	--public-font-section: clamp(26px, 3vw, 32px);
+	--public-font-content-title: clamp(19px, 2vw, 24px);
+	--public-font-sans: "Hanken Grotesk Variable", "Roboto Variable", Roboto, system-ui, sans-serif;
+	--public-font-serif: "Source Serif 4 Variable", Georgia, "Times New Roman", serif;
+	--public-font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
+	--public-radius-control: 4px;
+	--public-radius-surface: 8px;
+	--public-content-measure: 68ch;
+	--public-section-gap: clamp(2rem, 5vw, 4.5rem);
+}
+
 html {
     scroll-behavior: smooth;
     min-height: 100%;
@@ -131,6 +147,75 @@ html.homepage-index-page.dark {
 :where(a, button, input, textarea, select, [tabindex]):focus-visible {
     outline: 2px solid var(--primary);
     outline-offset: 3px;
+}
+
+.public-page-header {
+	padding: clamp(1rem, 3vw, 2.25rem) 0.25rem clamp(1.4rem, 3vw, 2.5rem);
+	border-bottom: 1px solid var(--line-divider);
+}
+
+.public-eyebrow,
+.public-metadata {
+	font-family: var(--public-font-mono);
+	font-size: var(--public-font-meta);
+	letter-spacing: 0;
+}
+
+.public-eyebrow {
+	margin: 0 0 0.4rem;
+	color: var(--btn-content);
+	font-weight: 700;
+	line-height: 1.4;
+	text-transform: uppercase;
+}
+
+.public-page-title,
+.public-section-heading,
+.public-content-title {
+	margin: 0;
+	color: var(--content-color);
+	font-family: var(--public-font-serif);
+	font-weight: 620;
+	letter-spacing: 0;
+	text-wrap: balance;
+}
+
+.public-page-title {
+	font-size: var(--public-font-title);
+	line-height: 1.08;
+}
+
+.public-section-heading {
+	font-size: var(--public-font-section);
+	line-height: 1.15;
+}
+
+.public-content-title {
+	font-size: var(--public-font-content-title);
+	line-height: 1.25;
+}
+
+.public-page-intro,
+.public-body {
+	max-width: var(--public-content-measure);
+	color: var(--meta-color);
+	font-family: var(--public-font-sans);
+	font-size: var(--public-font-body);
+	line-height: 1.65;
+	text-wrap: pretty;
+}
+
+.public-metadata {
+	color: var(--meta-color);
+	font-weight: 650;
+	line-height: 1.45;
+}
+
+.public-toolbar {
+	border: 1px solid var(--line-divider);
+	border-radius: var(--public-radius-surface);
+	background: var(--card-bg-solid);
+	box-shadow: var(--card-shadow);
 }
 
 @layer components {

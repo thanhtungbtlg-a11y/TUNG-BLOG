@@ -122,7 +122,15 @@ function isCurrentLink(link: NavBarLink) {
             event.preventDefault();
             requestSearchOpen();
         }
-        if (event.key === "Escape") setMenuOpen(false);
+        if (event.key === "Escape") {
+            const menuBtn = document.getElementById("nav-menu-switch");
+            const menuPanel = document.getElementById("nav-menu-panel");
+            if (menuBtn && menuPanel && !menuPanel.classList.contains("float-panel-closed")) {
+                event.preventDefault();
+                setMenuOpen(false);
+                menuBtn.focus();
+            }
+        }
     }, true);
 
     document.addEventListener("click", (event) => {

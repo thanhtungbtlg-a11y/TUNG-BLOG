@@ -73,6 +73,23 @@ The visual order is `Display > Primary section heading > Secondary/compact secti
 
 Do not introduce one-off near-duplicate sizes, use display serif beyond identity, shrink readable metadata below 12px, choose heading levels for appearance, or promote ordinary content titles above their parent section heading.
 
+### Public Page Type Roles And Surfaces
+
+Archive, Article, Gallery, Second Brain, Portfolio, and About reuse a compact public-page scale without imitating the homepage composition. The reusable tokens are:
+
+| Token | Role | Size |
+| --- | --- | --- |
+| `--public-font-meta` | Real dates, counts, categories, disciplines, and control labels | `12px` |
+| `--public-font-small` | Secondary interface copy | `14px` |
+| `--public-font-body` | Introductions, descriptions, and prose | `16px` |
+| `--public-font-content-title` | Project, article, gallery, and vault titles | `19-24px` |
+| `--public-font-section` | Public-page section headings | `26-32px` |
+| `--public-font-title` | One page-level identity heading | `34-48px` |
+
+Public pages use Hanken Grotesk for body and controls, Source Serif 4 for page and content hierarchy, and JetBrains Mono only for real metadata. Prose targets `68ch`; surfaces use 4px control radii or 8px content radii. The Admin interface remains an operational surface and is not forced into this editorial scale.
+
+Controls must use a text color that reaches WCAG AA contrast against regular, hover, and active backgrounds. Accent color may identify focus, links, and state, but it is not a substitute for readable control text.
+
 ## Layout And Rhythm
 
 ```text

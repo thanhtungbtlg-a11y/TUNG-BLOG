@@ -415,7 +415,9 @@ function setViewMode(mode: ViewMode) {
 								<small>{post.data.category || "Uncategorized"} {formatTags(post.data.tags)}</small>
 							</span>
 							{#if post.data.latest}<span class="latest-badge">New</span>{/if}
-							<Icon class="compact-arrow" icon="material-symbols:chevron-right-rounded" />
+							<span class="compact-arrow" aria-hidden="true">
+								<Icon icon="material-symbols:chevron-right-rounded" />
+							</span>
 						</a>
 					{/each}
 				</div>
@@ -458,9 +460,10 @@ function setViewMode(mode: ViewMode) {
 	}
 
 	.archive-header p {
-		color: var(--meta-color);
-		font-size: 0.82rem;
-		font-weight: 800;
+		color: var(--btn-content);
+		font-family: var(--public-font-mono);
+		font-size: var(--public-font-meta);
+		font-weight: 700;
 		letter-spacing: 0;
 		text-transform: uppercase;
 	}
@@ -468,15 +471,18 @@ function setViewMode(mode: ViewMode) {
 	.archive-header h1 {
 		margin-top: 0.15rem;
 		color: var(--content-color);
-		font-size: clamp(1.8rem, 4vw, 2.35rem);
-		line-height: 1.15;
+		font-family: var(--public-font-serif);
+		font-size: var(--public-font-title);
+		font-weight: 620;
+		line-height: 1.08;
 	}
 
 	.archive-total {
 		display: block;
 		margin-top: 0.28rem;
 		color: var(--meta-color);
-		font-size: 0.84rem;
+		font-family: var(--public-font-mono);
+		font-size: var(--public-font-meta);
 		font-weight: 650;
 	}
 
@@ -485,7 +491,7 @@ function setViewMode(mode: ViewMode) {
 	.archive-search > div {
 		min-height: 2.45rem;
 		border: 1px solid var(--card-border);
-		border-radius: 7px;
+		border-radius: var(--public-radius-control);
 		background: var(--btn-regular-bg);
 		color: var(--content-color);
 		font: inherit;
@@ -511,18 +517,18 @@ function setViewMode(mode: ViewMode) {
 		gap: 0.65rem;
 		padding: 0.85rem;
 		border: 1px solid var(--card-border);
-		border-radius: 8px;
-		background: color-mix(in oklch, var(--float-panel-bg), transparent 3%);
+		border-radius: var(--public-radius-surface);
+		background: var(--card-bg-solid);
 		box-shadow: var(--card-shadow);
-		backdrop-filter: blur(14px) saturate(1.05);
 	}
 
 	.archive-filters label {
 		display: grid;
 		gap: 0.35rem;
 		color: var(--meta-color);
-		font-size: 0.76rem;
-		font-weight: 850;
+		font-family: var(--public-font-mono);
+		font-size: var(--public-font-meta);
+		font-weight: 700;
 	}
 
 	.archive-search > div {
@@ -565,7 +571,7 @@ function setViewMode(mode: ViewMode) {
 		grid-template-columns: repeat(3, 2.45rem);
 		padding: 0.18rem;
 		border: 1px solid var(--card-border);
-		border-radius: 7px;
+		border-radius: var(--public-radius-control);
 		background: var(--btn-regular-bg);
 	}
 
@@ -576,7 +582,7 @@ function setViewMode(mode: ViewMode) {
 		width: 2.1rem;
 		height: 2.1rem;
 		border: 0;
-		border-radius: 6px;
+		border-radius: var(--public-radius-control);
 		background: transparent;
 		color: var(--meta-color);
 		cursor: pointer;
@@ -602,9 +608,10 @@ function setViewMode(mode: ViewMode) {
 
 	.section-title {
 		gap: 0.45rem;
-		color: var(--primary);
-		font-size: 0.82rem;
-		font-weight: 900;
+		color: var(--btn-content);
+		font-family: var(--public-font-mono);
+		font-size: var(--public-font-meta);
+		font-weight: 700;
 		text-transform: uppercase;
 	}
 
@@ -627,7 +634,7 @@ function setViewMode(mode: ViewMode) {
 		min-height: 8rem;
 		padding: 0.95rem;
 		border: 1px solid var(--card-border);
-		border-radius: 8px;
+		border-radius: var(--public-radius-surface);
 		background: var(--card-bg);
 		box-shadow: var(--card-shadow);
 		transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
@@ -642,7 +649,12 @@ function setViewMode(mode: ViewMode) {
 	.latest-card time,
 	.latest-card p {
 		color: var(--meta-color);
-		font-size: 0.8rem;
+		font-size: var(--public-font-small);
+	}
+
+	.latest-card time {
+		font-family: var(--public-font-mono);
+		font-size: var(--public-font-meta);
 	}
 
 	.latest-card strong {
@@ -664,7 +676,7 @@ function setViewMode(mode: ViewMode) {
 		gap: 0.5rem;
 		padding: 0.95rem;
 		border: 1px solid color-mix(in oklch, var(--primary), transparent 62%);
-		border-radius: 8px;
+		border-radius: var(--public-radius-surface);
 		background: color-mix(in oklch, var(--primary), transparent 90%);
 		box-shadow: var(--card-shadow);
 		transition: transform 160ms ease, border-color 160ms ease;
@@ -699,7 +711,7 @@ function setViewMode(mode: ViewMode) {
 		gap: 0.65rem;
 		padding: 1rem;
 		border: 1px solid var(--card-border);
-		border-radius: 8px;
+		border-radius: var(--public-radius-surface);
 		background: var(--card-bg);
 		content-visibility: auto;
 		contain-intrinsic-size: auto 28rem;
@@ -724,7 +736,8 @@ function setViewMode(mode: ViewMode) {
 
 	.month-label {
 		padding-top: 0.55rem;
-		font-size: 0.82rem;
+		font-family: var(--public-font-mono);
+		font-size: var(--public-font-meta);
 		font-weight: 850;
 		text-transform: capitalize;
 	}
@@ -738,7 +751,7 @@ function setViewMode(mode: ViewMode) {
 		gap: 0.65rem;
 		min-height: 3rem;
 		padding: 0.45rem 0.55rem;
-		border-radius: 7px;
+		border-radius: var(--public-radius-control);
 		transition: background 160ms ease, transform 160ms ease;
 	}
 
@@ -760,7 +773,7 @@ function setViewMode(mode: ViewMode) {
 		min-height: 10.5rem;
 		padding: 1rem;
 		border: 1px solid var(--card-border);
-		border-radius: 8px;
+		border-radius: var(--public-radius-surface);
 		background: var(--card-bg);
 		box-shadow: var(--card-shadow);
 		transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
@@ -778,13 +791,16 @@ function setViewMode(mode: ViewMode) {
 		justify-content: space-between;
 		gap: 0.5rem;
 		color: var(--meta-color);
-		font-size: 0.76rem;
+		font-family: var(--public-font-mono);
+		font-size: var(--public-font-meta);
 		font-weight: 750;
 	}
 
 	.archive-card > strong {
 		color: var(--content-color);
-		font-size: 1.05rem;
+		font-family: var(--public-font-serif);
+		font-size: var(--public-font-content-title);
+		font-weight: 620;
 		line-height: 1.4;
 	}
 
@@ -793,7 +809,7 @@ function setViewMode(mode: ViewMode) {
 		overflow: hidden;
 		margin: 0;
 		color: var(--meta-color);
-		font-size: 0.88rem;
+		font-size: var(--public-font-small);
 		line-height: 1.55;
 		-webkit-box-orient: vertical;
 		-webkit-line-clamp: 2;
@@ -807,7 +823,7 @@ function setViewMode(mode: ViewMode) {
 	.compact-list {
 		display: grid;
 		border: 1px solid var(--card-border);
-		border-radius: 8px;
+		border-radius: var(--public-radius-surface);
 		background: var(--card-bg);
 		box-shadow: var(--card-shadow);
 		overflow: hidden;
@@ -835,7 +851,8 @@ function setViewMode(mode: ViewMode) {
 	.compact-post time,
 	.compact-main small {
 		color: var(--meta-color);
-		font-size: 0.78rem;
+		font-family: var(--public-font-mono);
+		font-size: var(--public-font-meta);
 	}
 
 	.compact-post time {
@@ -873,7 +890,8 @@ function setViewMode(mode: ViewMode) {
 	.post-date {
 		width: 3rem;
 		color: var(--meta-color);
-		font-size: 0.78rem;
+		font-family: var(--public-font-mono);
+		font-size: var(--public-font-meta);
 		font-weight: 750;
 		text-align: right;
 	}
@@ -905,7 +923,8 @@ function setViewMode(mode: ViewMode) {
 		padding: 0.15rem 0.5rem;
 		background: var(--primary);
 		color: white;
-		font-size: 0.7rem;
+		font-family: var(--public-font-mono);
+		font-size: var(--public-font-meta);
 		font-weight: 850;
 	}
 
@@ -916,7 +935,7 @@ function setViewMode(mode: ViewMode) {
 		gap: 0.5rem;
 		min-height: 10rem;
 		border: 1px dashed var(--card-border);
-		border-radius: 8px;
+		border-radius: var(--public-radius-surface);
 		color: var(--meta-color);
 	}
 

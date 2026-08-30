@@ -8,7 +8,8 @@ let showPassword = $state(false);
 let loading = $state(false);
 let error = $state("");
 let pendingHref = $state("/portfolio/");
-let passwordInput: HTMLInputElement;
+let passwordInput = $state<HTMLInputElement>();
+let returnFocus: HTMLElement | null = null;
 
 onMount(() => {
 	const handleClick = (event: MouseEvent) => {
@@ -39,11 +40,17 @@ onMount(() => {
 		) {
 			return;
 		}
+		returnFocus = anchor;
 		event.preventDefault();
 		void requestAccess(destination.href);
 	};
 
 	const handleRequest = (event: Event) => {
+		const activeElement = document.activeElement;
+		returnFocus =
+			activeElement instanceof HTMLElement && activeElement !== document.body
+				? activeElement
+				: null;
 		const href =
 			event instanceof CustomEvent && typeof event.detail?.href === "string"
 				? event.detail.href
@@ -105,10 +112,26 @@ function openDialog(href: string) {
 
 function closeDialog() {
 	if (loading) return;
+	const target = returnFocus;
+	returnFocus = null;
 	open = false;
 	password = "";
 	error = "";
 	document.documentElement.classList.remove("portfolio-dialog-open");
+	void tick().then(() => {
+		if (
+			target?.isConnected &&
+			!target.closest("[inert]") &&
+			target.getClientRects().length > 0
+		) {
+			target.focus();
+			return;
+		}
+		const fallbackSelector = window.matchMedia("(max-width: 860px)").matches
+			? "#nav-menu-switch"
+			: 'a[data-nav-url="/portfolio/"]';
+		document.querySelector<HTMLElement>(fallbackSelector)?.focus();
+	});
 }
 
 async function submitPassword() {
@@ -143,7 +166,33 @@ async function submitPassword() {
 }
 
 function handleWindowKeydown(event: KeyboardEvent) {
-	if (event.key === "Escape" && open) closeDialog();
+	if (!open) return;
+	if (event.key === "Tab") {
+		trapDialogFocus(event);
+		return;
+	}
+	if (event.key === "Escape") closeDialog();
+}
+
+function trapDialogFocus(event: KeyboardEvent) {
+	const dialog = document.querySelector<HTMLElement>(".portfolio-dialog");
+	if (!dialog) return;
+	const focusable = [
+		...dialog.querySelectorAll<HTMLElement>(
+			'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+		),
+	].filter((element) => element.getClientRects().length > 0);
+	const first = focusable[0];
+	const last = focusable.at(-1);
+	if (!first || !last) return;
+
+	if (event.shiftKey && document.activeElement === first) {
+		event.preventDefault();
+		last.focus();
+	} else if (!event.shiftKey && document.activeElement === last) {
+		event.preventDefault();
+		first.focus();
+	}
 }
 
 function safeDestination(value: string) {
@@ -171,9 +220,10 @@ function isPortfolioPath(pathname: string) {
 			class="portfolio-dialog-backdrop"
 			type="button"
 			aria-label="Close"
+			tabindex="-1"
 			onclick={closeDialog}
 		></button>
-		<section
+		<div
 			class="portfolio-dialog"
 			role="dialog"
 			aria-modal="true"
@@ -218,7 +268,7 @@ function isPortfolioPath(pathname: string) {
 					{loading ? "Checking..." : "Open portfolio"}
 				</button>
 			</form>
-		</section>
+		</div>
 	</div>
 {/if}
 

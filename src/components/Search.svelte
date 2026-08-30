@@ -4,7 +4,7 @@ import { i18n } from "@i18n/translation";
 import Icon from "@iconify/svelte";
 import { url } from "@utils/url-utils.ts";
 import Fuse, { type FuseResultMatch } from "fuse.js";
-import { onMount } from "svelte";
+import { onMount, tick } from "svelte";
 
 type SearchIndexPost = {
 	title: string;
@@ -76,6 +76,7 @@ let open = false;
 let keyword = "";
 let activeIndex = 0;
 let searchInput: HTMLInputElement;
+let returnFocus: HTMLElement | null = null;
 let searchLoaded = false;
 let searchLoading = false;
 let searchIndex: SearchIndex = {
@@ -329,6 +330,13 @@ function highlightParts(value: string, term: string): HighlightPart[] {
 const tagUrl = (tag: string) => url(`/archive/?tag=${encodeURIComponent(tag)}`);
 
 const openPalette = () => {
+	if (!open) {
+		const activeElement = document.activeElement;
+		returnFocus =
+			activeElement instanceof HTMLElement && activeElement !== document.body
+				? activeElement
+				: null;
+	}
 	open = true;
 	activeIndex = 0;
 	void loadSearchIndex();
@@ -339,6 +347,20 @@ const closePalette = () => {
 	open = false;
 	keyword = "";
 	activeIndex = 0;
+	const target = returnFocus;
+	returnFocus = null;
+	void tick().then(() => {
+		if (target?.isConnected) {
+			target.focus();
+			return;
+		}
+		const fallback = document.querySelector<HTMLElement>(
+			window.matchMedia("(min-width: 1024px)").matches
+				? "#search-bar"
+				: "#search-switch",
+		);
+		fallback?.focus();
+	});
 };
 
 onMount(() => {
@@ -357,6 +379,11 @@ onMount(() => {
 
 		if (!open) return;
 
+		if (event.key === "Tab") {
+			trapSearchFocus(event);
+			return;
+		}
+
 		if (event.key === "Escape") {
 			event.preventDefault();
 			closePalette();
@@ -372,6 +399,27 @@ onMount(() => {
 		window.removeEventListener(SEARCH_OPEN_EVENT, onOpenSearch);
 	};
 });
+
+function trapSearchFocus(event: KeyboardEvent) {
+	const panel = document.querySelector<HTMLElement>(".command-panel");
+	if (!panel) return;
+	const focusable = [
+		...panel.querySelectorAll<HTMLElement>(
+			'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+		),
+	].filter((element) => element.getClientRects().length > 0);
+	const first = focusable[0];
+	const last = focusable.at(-1);
+	if (!first || !last) return;
+
+	if (event.shiftKey && document.activeElement === first) {
+		event.preventDefault();
+		last.focus();
+	} else if (!event.shiftKey && document.activeElement === last) {
+		event.preventDefault();
+		first.focus();
+	}
+}
 
 async function loadSearchIndex() {
 	if (searchLoaded || searchLoading) return;
@@ -503,7 +551,7 @@ function handleInputKeydown(event: KeyboardEvent) {
 
 {#if open}
 	<div id="search-panel" class="command-shell" role="dialog" aria-modal="true">
-		<button class="command-backdrop" aria-label="Close search" onclick={closePalette}></button>
+		<button class="command-backdrop" aria-label="Close search" tabindex="-1" onclick={closePalette}></button>
 		<div class="command-panel">
 			<div class="command-input-row">
 				<Icon icon="material-symbols:search" class="command-search-icon" />

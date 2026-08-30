@@ -1,9 +1,12 @@
 const baseUrl = "http://127.0.0.1:4326";
+const previewCommand = process.env.CI
+	? "pnpm preview --host 127.0.0.1 --port 4326"
+	: "corepack pnpm preview --host 127.0.0.1 --port 4326";
 
 module.exports = {
 	ci: {
 		collect: {
-			startServerCommand: "pnpm preview --host 127.0.0.1 --port 4326",
+			startServerCommand: previewCommand,
 			startServerReadyPattern: "Local",
 			url: [
 				`${baseUrl}/`,

@@ -301,7 +301,7 @@ function formatDate(value: string) {
 		height: 3rem;
 		flex: 0 0 auto;
 		place-items: center;
-		border-radius: 8px;
+		border-radius: var(--public-radius-surface);
 		border: 1px solid color-mix(in oklch, var(--primary), transparent 72%);
 		background: var(--btn-regular-bg);
 		color: var(--primary);
@@ -319,23 +319,27 @@ function formatDate(value: string) {
 	}
 
 	.gallery-kicker {
-		color: var(--primary);
-		font-size: 0.72rem;
-		font-weight: 850;
+		color: var(--btn-content);
+		font-family: var(--public-font-mono);
+		font-size: var(--public-font-meta);
+		font-weight: 700;
 		letter-spacing: 0;
 		text-transform: uppercase;
 	}
 
 	.gallery-header h1 {
 		color: var(--content-color);
-		font-size: clamp(1.8rem, 4vw, 2.35rem);
-		line-height: 1.15;
+		font-family: var(--public-font-serif);
+		font-size: var(--public-font-title);
+		font-weight: 620;
+		line-height: 1.08;
 	}
 
 	.gallery-header #gallery-summary {
 		margin-top: 0.25rem;
 		color: var(--meta-color);
-		font-size: 0.86rem;
+		font-family: var(--public-font-mono);
+		font-size: var(--public-font-meta);
 	}
 
 	.gallery-toolbar {
@@ -349,10 +353,9 @@ function formatDate(value: string) {
 		margin: 1rem 0 1.5rem;
 		padding: 0.75rem;
 		border: 1px solid var(--card-border);
-		border-radius: 8px;
-		background: color-mix(in oklch, var(--float-panel-bg), transparent 2%);
+		border-radius: var(--public-radius-surface);
+		background: var(--card-bg-solid);
 		box-shadow: var(--card-shadow);
-		backdrop-filter: blur(14px) saturate(1.05);
 	}
 
 	.gallery-toolbar > label {
@@ -360,8 +363,9 @@ function formatDate(value: string) {
 		min-width: 0;
 		gap: 0.25rem;
 		color: var(--meta-color);
-		font-size: 0.7rem;
-		font-weight: 800;
+		font-family: var(--public-font-mono);
+		font-size: var(--public-font-meta);
+		font-weight: 700;
 	}
 
 	.gallery-search {
@@ -374,7 +378,7 @@ function formatDate(value: string) {
 	.gallery-reset {
 		min-height: 2.75rem;
 		border: 1px solid var(--card-border);
-		border-radius: 7px;
+		border-radius: var(--public-radius-control);
 		background: var(--btn-regular-bg);
 		color: var(--content-color);
 	}
@@ -385,6 +389,8 @@ function formatDate(value: string) {
 		border: 0;
 		background: transparent;
 		color: inherit;
+		font-family: var(--public-font-sans);
+		font-size: var(--public-font-small);
 		outline: none;
 	}
 
@@ -398,6 +404,7 @@ function formatDate(value: string) {
 		width: 100%;
 		padding: 0 0.65rem;
 		font: inherit;
+		font-size: var(--public-font-small);
 		font-weight: 750;
 	}
 
@@ -409,6 +416,8 @@ function formatDate(value: string) {
 		gap: 0.4rem;
 		padding: 0 0.8rem;
 		font: inherit;
+		font-family: var(--public-font-sans);
+		font-size: var(--public-font-small);
 		font-weight: 800;
 		cursor: pointer;
 	}
@@ -433,13 +442,16 @@ function formatDate(value: string) {
 
 	.gallery-group-heading h2 {
 		color: var(--content-color);
-		font-size: 1.15rem;
+		font-family: var(--public-font-serif);
+		font-size: var(--public-font-content-title);
+		font-weight: 620;
 	}
 
 	.gallery-group-heading p,
 	.gallery-group-heading > span {
 		color: var(--meta-color);
-		font-size: 0.76rem;
+		font-family: var(--public-font-mono);
+		font-size: var(--public-font-meta);
 	}
 
 	.photo-gallery {
@@ -453,7 +465,9 @@ function formatDate(value: string) {
 		margin: 0 0 0.85rem;
 		break-inside: avoid;
 		overflow: hidden;
+		border-radius: var(--public-radius-surface);
 		background: var(--card-bg-solid);
+		backdrop-filter: none;
 	}
 
 	.gallery-image-link {
@@ -486,14 +500,15 @@ function formatDate(value: string) {
 
 	.gallery-caption h3 {
 		color: var(--content-color);
-		font-size: 0.88rem;
+		font-family: var(--public-font-sans);
+		font-size: var(--public-font-small);
 		line-height: 1.35;
 	}
 
 	.gallery-caption p {
 		margin-top: 0.35rem;
 		color: var(--meta-color);
-		font-size: 0.78rem;
+		font-size: var(--public-font-small);
 		line-height: 1.55;
 	}
 
@@ -530,7 +545,6 @@ function formatDate(value: string) {
 	}
 
 	@media (max-width: 960px) {
-		.gallery-header h1 { font-size: 1.7rem; }
 		.gallery-toolbar {
 			position: static;
 			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;

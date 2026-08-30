@@ -76,7 +76,7 @@ const jsonLd = {
 ---
 <MainGridLayout title={entry.data.title} description={entry.data.description} lang={entry.data.lang} setOGTypeArticle={true} headings={headings} ogImage={ogImageUrl.toString()} immediateContent={true}>
     <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
-    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4">
+    <div class="flex w-full overflow-hidden relative mb-4">
         <div id="post-container" class:list={["card-base z-10 px-6 md:px-9 pt-6 pb-4 relative w-full ",
             {}
         ]}>
@@ -101,8 +101,8 @@ const jsonLd = {
             <!-- title -->
             <div class="relative">
 				<h1
-                    class="transition w-full block font-bold mb-3
-                    text-3xl md:text-[2.25rem]/[2.75rem]
+					class="transition w-full block font-semibold mb-3 [font-family:var(--public-font-serif)]
+					text-[2.125rem]/[1.08] md:text-[3rem]/[1.08]
                     text-black/90 dark:text-white/90
                     md:before:w-1 before:h-5 before:rounded-md before:bg-[var(--primary)]
                     before:absolute before:top-[0.75rem] before:left-[-1.125rem]
@@ -137,9 +137,9 @@ const jsonLd = {
                 <ImageWrapper id="post-cover" src={entry.data.image} alt={`Cover image: ${entry.data.title}`} basePath={path.join("content/posts/", getDir(entry.id))} widths={[640, 960, 1280]} sizes="(max-width: 1024px) calc(100vw - 2rem), 768px" class="mb-8 rounded-lg cover-zoom"/>
             }
 
-            <div class="mb-7 flex items-center gap-3 text-xs font-bold uppercase tracking-normal text-[var(--meta-color)]">
-                <div class="h-px flex-1 border-t border-dashed border-[var(--line-divider)]"></div>
-                <div class="inline-flex items-center gap-2 rounded-full bg-black/5 px-3 py-1.5 dark:bg-white/10">
+			<div class="mb-7 flex items-center gap-3 text-[var(--public-font-meta)] font-bold uppercase tracking-normal text-[var(--meta-color)] [font-family:var(--public-font-mono)]">
+				<div class="h-px flex-1 border-t border-dashed border-[var(--line-divider)]"></div>
+				<div class="inline-flex items-center gap-2 px-2 py-1.5">
                     <Icon name="material-symbols:menu-book-outline-rounded" class="text-base text-[var(--primary)]" />
                     Article
                 </div>

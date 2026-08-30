@@ -1,16 +1,8 @@
 import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
+import { PUBLIC_ROUTES } from "../e2e/helpers/public-page-audit";
 
 const snapshotStyle = fileURLToPath(new URL("./snapshot.css", import.meta.url));
-
-const routes = [
-	{ name: "home", path: "/" },
-	{ name: "archive", path: "/archive/" },
-	{ name: "gallery", path: "/gallery/" },
-	{ name: "about", path: "/about/" },
-	{ name: "second-brain", path: "/brain/" },
-	{ name: "post", path: "/posts/6-thang-nhin-lai/" },
-] as const;
 
 const themes = ["light", "dark"] as const;
 
@@ -26,7 +18,7 @@ for (const theme of themes) {
 			await page.emulateMedia({ colorScheme: theme });
 		});
 
-		for (const route of routes) {
+		for (const route of PUBLIC_ROUTES) {
 			test(`${route.name} remains visually stable`, async ({
 				page,
 			}, testInfo) => {

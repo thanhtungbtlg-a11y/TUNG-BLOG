@@ -21,8 +21,9 @@ const { Content } = await render(aboutPost);
 	title={i18n(I18nKey.about)}
 	description="About Nguyễn Thanh Tùng and this personal collection of writing, photographs, and notes."
 	wide
+	immediateContent
 >
-	<section class="about-shell card-base onload-animation">
+	<section class="about-shell">
 		<div class="about-profile">
 			<a
 				href="#about-content"
@@ -69,7 +70,7 @@ const { Content } = await render(aboutPost);
 
 <style>
 	.about-shell {
-		padding: clamp(1rem, 3vw, 1.75rem);
+		padding: clamp(1rem, 3vw, 2rem) 0.25rem;
 	}
 
 	.about-profile {
@@ -86,7 +87,7 @@ const { Content } = await render(aboutPost);
 		display: block;
 		overflow: hidden;
 		min-height: 15rem;
-		border-radius: var(--radius-large);
+		border-radius: var(--public-radius-surface);
 		border: 1px solid color-mix(in oklch, var(--primary), transparent 62%);
 		background: var(--btn-regular-bg);
 	}
@@ -100,9 +101,10 @@ const { Content } = await render(aboutPost);
 
 	.about-kicker {
 		margin: 0 0 0.55rem;
-		color: var(--primary);
-		font-size: 0.8rem;
-		font-weight: 900;
+		color: var(--btn-content);
+		font-family: var(--public-font-mono);
+		font-size: var(--public-font-meta);
+		font-weight: 700;
 		letter-spacing: 0;
 		text-transform: uppercase;
 	}
@@ -110,8 +112,9 @@ const { Content } = await render(aboutPost);
 	.about-intro h1 {
 		margin: 0;
 		color: var(--content-color);
-		font-size: clamp(2rem, 4vw, 2.8rem);
-		font-weight: 900;
+		font-family: var(--public-font-serif);
+		font-size: var(--public-font-title);
+		font-weight: 620;
 		line-height: 1.08;
 		text-wrap: balance;
 	}
@@ -122,7 +125,8 @@ const { Content } = await render(aboutPost);
 		padding-left: 1rem;
 		border-left: 3px solid var(--primary);
 		color: var(--content-color);
-		font-size: clamp(1rem, 2vw, 1.2rem);
+		font-family: var(--public-font-sans);
+		font-size: clamp(var(--public-font-body), 2vw, 1.125rem);
 		font-style: italic;
 		font-weight: 650;
 		line-height: 1.65;
@@ -140,11 +144,14 @@ const { Content } = await render(aboutPost);
 		display: inline-flex;
 		align-items: center;
 		gap: 0.55rem;
-		min-height: 2.75rem;
+		min-height: 2.5rem;
 		padding: 0 0.9rem;
-		border-radius: 0.75rem;
+		border: 1px solid var(--line-divider);
+		border-radius: var(--public-radius-control);
 		background: var(--btn-regular-bg);
 		color: var(--btn-content);
+		font-family: var(--public-font-sans);
+		font-size: var(--public-font-small);
 		font-weight: 800;
 		transition:
 			transform 180ms ease,
@@ -163,7 +170,10 @@ const { Content } = await render(aboutPost);
 	}
 
 	.about-content {
+		max-width: var(--public-content-measure);
 		padding-top: clamp(1.2rem, 3vw, 2rem);
+		font-family: var(--public-font-sans);
+		font-size: var(--public-font-body);
 	}
 
 	.about-content :global(.custom-md) {

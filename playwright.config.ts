@@ -4,7 +4,7 @@ const port = 4325;
 const baseURL = `http://127.0.0.1:${port}`;
 const webServerCommand = process.env.CI
 	? `pnpm preview --host 127.0.0.1 --port ${port}`
-	: `pnpm start --host 127.0.0.1 --port ${port}`;
+	: `corepack pnpm start --host 127.0.0.1 --port ${port}`;
 
 export default defineConfig({
 	testDir: "./tests/e2e",
