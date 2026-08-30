@@ -845,6 +845,13 @@ function formatTime(seconds: number) {
 		width: min(312px, calc(100vw - 24px));
 	}
 
+	:global(html.homepage-index-page) .music-player:not(.expanded) {
+		position: absolute;
+		top: calc(4.5rem + 1rem);
+		right: max(14px, calc((100vw - var(--page-width)) / 2 + 1.5rem));
+		bottom: auto;
+	}
+
 	.mini,
 	.panel {
 		background: var(--music-player-bg);
@@ -1275,8 +1282,8 @@ function formatTime(seconds: number) {
 		}
 
 		:global(html.homepage-index-page) .music-player:not(.expanded) {
-			position: absolute;
-			top: calc(5.5rem + 32rem);
+			top: calc(4.5rem + 0.75rem);
+			right: 6px;
 			bottom: auto;
 		}
 
@@ -1307,12 +1314,6 @@ function formatTime(seconds: number) {
 			max-height: min(58vh, 32rem);
 			overflow-y: auto;
 			overscroll-behavior: contain;
-		}
-	}
-
-	@media (max-width: 520px) {
-		:global(html.homepage-index-page) .music-player:not(.expanded) {
-			top: calc(5.5rem + 23.75rem);
 		}
 	}
 

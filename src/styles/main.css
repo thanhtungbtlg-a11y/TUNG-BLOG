@@ -31,45 +31,74 @@ body {
 }
 
 body.homepage-index-page {
-	background: var(--page-bg);
+	background: var(--homepage-page-bg, var(--page-bg));
+	font-family: "Hanken Grotesk Variable", "Roboto Variable", Roboto, system-ui, sans-serif;
 }
 
 html.homepage-index-page {
 	--home-font-meta: 12px;
-	--home-font-small: 13px;
+	--home-font-small: 14px;
 	--home-font-ui: 14px;
-	--home-font-body: 15px;
-	--home-font-display: clamp(64px, 5vw, 72px);
-	--home-font-section-primary: 34px;
-	--home-font-section-secondary: 30px;
-	--home-font-section-compact: 23px;
-	--homepage-accent-text: var(--primary);
+	--home-font-body: 16px;
+	--home-font-display: clamp(64px, 5vw, 70px);
+	--home-font-section-primary: 36px;
+	--home-font-section-secondary: 32px;
+	--home-font-section-compact: 26px;
+	--home-font-display-family: "Source Serif 4 Variable", Georgia, "Times New Roman", serif;
+	--home-font-body-family: "Hanken Grotesk Variable", "Roboto Variable", Roboto, system-ui, sans-serif;
+	--homepage-page-bg: var(--page-bg);
+	--homepage-accent-text: #a9682a;
 	--homepage-meta-color: var(--meta-color);
 	--homepage-line-color: var(--line-color);
-	--homepage-register-bg: var(--card-bg-solid);
-	--homepage-project-surface: transparent;
+	--homepage-card-bg: var(--card-bg-solid);
+	--homepage-muted-bg: color-mix(in srgb, var(--card-bg-solid), var(--page-bg) 28%);
+	--homepage-register-bg: var(--homepage-card-bg);
+	--homepage-project-surface: var(--homepage-card-bg);
+	--homepage-card-shadow: 0 8px 28px rgb(0 0 0 / 7%);
+	--homepage-radius: 0.5rem;
 	background-image: none;
 }
 
 html.homepage-index-page:not(.dark) {
-	--homepage-page-bg: color-mix(in srgb, var(--page-bg) 72%, #f1f2f0);
-	--homepage-accent-text: color-mix(in srgb, var(--primary) 52%, black);
-	--homepage-meta-color: color-mix(in srgb, var(--content-color) 76%, var(--homepage-page-bg));
-	--homepage-line-color: color-mix(in srgb, var(--content-color) 18%, transparent);
-	--homepage-register-bg: color-mix(in srgb, var(--homepage-page-bg) 90%, var(--card-bg-solid));
-	--homepage-project-surface: color-mix(in srgb, var(--homepage-page-bg) 94%, var(--card-bg-solid));
+	--page-bg: #faf9f7;
+	--card-bg-solid: #ffffff;
+	--content-color: #162839;
+	--meta-color: #59616a;
+	--line-color: #dadad8;
+	--line-divider: #dadad8;
+	--homepage-page-bg: #faf9f7;
+	--homepage-accent-text: #8c4f10;
+	--homepage-meta-color: #59616a;
+	--homepage-line-color: #dadad8;
+	--homepage-card-bg: #ffffff;
+	--homepage-muted-bg: #f1f0ed;
+	--homepage-register-bg: #ffffff;
+	--homepage-project-surface: #ffffff;
+	--homepage-card-shadow: 0 8px 26px rgb(22 40 57 / 7%);
 }
 
 html.homepage-index-page:not(.dark) body.homepage-index-page {
 	background: var(--homepage-page-bg);
 }
 
+html.homepage-index-page.dark {
+	--homepage-accent-text: #d9a063;
+	--homepage-page-bg: var(--page-bg);
+	--homepage-card-bg: color-mix(in srgb, var(--card-bg-solid) 94%, white 6%);
+	--homepage-muted-bg: color-mix(in srgb, var(--card-bg-solid), black 16%);
+	--homepage-register-bg: var(--homepage-card-bg);
+	--homepage-project-surface: var(--homepage-card-bg);
+	--homepage-line-color: color-mix(in srgb, var(--content-color) 18%, transparent);
+	--homepage-meta-color: color-mix(in srgb, var(--content-color) 68%, transparent);
+	--homepage-card-shadow: 0 12px 32px rgb(0 0 0 / 24%);
+}
+
 @media (max-width: 520px) {
 	html.homepage-index-page {
-		--home-font-display: clamp(43px, 11.5vw, 48px);
-		--home-font-section-primary: 29px;
-		--home-font-section-secondary: 26px;
-		--home-font-section-compact: 21px;
+		--home-font-display: clamp(44px, 11.5vw, 48px);
+		--home-font-section-primary: 30px;
+		--home-font-section-secondary: 27px;
+		--home-font-section-compact: 24px;
 	}
 }
 

@@ -19,8 +19,6 @@ const updatedLabel =
 				timeZone: "Asia/Ho_Chi_Minh",
 			}).format(updatedAt)
 		: "";
-const [updatedDay = "", updatedMonth = "", updatedYear = ""] =
-	updatedLabel.split(" ");
 const liveTopic = data.liveTopics[0];
 const registerEntries = [
 	{
@@ -29,6 +27,7 @@ const registerEntries = [
 		unit: "project records",
 		scope: "Building services, process piping, and CAD/BIM workflows",
 		href: "/portfolio/",
+		icon: "material-symbols:architecture-rounded",
 	},
 	{
 		label: "Journal",
@@ -36,6 +35,7 @@ const registerEntries = [
 		unit: "entries",
 		scope: "Personal notes and working reflections",
 		href: "/archive/",
+		icon: "material-symbols:edit-note-rounded",
 	},
 	{
 		label: "Second Brain",
@@ -45,6 +45,7 @@ const registerEntries = [
 			? `${liveTopic.title} linked research notes`
 			: "Linked technical research notes",
 		href: "/brain/",
+		icon: "material-symbols:account-tree-outline-rounded",
 	},
 	{
 		label: "Gallery",
@@ -52,6 +53,7 @@ const registerEntries = [
 		unit: "photographs",
 		scope: "Places, light, and ordinary moments",
 		href: "/gallery/",
+		icon: "material-symbols:photo-camera-outline-rounded",
 	},
 ];
 ---
@@ -62,8 +64,8 @@ const registerEntries = [
 			src={heroImage}
 			alt="A quiet desk beside a sunlit window with a chair, a cup, and two plants"
 			class="home-hero__image"
-			widths={[480, 718]}
-			sizes="(max-width: 760px) 100vw, 1200px"
+			widths={[480, 768, 1200, 1440]}
+			sizes="(max-width: 760px) 100vw, 1280px"
 			loading="eager"
 			decoding="async"
 			fetchpriority="high"
@@ -80,11 +82,11 @@ const registerEntries = [
 			</p>
 			<div class="home-hero__actions">
 				<a class="home-hero__primary" href="/portfolio/">
-					Open engineering portfolio
+					Explore portfolio
 					<Icon name="material-symbols:arrow-outward-rounded" aria-hidden="true" />
 				</a>
 				<a class="home-hero__secondary" href="/archive/">
-					Browse journal notes
+					Read the journal
 					<Icon name="material-symbols:arrow-forward-rounded" aria-hidden="true" />
 				</a>
 			</div>
@@ -98,17 +100,14 @@ const registerEntries = [
 	>
 		<header>
 			<div>
-				<p>Index</p>
+				<p>Knowledge index</p>
 				<h2 id="work-register-title">Work &amp; Knowledge Register</h2>
 			</div>
 			{
 				updatedLabel && updatedAt && (
 					<p class="work-register__updated">
 						<span>Last updated</span>
-						<time datetime={data.lastUpdated}>
-							<span>{updatedDay} {updatedMonth}</span>
-							<span>{updatedYear}</span>
-						</time>
+						<time datetime={data.lastUpdated}>{updatedLabel}</time>
 					</p>
 				)
 			}
@@ -116,18 +115,21 @@ const registerEntries = [
 		<dl>
 			{
 				registerEntries.map((entry) => (
-					<div>
+					<div class="work-register__card">
+						<span class="work-register__icon" aria-hidden="true">
+							<Icon name={entry.icon} />
+						</span>
 						<dt>
 							<a href={entry.href}>
 								{entry.label}
 								<Icon name="material-symbols:arrow-outward-rounded" aria-hidden="true" />
 							</a>
 						</dt>
-						<dd class="work-register__scope">{entry.scope}</dd>
 						<dd class="work-register__count">
 							<strong>{entry.count}</strong>
 							<span>{entry.unit}</span>
 						</dd>
+						<dd class="work-register__scope">{entry.scope}</dd>
 					</div>
 				))
 			}
@@ -492,6 +494,365 @@ const registerEntries = [
 
 	@media (prefers-reduced-motion: reduce) {
 		.home-hero__actions a {
+			transition: none;
+		}
+	}
+</style>
+
+<style>
+	.home-hero .home-hero__media {
+		min-height: 37.5rem;
+		border-color: rgb(255 255 255 / 12%);
+		border-radius: var(--homepage-radius);
+		box-shadow: var(--homepage-card-shadow);
+	}
+
+	.home-hero .home-hero__shade {
+		background: rgb(5 9 8 / 47%);
+	}
+
+	.home-hero .home-hero__content {
+		right: clamp(1.5rem, 4vw, 4rem);
+		bottom: clamp(2rem, 5vw, 4rem);
+		left: clamp(1.5rem, 4vw, 4rem);
+		max-width: 44rem;
+	}
+
+	.home-hero .home-hero__kicker {
+		color: #f0c28f;
+	}
+
+	.home-hero .home-hero__content h1 {
+		font-family: var(--home-font-display-family);
+		font-weight: 620;
+		line-height: 0.98;
+	}
+
+	.home-hero .home-hero__intro {
+		max-width: 40rem;
+		font-size: var(--home-font-body);
+		color: rgb(255 255 255 / 86%);
+	}
+
+	.home-hero .home-hero__actions {
+		gap: 0.75rem;
+		margin-top: 1.65rem;
+	}
+
+	.home-hero .home-hero__actions a {
+		min-height: 2.85rem;
+		padding: 0.7rem 1rem;
+		border: 1px solid rgb(255 255 255 / 55%);
+		border-radius: 0.25rem;
+		text-decoration: none;
+	}
+
+	.home-hero .home-hero__primary {
+		background: #fff;
+		color: #162839;
+	}
+
+	.home-hero .home-hero__secondary {
+		background: rgb(5 9 8 / 28%);
+		color: #fff !important;
+	}
+
+	.home-hero .work-register {
+		border: 0;
+		border-radius: 0;
+		background: transparent;
+	}
+
+	.home-hero .work-register header {
+		padding: 0 0 1.25rem;
+	}
+
+	.home-hero .work-register h2 {
+		margin-top: 0.3rem;
+		font-size: var(--home-font-section-secondary);
+		line-height: 1.15;
+	}
+
+	.home-hero .work-register__updated {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+	}
+
+	@media (max-width: 520px) {
+		.home-hero .home-hero__media {
+			min-height: 30rem;
+		}
+
+		.home-hero .home-hero__content {
+			right: 1rem;
+			bottom: 1.15rem;
+			left: 1rem;
+		}
+
+		.home-hero .home-hero__intro {
+			margin-top: 0.7rem;
+			font-size: 15px;
+		}
+
+		.home-hero .home-hero__actions {
+			margin-top: 1rem;
+		}
+
+		.home-hero .work-register header {
+			align-items: flex-start;
+			min-height: 0;
+			flex-direction: column;
+			gap: 0.7rem;
+			padding: 0 0 0.85rem;
+		}
+
+		.home-hero .work-register h2 {
+			font-size: 25px;
+		}
+
+		.home-hero .work-register__updated {
+			align-items: flex-start;
+			max-width: none;
+			text-align: left;
+		}
+	}
+</style>
+
+<style>
+	.home-hero {
+		gap: 3.75rem;
+	}
+
+	.home-hero__media {
+		min-height: 37.5rem;
+		border-color: rgb(255 255 255 / 12%);
+		border-radius: var(--homepage-radius);
+		box-shadow: var(--homepage-card-shadow);
+	}
+
+	.home-hero__shade {
+		background: rgb(5 9 8 / 47%);
+	}
+
+	.home-hero__content {
+		right: clamp(1.5rem, 4vw, 4rem);
+		bottom: clamp(2rem, 5vw, 4rem);
+		left: clamp(1.5rem, 4vw, 4rem);
+		max-width: 44rem;
+	}
+
+	.home-hero__kicker {
+		color: #f0c28f;
+	}
+
+	.home-hero h1 {
+		font-family: var(--home-font-display-family);
+		font-weight: 620;
+	}
+
+	.home-hero__intro {
+		max-width: 40rem;
+		font-size: var(--home-font-body);
+		color: rgb(255 255 255 / 86%);
+	}
+
+	.home-hero__actions {
+		gap: 0.75rem;
+		margin-top: 1.65rem;
+	}
+
+	.home-hero__actions a {
+		min-height: 2.85rem;
+		padding: 0.7rem 1rem;
+		border: 1px solid rgb(255 255 255 / 55%);
+		border-radius: 0.25rem;
+		text-decoration: none;
+	}
+
+	.home-hero__primary {
+		background: #fff;
+		color: #162839 !important;
+	}
+
+	.home-hero__primary:hover {
+		border-color: #f0c28f;
+		background: #f0c28f;
+	}
+
+	.home-hero__secondary {
+		background: rgb(5 9 8 / 28%);
+		color: #fff !important;
+	}
+
+	.home-hero__secondary:hover {
+		background: #fff;
+		color: #162839 !important;
+	}
+
+	.work-register {
+		border: 0;
+		border-radius: 0;
+		background: transparent;
+	}
+
+	.work-register header {
+		padding: 0 0 1.25rem;
+		border-bottom: 1px solid var(--homepage-line-color);
+	}
+
+	.work-register header > div > p,
+	.work-register__updated {
+		color: var(--homepage-accent-text);
+	}
+
+	.work-register h2 {
+		margin-top: 0.3rem;
+		font-family: var(--home-font-display-family);
+		font-size: var(--home-font-section-secondary);
+		font-weight: 620;
+		line-height: 1.15;
+	}
+
+	.work-register__updated {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		color: var(--homepage-meta-color);
+	}
+
+	.work-register__updated time {
+		margin-top: 0.2rem;
+	}
+
+	.work-register dl {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 1rem;
+		margin: 1.25rem 0 0;
+	}
+
+	.work-register dl .work-register__card {
+		display: flex;
+		min-width: 0;
+		min-height: 12rem;
+		flex-direction: column;
+		gap: 0;
+		align-items: stretch;
+		padding: 1.25rem;
+		border: 1px solid var(--homepage-line-color);
+		border-radius: 0.25rem;
+		background: var(--homepage-register-bg);
+		box-shadow: var(--homepage-card-shadow);
+		transition: border-color 180ms ease, transform 180ms ease;
+	}
+
+	.work-register dl .work-register__card + .work-register__card {
+		border-top: 1px solid var(--homepage-line-color);
+	}
+
+	.work-register__card:hover {
+		border-color: var(--homepage-accent-text);
+		transform: translateY(-2px);
+	}
+
+	.work-register__icon {
+		display: inline-flex;
+		width: 2rem;
+		height: 2rem;
+		align-items: center;
+		justify-content: flex-start;
+		margin-bottom: 1rem;
+		font-size: 1.45rem;
+		color: var(--homepage-accent-text);
+	}
+
+	.work-register__count {
+		justify-content: flex-start;
+		margin-top: auto;
+		white-space: normal;
+	}
+
+	.work-register__count strong {
+		font-family: var(--home-font-display-family);
+		font-size: 2.65rem;
+		font-weight: 650;
+		line-height: 1;
+	}
+
+	.work-register__scope {
+		margin-top: 0.75rem;
+		font-size: var(--home-font-small);
+		line-height: 1.45;
+	}
+
+	@media (max-width: 900px) {
+		.work-register dl {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	@media (max-width: 520px) {
+		.home-hero {
+			gap: 2.75rem;
+		}
+
+		.home-hero__media {
+			min-height: 30rem;
+		}
+
+		.home-hero__content {
+			right: 1rem;
+			bottom: 1.15rem;
+			left: 1rem;
+		}
+
+		.home-hero__intro {
+			margin-top: 0.7rem;
+			font-size: 15px;
+		}
+
+		.home-hero__actions {
+			margin-top: 1rem;
+		}
+
+		.home-hero__actions a {
+			min-height: 2.65rem;
+		}
+
+		.work-register header {
+			align-items: flex-start;
+			flex-direction: column;
+			gap: 0.7rem;
+			padding: 0 0 0.85rem;
+		}
+
+		.work-register__updated {
+			align-items: flex-start;
+		}
+
+		.work-register h2 {
+			font-size: 25px;
+		}
+
+		.work-register dl {
+			grid-template-columns: 1fr;
+			gap: 0.75rem;
+			margin-top: 0.9rem;
+		}
+
+		.work-register dl .work-register__card {
+			min-height: 9.5rem;
+			padding: 1rem;
+		}
+
+		.work-register__icon {
+			margin-bottom: 0.65rem;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.work-register__card {
 			transition: none;
 		}
 	}

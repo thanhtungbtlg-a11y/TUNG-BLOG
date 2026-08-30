@@ -1,4 +1,4 @@
-# Homepage Design: Maintained Personal Engineering Index
+# Homepage Design: Architectural Logic
 
 ## Subject
 
@@ -17,27 +17,27 @@ Within ten seconds, a visitor should understand who Thanh Tung is, what engineer
 
 ## Visual Thesis
 
-**A maintained personal engineering index.**
+**Architectural Logic: engineering precision with an editorial, human surface.**
 
-The warm workspace photograph supplies the human setting. The interface supplies precise structure, real project information, and a calm editorial reading rhythm. Engineering identity comes from how information is organized, not from blueprint decoration.
+The warm workspace photograph supplies the human setting. A paper-like surface, navy structure, copper signals, restrained cards, and an academic type hierarchy make the interface feel professional without becoming corporate. Engineering identity comes from real records and their organization, not decorative diagrams.
 
 ## Color
 
-Homepage components use the existing semantic theme variables and support Ocean, Sakura, Forest, and Mono presets. No homepage-only accent was introduced.
+The homepage has a deliberately stable light-mode identity while continuing to support the site's existing dark mode and visitor controls.
 
-- `--primary` carries links, focus, and the few active signals.
-- `--content-color` carries primary text.
-- `--meta-color` carries supporting information with accessible contrast.
-- `--page-bg`, `--card-bg-solid`, and `--line-color` provide quiet structure.
+- Surface: `#faf9f7`, a warm paper-like background.
+- Primary text and heavy elements: `#162839` navy.
+- Accent: `#8c4f10` copper, used for category signals, active states, and meaningful links.
+- Outline: `#dadad8` for borders and dividers.
+- Card surface: `#ffffff`; muted section surface: `#f1f0ed`.
 
-The warm browns in the hero image remain photographic rather than being copied into decorative UI colors.
+Copper is a signal rather than a default text color. Dark mode keeps the existing deep surface and uses a lighter copper signal without flattening its contrast.
 
 ## Type
 
-- Roboto Variable is the primary reading and interface face.
-- The system serif is selective: the name, the lead journal title, the lead project title, the live knowledge title, and the About statement.
+- Hanken Grotesk Variable is the primary reading and interface face.
+- Source Serif 4 Variable carries identity, section structure, and selected editorial content titles.
 - JetBrains Mono is reserved for real categories, dates, counts, update information, and project metadata.
-- Section headings use Roboto so the serif retains editorial weight.
 - Monospace is never used to simulate technical complexity.
 
 ### Homepage Type Roles And Scale
@@ -46,18 +46,18 @@ The homepage uses a deliberately small set of role-based tokens rather than arbi
 
 | Role | Family | Size | Weight | Line height | Letter spacing | Homepage examples |
 | --- | --- | --- | --- | --- | --- | --- |
-| Display | system editorial serif | `64-72px` desktop, `43-48px` mobile | 500 | 0.96 | 0 | Nguyen Thanh Tung only |
-| Primary section heading | Roboto Variable | `34px` desktop, `29px` mobile | 760 | 1.15 | 0 | Selected engineering work |
-| Secondary section heading | Roboto Variable | `30px` desktop, `26px` mobile | 760 | 1.15 | 0 | Latest from the journal |
-| Compact section heading | Roboto Variable | `23px` desktop, `21px` mobile | 760 | 1.15 | 0 | Knowledge system, Recent photographs, About this space |
-| Featured content title | system editorial serif | `30-32px` | 550 | 1.25 | 0 | Lead journal and live knowledge titles |
-| Content title | serif when editorial; otherwise Roboto Variable | `17-23px` | 550-700 | 1.25-1.3 | 0 | Project and compact record titles |
-| Body | Roboto Variable | `15-16px` | 400 | 1.55-1.7 | 0 | Descriptions, summaries, and prose |
-| Small body | Roboto Variable | `13px` | 500-700 | 1.45 | 0 | Register scope and compact values |
+| Display | Source Serif 4 Variable | `64-70px` desktop, `44-48px` mobile | 620 | 0.98 | 0 | Nguyen Thanh Tung only |
+| Primary section heading | Source Serif 4 Variable | `36px` desktop, `30px` mobile | 620 | 1.15 | 0 | Selected engineering work |
+| Secondary section heading | Source Serif 4 Variable | `32px` desktop, `27px` mobile | 620 | 1.15 | 0 | Latest from the journal, Work & Knowledge Register |
+| Compact section heading | Source Serif 4 Variable | `26px` desktop, `24px` mobile | 620 | 1.15 | 0 | Knowledge system, Recent photographs, About this space |
+| Featured content title | Source Serif 4 Variable | `28-32px` | 620 | 1.25 | 0 | Lead journal and live knowledge titles |
+| Content title | Source Serif 4 Variable | `21-24px` | 620 | 1.25-1.3 | 0 | Project and compact record titles |
+| Body | Hanken Grotesk Variable | `15-16px` | 400 | 1.55-1.7 | 0 | Descriptions, summaries, and prose |
+| Small body | Hanken Grotesk Variable | `14px` | 500-700 | 1.45 | 0 | Register scope and compact values |
 | Metadata | JetBrains Mono Variable | `12px` | 650-700 | 1.35-1.5 | 0 | Dates, disciplines, categories, counts, periods, and status |
 | Eyebrow | JetBrains Mono Variable | `12px` | 700 | 1.35 | 0 | Practice, Journal, Second Brain, Gallery, About |
-| Navigation | Roboto Variable | `14px` | 650 | 1.4 | 0 | Navbar destinations |
-| Action | Roboto Variable | `14px` | 700-750 | 1.4 | CTAs and text links |
+| Navigation | Hanken Grotesk Variable | `14px` | 650 | 1.4 | 0 | Navbar destinations |
+| Action | Hanken Grotesk Variable | `14px` | 700-750 | 1.4 | CTAs and text links |
 
 #### Hierarchy Rules
 
@@ -112,7 +112,7 @@ Section numbers are prohibited unless the content is a real ordered sequence.
 
 ## Signature Element
 
-The single signature element is the **Work & Knowledge Register** attached to the hero.
+The single signature element is the **Work & Knowledge Register** immediately following the hero.
 
 It uses only repository-derived information:
 
@@ -122,7 +122,7 @@ It uses only repository-derived information:
 - Gallery photographs;
 - the newest update date derived from those sources.
 
-It is an editorial index, not a dashboard. It is not repeated elsewhere on the page.
+It is an editorial index, not a dashboard. Four restrained cards provide category, real count, scope, and destination without inventing analytics. It is not repeated elsewhere on the page.
 
 ## Legitimate Engineering Metadata
 
@@ -139,22 +139,22 @@ Fake revision numbers, decorative statuses, drawing stamps, document codes, and 
 
 - Preserve the selected warm workspace image and its useful crop.
 - Keep one restrained dark shade for text readability; do not add decorative gradients or color effects.
-- Use one button-style primary CTA. Secondary navigation is a text link.
+- Use one solid primary CTA and one restrained outlined secondary CTA over the image.
 - Body copy remains lighter than the name and short enough to scan.
 - Desktop preserves the broad photographic composition.
-- At 390px the media height is reduced so the register and the beginning of Practice are visible in the initial viewport.
+- At 390px the crop, copy, and actions stay compact without shrinking the image into a decorative banner.
 
 ## Project Presentation
 
-The lead project is a project record rather than a generic card. Image, metadata, title, summary, and link are aligned by separators. Background fills, shadows, rounded containers, and decorative project numbers are omitted unless they communicate a real state.
+The lead project is the primary project record: image, metadata, title, summary, and link read as one composition. Supporting records are smaller repeated cards in the adjacent column. Radius stays at 4-8px and shadows remain low contrast.
 
 ## Background And Containers
 
 - The homepage uses a solid semantic page background.
 - The global grid/noise treatment is disabled on the homepage.
 - Engineering character comes from alignment, typography, metadata, and separators.
-- Cards are reserved for genuinely framed tools or repeated items.
-- Radius and shadows are not added to every content block.
+- Cards are reserved for the register, repeated project records, Journal records, and the two secondary knowledge/gallery modules.
+- Radius is limited to 4-8px. Shadows are subtle and never establish hierarchy by themselves.
 
 ## Mobile Player
 

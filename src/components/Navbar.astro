@@ -1,6 +1,6 @@
 ---
 import { Icon } from "astro-icon/components";
-import { navBarConfig, siteConfig } from "../config";
+import { navBarConfig, profileConfig, siteConfig } from "../config";
 import { LinkPresets } from "../constants/link-presets";
 import { LinkPreset, type NavBarLink } from "../types/config";
 import { url } from "../utils/url-utils";
@@ -11,6 +11,8 @@ import NavMenuPanel from "./widget/NavMenuPanel.astro";
 
 const className = Astro.props.class;
 const currentPath = Astro.url.pathname;
+const isHomepage = currentPath === "/";
+const emailUrl = profileConfig.links.find((link) => link.name === "Email")?.url;
 
 let links: NavBarLink[] = navBarConfig.links.map(
 	(item: NavBarLink | LinkPreset): NavBarLink => {
@@ -35,7 +37,7 @@ function isCurrentLink(link: NavBarLink) {
     <div class:list={[
         className,
         "navbar-surface card-base navbar-glass !overflow-visible max-w-[var(--page-width)] h-[4.25rem] !rounded-t-none mx-auto flex items-center justify-between px-3 md:px-4"]}>
-        <a href={url('/')} aria-label={`Home - ${siteConfig.title}`} class="navbar-brand btn-plain scale-animation rounded-lg h-[3.25rem] px-3 min-[360px]:px-5 font-bold active:scale-95">
+        <a href={url('/')} aria-label={`Home - ${isHomepage ? profileConfig.name : siteConfig.title}`} class="navbar-brand btn-plain scale-animation rounded-lg h-[3.25rem] px-3 min-[360px]:px-5 font-bold active:scale-95">
             <div class="flex flex-row text-[var(--primary)] items-center text-md">
                 <img
                     src={url('/favicon/favicon-dark-32.png')}
@@ -44,7 +46,7 @@ function isCurrentLink(link: NavBarLink) {
                     height="32"
                     class="navbar-brand-image h-8 w-8 rounded-lg object-cover mr-2 shadow-sm"
                 />
-                <span class="navbar-brand-title hidden min-[360px]:inline whitespace-nowrap">{siteConfig.title}</span>
+                <span class="navbar-brand-title hidden min-[360px]:inline whitespace-nowrap">{isHomepage ? profileConfig.name : siteConfig.title}</span>
                 <span class="navbar-hero-mark hidden select-none" aria-hidden="true">✳︎</span>
             </div>
         </a>
@@ -75,6 +77,11 @@ function isCurrentLink(link: NavBarLink) {
                     </div>
             )}
             <LightDarkSwitch client:load></LightDarkSwitch>
+			{isHomepage && emailUrl && (
+				<a class="navbar-connect hidden lg:inline-flex" href={emailUrl} target="_blank" rel="noreferrer">
+					Connect
+				</a>
+			)}
 			<button type="button" aria-label="Open navigation menu" aria-expanded="false" name="Nav Menu" class="navbar-menu-button btn-plain scale-animation rounded-lg w-11 h-11 active:scale-90 md:!hidden" id="nav-menu-switch">
                 <Icon name="material-symbols:menu-rounded" class="navbar-menu-icon text-[1.25rem]"></Icon>
                 <span class="navbar-menu-bars hidden" aria-hidden="true">
@@ -188,6 +195,13 @@ function isCurrentLink(link: NavBarLink) {
 
 .homepage-index-page .navbar-brand-title {
 	color: var(--content-color);
+	font-family: var(--home-font-display-family);
+	font-size: 1.25rem;
+	font-weight: 650;
+}
+
+.homepage-index-page .navbar-brand-image {
+	display: none;
 }
 
 .homepage-index-page .search-trigger-label {
@@ -195,7 +209,9 @@ function isCurrentLink(link: NavBarLink) {
 }
 
 .homepage-index-page #navbar .navbar-surface {
+	height: 4.5rem;
 	border-right: 0;
+	border-bottom: 1px solid var(--homepage-line-color);
 	border-left: 0;
 	border-radius: 0 !important;
 	box-shadow: none;
@@ -204,7 +220,7 @@ function isCurrentLink(link: NavBarLink) {
 }
 
 .homepage-index-page:not(.dark) #navbar .navbar-surface {
-	background: color-mix(in srgb, var(--homepage-page-bg) 92%, white);
+	background: color-mix(in srgb, var(--homepage-page-bg) 94%, white);
 }
 
 .homepage-index-page #navbar .navbar-link {
@@ -214,7 +230,7 @@ function isCurrentLink(link: NavBarLink) {
 }
 
 .homepage-index-page #navbar .navbar-link.is-active {
-	color: var(--content-color);
+	color: var(--homepage-accent-text);
 	background: transparent;
 }
 
@@ -224,6 +240,27 @@ function isCurrentLink(link: NavBarLink) {
 	left: 0.95rem;
 	height: 1px;
 	border-radius: 0;
+	background: var(--homepage-accent-text);
+}
+
+.navbar-connect {
+	min-height: 2.65rem;
+	align-items: center;
+	justify-content: center;
+	margin-left: 0.4rem;
+	padding: 0.6rem 1rem;
+	border: 1px solid var(--content-color);
+	border-radius: 0.25rem;
+	background: var(--content-color);
+	color: var(--homepage-page-bg, #fff);
+	font-size: var(--home-font-ui, 14px);
+	font-weight: 750;
+	transition: background-color 180ms ease, color 180ms ease;
+}
+
+.navbar-connect:hover {
+	background: transparent;
+	color: var(--content-color);
 }
 
 @media (hover: hover) and (pointer: fine) {
