@@ -169,7 +169,7 @@ function isCurrentLink(link: NavBarLink) {
 	};
 
 	const scheduleNavbarStateSync = () => {
-		window.requestAnimationFrame(syncNavbarState);
+		window.requestAnimationFrame(() => syncNavbarState());
 	};
 
 	syncNavbarState();
@@ -178,7 +178,7 @@ function isCurrentLink(link: NavBarLink) {
 			const target = new URL(visit.to.url, window.location.origin);
 			syncNavbarState(target.pathname);
 		});
-		window.swup?.hooks?.on("page:view", syncNavbarState);
+		window.swup?.hooks?.on("page:view", () => syncNavbarState());
 	};
 	if (window.swup?.hooks) bindSwupNavbarSync();
 	else document.addEventListener("swup:enable", bindSwupNavbarSync, { once: true });

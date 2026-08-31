@@ -127,6 +127,22 @@ test("theme choice persists after reload", async ({ page }) => {
 test("home navigation clears the previous active nav item", async ({
 	page,
 }) => {
+	const navigationErrors: string[] = [];
+	const analyticsErrors: string[] = [];
+	page.on("console", (message) => {
+		if (
+			message.type() === "error" &&
+			message.text().includes("Error in hook 'page:view'")
+		) {
+			navigationErrors.push(message.text());
+		}
+	});
+	page.on("pageerror", (error) => {
+		if (error.message.includes("vercel-analytics")) {
+			analyticsErrors.push(error.message);
+		}
+	});
+
 	await page.goto("/brain/");
 
 	const desktopNav = page.locator(".navbar-links");
@@ -139,6 +155,9 @@ test("home navigation clears the previous active nav item", async ({
 	await page.locator('a[data-nav-url="/"]:visible').first().click();
 
 	await expect(page).toHaveURL(/\/$/);
+	await expect(
+		page.getByRole("heading", { level: 1, name: "Nguyễn Thanh Tùng" }),
+	).toBeVisible();
 	const activeNavUrls = await page
 		.locator("[data-nav-url].is-active")
 		.evaluateAll((links) => [
@@ -159,6 +178,49 @@ test("home navigation clears the previous active nav item", async ({
 		"hidden",
 		"",
 	);
+
+	await page.goBack();
+	await expect(page).toHaveURL(/\/brain\/$/);
+	await expect(
+		page.getByRole("heading", { level: 1, name: "Second Brain" }),
+	).toBeVisible();
+	await expect(brainLink).toHaveAttribute("aria-current", "page");
+	await expect(homeLink).not.toHaveAttribute("aria-current", "page");
+
+	await page.goForward();
+	await expect(page).toHaveURL(/\/$/);
+	await expect(
+		page.getByRole("heading", { level: 1, name: "Nguyễn Thanh Tùng" }),
+	).toBeVisible();
+	await expect(homeLink).toHaveAttribute("aria-current", "page");
+	await expect(brainLink).not.toHaveAttribute("aria-current", "page");
+	expect(navigationErrors).toEqual([]);
+	expect(analyticsErrors).toEqual([]);
+
+	const analyticsRuntime = await page.evaluate(() => {
+		const analyticsScript = [...document.scripts].find((script) =>
+			script.textContent?.includes("__thanhTungVercelAnalyticsBound"),
+		);
+		if (!analyticsScript) return null;
+
+		const queue =
+			(window as typeof window & { vaq?: [string, unknown?][] }).vaq ?? [];
+		return {
+			ignoredBySwup: analyticsScript.hasAttribute("data-swup-ignore-script"),
+			pageviewPaths: queue
+				.filter(([event]) => event === "pageview")
+				.map(([, payload]) => (payload as { path?: string } | undefined)?.path),
+		};
+	});
+	if (analyticsRuntime) {
+		expect(analyticsRuntime.ignoredBySwup).toBe(true);
+		expect(analyticsRuntime.pageviewPaths).toEqual([
+			"/brain/",
+			"/",
+			"/brain/",
+			"/",
+		]);
+	}
 });
 
 test("collapsed player stays anchored to the viewport corner", async ({
