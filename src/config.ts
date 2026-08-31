@@ -35,7 +35,7 @@ export const navBarConfig: NavBarConfig = {
 		LinkPreset.Archive,
 		{ name: "Gallery", url: "/gallery/" },
 		{ name: "Second Brain", url: "/brain/", native: true },
-		{ name: "Portfolio", url: "/portfolio/" },
+		{ name: "Portfolio", url: "/portfolio/", native: true },
 		LinkPreset.About,
 	],
 };

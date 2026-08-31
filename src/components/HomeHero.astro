@@ -81,7 +81,7 @@ const registerEntries = [
 				through projects and technical notes.
 			</p>
 			<div class="home-hero__actions">
-				<a class="home-hero__primary" href="/portfolio/">
+				<a class="home-hero__primary" href="/portfolio/" data-no-swup>
 					Explore portfolio
 					<Icon name="material-symbols:arrow-outward-rounded" aria-hidden="true" />
 				</a>
@@ -120,7 +120,10 @@ const registerEntries = [
 							<Icon name={entry.icon} />
 						</span>
 						<dt>
-							<a href={entry.href}>
+							<a
+								href={entry.href}
+								data-no-swup={entry.href === "/portfolio/" ? true : undefined}
+							>
 								{entry.label}
 								<Icon name="material-symbols:arrow-outward-rounded" aria-hidden="true" />
 							</a>

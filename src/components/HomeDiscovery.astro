@@ -39,7 +39,7 @@ function galleryPath(item: HomepageGalleryItem) {
 				<h2 id="practice-title">Selected engineering work</h2>
 				<p>A lead project record supported by related piping and engineering workflow studies.</p>
 			</div>
-			<a href="/portfolio/">Open portfolio <Icon name="material-symbols:arrow-outward-rounded" /></a>
+			<a href="/portfolio/" data-no-swup>Open portfolio <Icon name="material-symbols:arrow-outward-rounded" /></a>
 		</header>
 
 		<div class="project-layout">
@@ -64,7 +64,11 @@ function galleryPath(item: HomepageGalleryItem) {
 							</p>
 							<h3>{leadProject.title}</h3>
 							<p>{leadProject.summary}</p>
-							<a href="/portfolio/" aria-label={`View project record: ${leadProject.title}`}>
+							<a
+								href="/portfolio/"
+								data-no-swup
+								aria-label={`View project record: ${leadProject.title}`}
+							>
 								View project record
 								<Icon name="material-symbols:arrow-forward-rounded" />
 							</a>

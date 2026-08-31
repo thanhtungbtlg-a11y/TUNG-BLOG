@@ -56,6 +56,21 @@ test("search keeps backward keyboard focus inside the modal", async ({
 	).toBe(true);
 });
 
+test("protected portfolio links bypass Swup before the gate resolves", async ({
+	page,
+}) => {
+	await page.goto("/");
+
+	const portfolioLinks = page.locator('a[href^="/portfolio"]');
+	expect(await portfolioLinks.count()).toBeGreaterThan(0);
+	const swupManagedLinks = await portfolioLinks.evaluateAll((links) =>
+		links
+			.filter((link) => !link.hasAttribute("data-no-swup"))
+			.map((link) => link.getAttribute("href")),
+	);
+	expect(swupManagedLinks).toEqual([]);
+});
+
 test("portfolio gate closes with Escape and restores a visible trigger", async ({
 	page,
 }) => {
