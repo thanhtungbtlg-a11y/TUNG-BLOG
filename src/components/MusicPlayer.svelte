@@ -845,13 +845,6 @@ function formatTime(seconds: number) {
 		width: min(312px, calc(100vw - 24px));
 	}
 
-	:global(html.homepage-index-page) .music-player:not(.expanded) {
-		position: absolute;
-		top: calc(4.5rem + 1rem);
-		right: max(14px, calc((100vw - var(--page-width)) / 2 + 1.5rem));
-		bottom: auto;
-	}
-
 	.mini,
 	.panel {
 		background: var(--music-player-bg);
@@ -1279,12 +1272,6 @@ function formatTime(seconds: number) {
 			left: auto;
 			bottom: calc(6px + env(safe-area-inset-bottom, 0px));
 			width: 52px;
-		}
-
-		:global(html.homepage-index-page) .music-player:not(.expanded) {
-			top: calc(4.5rem + 0.75rem);
-			right: 6px;
-			bottom: auto;
 		}
 
 		.music-player.expanded {

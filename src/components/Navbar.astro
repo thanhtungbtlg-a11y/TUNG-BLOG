@@ -46,7 +46,13 @@ function isCurrentLink(link: NavBarLink) {
                     height="32"
                     class="navbar-brand-image h-8 w-8 rounded-lg object-cover mr-2 shadow-sm"
                 />
-                <span class="navbar-brand-title hidden min-[360px]:inline whitespace-nowrap">{isHomepage ? profileConfig.name : siteConfig.title}</span>
+                <span
+					class="navbar-brand-title hidden min-[360px]:inline whitespace-nowrap"
+					data-home-label={profileConfig.name}
+					data-default-label={siteConfig.title}
+				>
+					{isHomepage ? profileConfig.name : siteConfig.title}
+				</span>
                 <span class="navbar-hero-mark hidden select-none" aria-hidden="true">✳︎</span>
             </div>
         </a>
@@ -77,8 +83,8 @@ function isCurrentLink(link: NavBarLink) {
                     </div>
             )}
             <LightDarkSwitch client:load></LightDarkSwitch>
-			{isHomepage && emailUrl && (
-				<a class="navbar-connect hidden lg:inline-flex" href={emailUrl} target="_blank" rel="noreferrer">
+			{emailUrl && (
+				<a class="navbar-connect hidden lg:inline-flex" href={emailUrl} target="_blank" rel="noreferrer" hidden={!isHomepage}>
 					Connect
 				</a>
 			)}
@@ -117,6 +123,68 @@ function isCurrentLink(link: NavBarLink) {
 		menuPanel.toggleAttribute("inert", !open);
 	};
 
+	const normalizePath = (path) => path.replace(/\/+$/, "") || "/";
+
+	const syncNavbarState = (pathname = window.location.pathname) => {
+		const currentPath = normalizePath(pathname);
+		const isHomepage = currentPath === "/";
+
+		document.documentElement.classList.toggle("homepage-index-page", isHomepage);
+		document.body?.classList.toggle("homepage-index-page", isHomepage);
+
+		document.querySelectorAll("[data-nav-url]").forEach((link) => {
+			if (!(link instanceof HTMLAnchorElement)) return;
+			const navUrl = link.dataset.navUrl;
+			if (!navUrl) return;
+
+			const target = new URL(navUrl, window.location.origin);
+			const targetPath = normalizePath(target.pathname);
+			const isCurrent = target.origin === window.location.origin && (
+				targetPath === "/"
+					? currentPath === "/"
+					: currentPath === targetPath || currentPath.startsWith(`${targetPath}/`)
+			);
+
+			link.classList.toggle("is-active", isCurrent);
+			if (isCurrent) link.setAttribute("aria-current", "page");
+			else link.removeAttribute("aria-current");
+		});
+
+		const brand = document.querySelector(".navbar-brand");
+		const brandTitle = document.querySelector(".navbar-brand-title");
+		if (brandTitle instanceof HTMLElement) {
+			const label = isHomepage
+				? brandTitle.dataset.homeLabel
+				: brandTitle.dataset.defaultLabel;
+			if (label) {
+				brandTitle.textContent = label;
+				brand?.setAttribute("aria-label", `Home - ${label}`);
+			}
+		}
+
+		const connect = document.querySelector(".navbar-connect");
+		if (connect instanceof HTMLElement) {
+			connect.toggleAttribute("hidden", !isHomepage);
+		}
+	};
+
+	const scheduleNavbarStateSync = () => {
+		window.requestAnimationFrame(syncNavbarState);
+	};
+
+	syncNavbarState();
+	const bindSwupNavbarSync = () => {
+		window.swup?.hooks?.on("visit:start", (visit) => {
+			const target = new URL(visit.to.url, window.location.origin);
+			syncNavbarState(target.pathname);
+		});
+		window.swup?.hooks?.on("page:view", syncNavbarState);
+	};
+	if (window.swup?.hooks) bindSwupNavbarSync();
+	else document.addEventListener("swup:enable", bindSwupNavbarSync, { once: true });
+
+	window.addEventListener("popstate", scheduleNavbarStateSync);
+
     document.addEventListener("keydown", (event) => {
         if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
             event.preventDefault();
@@ -150,6 +218,23 @@ function isCurrentLink(link: NavBarLink) {
             setMenuOpen(Boolean(menuPanel?.classList.contains("float-panel-closed")));
             return;
         }
+
+		const navLink = event.target.closest("a[data-nav-url]");
+		if (
+			navLink instanceof HTMLAnchorElement &&
+			event instanceof MouseEvent &&
+			event.button === 0 &&
+			!event.ctrlKey &&
+			!event.metaKey &&
+			!event.shiftKey &&
+			!event.altKey &&
+			navLink.target !== "_blank"
+		) {
+			const target = new URL(navLink.href, window.location.href);
+			if (target.origin === window.location.origin) {
+				syncNavbarState(target.pathname);
+			}
+		}
 
         if (event.target.closest("#nav-menu-panel a")) {
             setMenuOpen(false);
@@ -264,6 +349,10 @@ function isCurrentLink(link: NavBarLink) {
 	font-size: var(--home-font-ui, 14px);
 	font-weight: 750;
 	transition: background-color 180ms ease, color 180ms ease;
+}
+
+.navbar-connect[hidden] {
+	display: none !important;
 }
 
 .navbar-connect:hover {

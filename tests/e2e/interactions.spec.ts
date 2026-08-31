@@ -124,6 +124,66 @@ test("theme choice persists after reload", async ({ page }) => {
 	);
 });
 
+test("home navigation clears the previous active nav item", async ({
+	page,
+}) => {
+	await page.goto("/brain/");
+
+	const desktopNav = page.locator(".navbar-links");
+	const homeLink = desktopNav.locator('[data-nav-url="/"]');
+	const brainLink = desktopNav.locator('[data-nav-url="/brain/"]');
+	await expect(brainLink).toHaveAttribute("aria-current", "page");
+
+	const menuButton = page.locator("#nav-menu-switch");
+	if (await menuButton.isVisible()) await menuButton.click();
+	await page.locator('a[data-nav-url="/"]:visible').first().click();
+
+	await expect(page).toHaveURL(/\/$/);
+	const activeNavUrls = await page
+		.locator("[data-nav-url].is-active")
+		.evaluateAll((links) => [
+			...new Set(links.map((link) => link.getAttribute("data-nav-url"))),
+		]);
+	expect(activeNavUrls).toEqual(["/"]);
+	await expect(homeLink).toHaveAttribute("aria-current", "page");
+	await expect(homeLink).toHaveClass(/is-active/);
+	await expect(brainLink).not.toHaveAttribute("aria-current", "page");
+	await expect(brainLink).not.toHaveClass(/is-active/);
+	await expect(page.locator("html")).toHaveClass(/homepage-index-page/);
+	await expect(page.locator("body")).toHaveClass(/homepage-index-page/);
+	await expect(page.locator(".navbar-brand-title")).toHaveText(
+		"Nguyễn Thanh Tùng",
+	);
+	await expect(page.locator(".navbar-connect")).toBeAttached();
+	await expect(page.locator(".navbar-connect")).not.toHaveAttribute(
+		"hidden",
+		"",
+	);
+});
+
+test("collapsed player stays anchored to the viewport corner", async ({
+	page,
+}) => {
+	await page.goto("/");
+
+	const player = page.locator(".music-player:not(.expanded)");
+	await expect(player).toBeVisible();
+	const placement = await player.evaluate((element) => {
+		const rect = element.getBoundingClientRect();
+		return {
+			position: getComputedStyle(element).position,
+			bottomGap: window.innerHeight - rect.bottom,
+			rightGap: window.innerWidth - rect.right,
+		};
+	});
+
+	expect(placement.position).toBe("fixed");
+	expect(placement.bottomGap).toBeGreaterThanOrEqual(0);
+	expect(placement.bottomGap).toBeLessThanOrEqual(24);
+	expect(placement.rightGap).toBeGreaterThanOrEqual(0);
+	expect(placement.rightGap).toBeLessThanOrEqual(24);
+});
+
 test("compact mobile player does not cover homepage headings or actions", async ({
 	page,
 }) => {

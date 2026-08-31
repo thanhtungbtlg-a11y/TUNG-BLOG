@@ -22,6 +22,7 @@ function isCurrentLink(link: NavBarLink) {
 <nav id="nav-menu-panel" aria-label="Mobile navigation" aria-hidden="true" inert class:list={["float-panel float-panel-closed absolute transition-all fixed right-3 px-2 py-2"]}>
     {links.map((link) => (
         <a href={link.external ? link.url : url(link.url)}
+		   data-nav-url={link.url}
 		   aria-current={isCurrentLink(link) ? "page" : undefined}
 		   class:list={["mobile-nav-link group flex justify-between items-center py-2.5 pl-3 pr-2 rounded-lg gap-8 hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)] transition", {"is-active": isCurrentLink(link)}]}
            target={link.external ? "_blank" : null}
