@@ -168,3 +168,13 @@ test("accessibility: public pages have no serious or critical axe violations", a
 		await expectNoSeriousAxeViolations(page);
 	}
 });
+
+test("reduced motion removes delayed on-load fades", async ({ page }) => {
+	await page.emulateMedia({ reducedMotion: "reduce" });
+	await page.goto("/archive/");
+
+	await expect(page.locator("#content-wrapper")).toHaveCSS(
+		"animation-delay",
+		"0s",
+	);
+});
